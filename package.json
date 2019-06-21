@@ -8,13 +8,19 @@
   },
   "author": "Marko Sanković <msankovic@synapticon.com> (https://github.com/markosankovic)",
   "license": "MIT",
+  "dependencies": {
+    "commander": "^2.20.0",
+    "debug": "^4.1.1",
+    "motion-master-proto": "^2.8.2-motion-master-client.0",
+    "rxjs": "^6.5.2",
+    "uuid": "^3.3.2",
+    "zeromq": "^5.1.0"
+  },
   "devDependencies": {
+    "@types/commander": "^2.12.2",
+    "@types/uuid": "^3.4.4",
     "@types/zeromq": "^4.6.2",
     "tslint": "^5.17.0",
     "typescript": "^3.5.2"
-  },
-  "dependencies": {
-    "motion-master-proto": "^2.8.2-motion-master-client.0",
-    "zeromq": "^5.1.0"
   }
 }
