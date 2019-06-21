@@ -9,10 +9,12 @@
   "author": "Marko Sanković <msankovic@synapticon.com> (https://github.com/markosankovic)",
   "license": "MIT",
   "devDependencies": {
+    "@types/zeromq": "^4.6.2",
     "tslint": "^5.17.0",
     "typescript": "^3.5.2"
   },
   "dependencies": {
-    "motion-master-proto": "^2.8.2-motion-master-client.0"
+    "motion-master-proto": "^2.8.2-motion-master-client.0",
+    "zeromq": "^5.1.0"
   }
 }
