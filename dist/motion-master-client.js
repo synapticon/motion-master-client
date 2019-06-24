@@ -68,6 +68,16 @@ var MotionMasterClient = /** @class */ (function () {
         var request = { setDeviceParameterValues: setDeviceParameterValues };
         this.sendRequest(request, messageId);
     };
+    MotionMasterClient.prototype.requestGetDeviceFileList = function (deviceAddress, messageId) {
+        var getDeviceFileList = motion_master_proto_1.motionmaster.MotionMasterMessage.Request.GetDeviceFileList.create({ deviceAddress: deviceAddress });
+        var request = { getDeviceFileList: getDeviceFileList };
+        this.sendRequest(request, messageId);
+    };
+    MotionMasterClient.prototype.requestGetDeviceLog = function (deviceAddress, messageId) {
+        var getDeviceLog = motion_master_proto_1.motionmaster.MotionMasterMessage.Request.GetDeviceLog.create({ deviceAddress: deviceAddress });
+        var request = { getDeviceLog: getDeviceLog };
+        this.sendRequest(request, messageId);
+    };
     MotionMasterClient.prototype.sendRequest = function (request, messageId) {
         var message = encodeRequest(request, messageId);
         this.output.next(message);

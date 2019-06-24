@@ -122,6 +122,24 @@ export class MotionMasterClient {
     this.sendRequest(request, messageId);
   }
 
+  requestGetDeviceFileList(
+    deviceAddress: number,
+    messageId?: string,
+  ) {
+    const getDeviceFileList = motionmaster.MotionMasterMessage.Request.GetDeviceFileList.create({ deviceAddress });
+    const request: motionmaster.MotionMasterMessage.IRequest = { getDeviceFileList };
+    this.sendRequest(request, messageId);
+  }
+
+  requestGetDeviceLog(
+    deviceAddress: number,
+    messageId?: string,
+  ) {
+    const getDeviceLog = motionmaster.MotionMasterMessage.Request.GetDeviceLog.create({ deviceAddress });
+    const request: motionmaster.MotionMasterMessage.IRequest = { getDeviceLog };
+    this.sendRequest(request, messageId);
+  }
+
   sendRequest(request: motionmaster.MotionMasterMessage.IRequest, messageId?: string) {
     const message = encodeRequest(request, messageId);
     this.output.next(message);
@@ -170,9 +188,7 @@ export class MotionMasterClient {
   }
 
   // GetMultiDeviceParameterValues get_multi_device_parameter_values = 106;
-  // SetDeviceParameterValues set_device_parameter_values = 107;
   // SetMultiDeviceParameterValues set_multi_device_parameter_values = 108;
-  // GetDeviceFileList get_device_file_list = 109;
   // GetDeviceFile get_device_file = 110;
   // SetDeviceFile set_device_file = 111;
   // DeleteDeviceFile delete_device_file = 112;

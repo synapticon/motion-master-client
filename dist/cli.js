@@ -144,6 +144,12 @@ commander_1.default
                         parameters = args.map(paramToIndexAndSubindex);
                         motionMasterClient.requestGetDeviceParameterValues(deviceAddress, parameters, messageId);
                         break;
+                    case 'GetDeviceFileList':
+                        motionMasterClient.requestGetDeviceFileList(deviceAddress);
+                        break;
+                    case 'GetDeviceLog':
+                        motionMasterClient.requestGetDeviceLog(deviceAddress);
+                        break;
                     default:
                         throw new Error("Request \"" + commander_1.default.request + "\" doesn't exist");
                 }
