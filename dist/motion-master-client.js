@@ -3,10 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var motion_master_proto_1 = require("motion-master-proto");
 var operators_1 = require("rxjs/operators");
 var uuid_1 = require("uuid");
-function filterByDeviceAddress(deviceAddress, observable) {
-    return observable.pipe(operators_1.filter(function (data) { return data.deviceAddress === deviceAddress; }));
-}
-exports.filterByDeviceAddress = filterByDeviceAddress;
 function encodeRequest(request, id) {
     if (!id) {
         id = uuid_1.v4();
@@ -20,10 +16,16 @@ function decodeMotionMasterMessage(buffer) {
 }
 exports.decodeMotionMasterMessage = decodeMotionMasterMessage;
 var MotionMasterClient = /** @class */ (function () {
-    function MotionMasterClient(input, output) {
+    function MotionMasterClient(input, output, notification) {
         this.input = input;
         this.output = output;
+        this.notification = notification;
         this.motionMasterMessage$ = this.input.pipe(operators_1.map(decodeMotionMasterMessage));
+        this.notification$ = this.notification.pipe(operators_1.map(function (notif) {
+            var topic = notif[0].toString('utf8');
+            var message = decodeMotionMasterMessage(notif[1]);
+            return { topic: topic, message: message };
+        }));
         this.status$ = this.motionMasterMessage$.pipe(operators_1.map(function (message) { return message.status; }));
         this.systemVersion$ = this.status$.pipe(operators_1.filter(function (status) { return !!status.systemVersion; }), operators_1.map(function (status) { return status.systemVersion; }));
         this.deviceInfo$ = this.status$.pipe(operators_1.filter(function (status) { return !!status.deviceInfo; }), operators_1.map(function (status) { return status.deviceInfo; }));
@@ -77,8 +79,24 @@ var MotionMasterClient = /** @class */ (function () {
             topic: topic,
         });
         var request = { startMonitoringDeviceParameterValues: startMonitoringDeviceParameterValues };
-        console.log(request);
         this.sendRequest(request, messageId);
+    };
+    MotionMasterClient.prototype.getDeviceAtPosition$ = function (position) {
+        var messageId = uuid_1.v4();
+        var observable = this.motionMasterMessage$.pipe(operators_1.filter(function (message) { return message.id === messageId; }), operators_1.first(), operators_1.map(function (message) { return message.status; }), operators_1.map(function (status) {
+            if (status) {
+                var deviceInfo = status.deviceInfo;
+                if (deviceInfo && deviceInfo.devices) {
+                    return deviceInfo.devices[position];
+                }
+            }
+            return null;
+        }));
+        this.requestGetDeviceInfo(messageId);
+        return observable;
+    };
+    MotionMasterClient.prototype.filterNotificationByTopic$ = function (topic) {
+        return this.notification.pipe(operators_1.filter(function (notif) { return notif[0].toString('utf8') === topic; }), operators_1.map(function (notif) { return ({ topic: topic, message: decodeMotionMasterMessage(notif[1]) }); }));
     };
     return MotionMasterClient;
 }());

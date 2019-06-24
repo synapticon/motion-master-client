@@ -49,81 +49,83 @@ var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var commander_1 = __importDefault(require("commander"));
 var rxjs = __importStar(require("rxjs"));
+var operators_1 = require("rxjs/operators");
 var util = __importStar(require("util"));
 var uuid_1 = require("uuid");
 var zmq = __importStar(require("zeromq"));
-// tslint:disable-next-line: no-var-requires
+var motion_master_client_1 = require("./motion-master-client");
+// tslint:disable: no-var-requires
 var debug = require('debug')('motion-master-client');
-// tslint:disable-next-line: no-var-requires
 var version = require('../package.json')['version'];
+// tslint:enable-next-line: no-var-requires
 var inspectOptions = {
     showHidden: false,
     depth: null,
     colors: true,
     maxArrayLength: null,
 };
-var pingSystemInterval = rxjs.interval(250);
-var operators_1 = require("rxjs/operators");
-var motion_master_client_1 = require("./motion-master-client");
-var ZMQ_SERVER_ENDPOINT = 'tcp://127.0.0.1:62524';
-var ZMQ_MONITOR_ENDPOINT = 'tcp://127.0.0.1:62525';
+var cliOptions = {
+    pingSystemInterval: 250,
+    serverEndpoint: 'tcp://127.0.0.1:62524',
+    notificationEndpoint: 'tcp://127.0.0.1:62525',
+};
+var pingSystemInterval = rxjs.interval(cliOptions.pingSystemInterval);
 var identity = uuid_1.v4();
 debug("Identity: " + identity);
 var serverSocket = zmq.socket('dealer');
 serverSocket.identity = identity;
-serverSocket.connect(ZMQ_SERVER_ENDPOINT);
-debug("ZeroMQ DEALER socket is connected to endpoint: " + ZMQ_SERVER_ENDPOINT);
-var notificationSocket = zmq.socket('sub').connect(ZMQ_MONITOR_ENDPOINT);
-debug("ZeroMQ SUB socket connected to endpoint: " + ZMQ_MONITOR_ENDPOINT);
+serverSocket.connect(cliOptions.serverEndpoint);
+debug("ZeroMQ DEALER socket is connected to server endpoint: " + cliOptions.serverEndpoint);
+var notificationSocket = zmq.socket('sub').connect(cliOptions.notificationEndpoint);
+debug("ZeroMQ SUB socket connected to notification endpoint: " + cliOptions.notificationEndpoint);
 notificationSocket.subscribe('');
 process.on('uncaughtException', function (err) {
-    console.error('Caught exception: ' + err.message);
+    console.error('Caught exception: ' + err);
+    process.exit();
+});
+process.on('unhandledRejection', function (reason) {
+    console.error('Unhandled rejection reason: ', reason);
     process.exit();
 });
 var input = new rxjs.Subject();
 var output = new rxjs.Subject();
 var notification = new rxjs.Subject();
-notificationSocket.on('message', function (topicBuffer, messageBuffer) {
-    var topic = topicBuffer.toString();
-    var message = motion_master_client_1.decodeMotionMasterMessage(messageBuffer);
-    if (topic !== 'heartbeat') { // skip heartbeat
-        notification.next({ topic: topic, message: message });
-    }
+// feed notification buffer data coming from Motion Master to MotionMasterClient
+notificationSocket.on('message', function (topic, message) {
+    notification.next([topic, message]);
 });
-var motionMasterClient = new motion_master_client_1.MotionMasterClient(input, output);
+var motionMasterClient = new motion_master_client_1.MotionMasterClient(input, output, notification);
 pingSystemInterval.subscribe(function () { return motionMasterClient.requestPingSystem(); });
+// feed buffer data coming from Motion Master to MotionMasterClient
 serverSocket.on('message', function (data) {
     input.next(data);
 });
-output.subscribe({
-    next: function (buffer) {
-        var message = motion_master_client_1.decodeMotionMasterMessage(buffer);
-        // log outgoing messages
-        if (message && message.request && message.request.pingSystem) { // skip ping messages
-            // ignore
-        }
-        else {
-            debug(util.inspect(motion_master_client_1.decodeMotionMasterMessage(buffer), inspectOptions));
-        }
-        serverSocket.send(buffer);
-    },
+// send buffer data fed from MotionMasterClient to Motion Master
+output.subscribe(function (buffer) {
+    var message = motion_master_client_1.decodeMotionMasterMessage(buffer);
+    // log outgoing messages and skip ping messages
+    if (!(message && message.request && message.request.pingSystem)) {
+        debug(util.inspect(motion_master_client_1.decodeMotionMasterMessage(buffer).toJSON(), inspectOptions));
+    }
+    serverSocket.send(buffer);
 });
-motionMasterClient.status$.subscribe(function (status) {
-    console.log(util.inspect(status, inspectOptions));
+// log all status messages coming from Motion Master
+motionMasterClient.motionMasterMessage$.subscribe(function (msg) {
+    var timestamp = Date.now();
+    var message = msg.toJSON();
+    console.log(util.inspect({ timestamp: timestamp, message: message }, inspectOptions));
 });
 commander_1.default
-    .version(version)
-    .option('-k, --no-exit', 'keep the program running while the monitoring is publishing messages')
-    .option('-d, --device-address <value>', 'device address', parseInt)
-    .option('-p, --device-position <value>', 'use the device position instead of the device address', parseInt);
+    .version(version);
 commander_1.default
-    .command('request <type> [params...]')
-    .description('send a request message to Motion Master')
-    .action(function (type, params) { return __awaiter(_this, void 0, void 0, function () {
+    .command('request <type> [args...]')
+    .option('-d, --device-address <value>', 'device address (uint32) generated by Motion Master - takes precedence over device position', parseOptionValueAsInt)
+    .option('-p, --device-position <value>', 'used when device address is not specified', parseOptionValueAsInt, 0)
+    .action(function (type, args, cmd) { return __awaiter(_this, void 0, void 0, function () {
     var deviceAddress, messageId, parameters;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, getProgramDeviceAddress()];
+            case 0: return [4 /*yield*/, getCommandDeviceAddress(cmd)];
             case 1:
                 deviceAddress = _a.sent();
                 messageId = uuid_1.v4();
@@ -139,7 +141,7 @@ commander_1.default
                         motionMasterClient.requestGetDeviceParameterInfo(deviceAddress, messageId);
                         break;
                     case 'GetDeviceParameterValues':
-                        parameters = params.map(paramToIndexAndSubindex);
+                        parameters = args.map(paramToIndexAndSubindex);
                         motionMasterClient.requestGetDeviceParameterValues(deviceAddress, parameters, messageId);
                         break;
                     default:
@@ -151,11 +153,13 @@ commander_1.default
 }); });
 commander_1.default
     .command('upload [params...]')
-    .action(function (params) { return __awaiter(_this, void 0, void 0, function () {
+    .option('-d, --device-address <value>', 'device address (uint32) generated by Motion Master - takes precedence over device position', parseOptionValueAsInt)
+    .option('-p, --device-position <value>', 'used when device address is not specified', parseOptionValueAsInt, 0)
+    .action(function (params, cmd) { return __awaiter(_this, void 0, void 0, function () {
     var deviceAddress, parameters, messageId;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, getProgramDeviceAddress()];
+            case 0: return [4 /*yield*/, getCommandDeviceAddress(cmd)];
             case 1:
                 deviceAddress = _a.sent();
                 parameters = params.map(paramToIndexAndSubindex);
@@ -167,41 +171,42 @@ commander_1.default
     });
 }); });
 commander_1.default
-    .command('download <param> <value>')
-    .action(function (param, value) { return __awaiter(_this, void 0, void 0, function () {
-    var deviceAddress, _a, index, subindex, intValue, messageId;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0: return [4 /*yield*/, getProgramDeviceAddress()];
+    .command('download [paramValues...]')
+    .option('-d, --device-address <value>', 'device address (uint32) generated by Motion Master - takes precedence over device position', parseOptionValueAsInt)
+    .option('-p, --device-position <value>', 'used when device address is not specified', parseOptionValueAsInt, 0)
+    .action(function (paramValues, cmd) { return __awaiter(_this, void 0, void 0, function () {
+    var deviceAddress, parameters, messageId;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, getCommandDeviceAddress(cmd)];
             case 1:
-                deviceAddress = _b.sent();
-                _a = paramToIndexAndSubindex(param), index = _a.index, subindex = _a.subindex;
-                intValue = parseInt(value, 10);
+                deviceAddress = _a.sent();
+                parameters = paramValues.map(paramValueToIndexAndSubindex);
                 messageId = uuid_1.v4();
                 exitOnMessageReceived(messageId);
-                motionMasterClient.requestSetDeviceParameterValues(deviceAddress, [
-                    {
-                        index: index,
-                        subindex: subindex,
-                        intValue: intValue,
-                    },
-                ], messageId);
+                motionMasterClient.requestSetDeviceParameterValues(deviceAddress, parameters, messageId);
                 return [2 /*return*/];
         }
     });
 }); });
 commander_1.default
-    .command('monitor <interval> <topic> [params...]')
-    .action(function (interval, topic, params) { return __awaiter(_this, void 0, void 0, function () {
-    var deviceAddress, parameters;
+    .command('monitor <topic> [params...]')
+    .option('-d, --device-address <value>', 'device address (uint32) generated by Motion Master - takes precedence over device position', parseOptionValueAsInt)
+    .option('-p, --device-position <value>', 'used when device address is not specified', parseOptionValueAsInt, 0)
+    .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
+    .action(function (topic, params, cmd) { return __awaiter(_this, void 0, void 0, function () {
+    var deviceAddress, interval, parameters;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, getProgramDeviceAddress()];
+            case 0: return [4 /*yield*/, getCommandDeviceAddress(cmd)];
             case 1:
                 deviceAddress = _a.sent();
-                notification.pipe(operators_1.filter(function (notif) { return notif.topic === topic; })).subscribe(function (notif) {
-                    console.log(Date.now(), notif.topic, util.inspect(notif.message, inspectOptions));
+                motionMasterClient.filterNotificationByTopic$(topic).subscribe(function (notif) {
+                    var timestamp = Date.now();
+                    var message = notif.message;
+                    console.log(util.inspect({ timestamp: timestamp, topic: topic, message: message }, inspectOptions));
                 });
+                interval = cmd.interval;
                 parameters = params.map(paramToIndexAndSubindex);
                 motionMasterClient.startMonitoringDeviceParameterValues(interval, topic, { parameters: parameters, deviceAddress: deviceAddress });
                 return [2 /*return*/];
@@ -210,44 +215,41 @@ commander_1.default
 }); });
 commander_1.default.parse(process.argv);
 function paramToIndexAndSubindex(param) {
-    var _a;
-    var index;
-    var subindex;
-    _a = param.split(':'), index = _a[0], subindex = _a[1];
-    index = parseInt(index, 16);
-    subindex = parseInt(subindex, 10);
+    var _a = param.split(':'), indexStr = _a[0], subindexStr = _a[1];
+    var index = parseInt(indexStr, 16);
+    var subindex = parseInt(subindexStr, 10);
     return { index: index, subindex: subindex };
 }
-function getDeviceAtPosition(position) {
-    var messageId = uuid_1.v4();
-    var observable = motionMasterClient.motionMasterMessage$.pipe(operators_1.filter(function (message) { return message.id === messageId; }), operators_1.first(), operators_1.map(function (message) { return message.status; }), operators_1.map(function (status) {
-        if (status) {
-            var deviceInfo = status.deviceInfo;
-            if (deviceInfo && deviceInfo.devices) {
-                return deviceInfo.devices[position];
-            }
-        }
-        return null;
-    }));
-    motionMasterClient.requestGetDeviceInfo(messageId);
-    return observable;
+function paramValueToIndexAndSubindex(paramValue) {
+    var _a = paramValue.split('='), param = _a[0], valueStr = _a[1];
+    var _b = paramToIndexAndSubindex(param), index = _b.index, subindex = _b.subindex;
+    var value = parseFloat(valueStr);
+    var intValue = value;
+    var uintValue = value;
+    var floatValue = value;
+    return { index: index, subindex: subindex, intValue: intValue, uintValue: uintValue, floatValue: floatValue };
 }
-function getProgramDeviceAddress() {
+function getCommandDeviceAddress(command) {
     return __awaiter(this, void 0, void 0, function () {
-        var deviceAddress, device;
+        var device;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    deviceAddress = commander_1.default.deviceAddress;
-                    if (!Number.isInteger(commander_1.default.devicePosition)) return [3 /*break*/, 2];
-                    return [4 /*yield*/, getDeviceAtPosition(commander_1.default.devicePosition).toPromise()];
+                    if (!command.deviceAddress) return [3 /*break*/, 1];
+                    return [2 /*return*/, command.deviceAddress];
                 case 1:
+                    if (!Number.isInteger(command.devicePosition)) return [3 /*break*/, 3];
+                    return [4 /*yield*/, motionMasterClient.getDeviceAtPosition$(command.devicePosition).toPromise()];
+                case 2:
                     device = _a.sent();
                     if (device) {
-                        deviceAddress = device.deviceAddress;
+                        return [2 /*return*/, device.deviceAddress];
                     }
-                    _a.label = 2;
-                case 2: return [2 /*return*/, deviceAddress];
+                    else {
+                        throw new Error("There is no device at position " + command.devicePosition);
+                    }
+                    _a.label = 3;
+                case 3: return [2 /*return*/];
             }
         });
     });
@@ -259,5 +261,8 @@ function exitOnMessageReceived(messageId, exit) {
             process.exit();
         }
     });
+}
+function parseOptionValueAsInt(value) {
+    return parseInt(value, 10);
 }
 //# sourceMappingURL=cli.js.map

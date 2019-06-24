@@ -1,13 +1,7 @@
 import { motionmaster } from 'motion-master-proto';
 import { Observable, Subject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, first, map } from 'rxjs/operators';
 import { v4 } from 'uuid';
-
-export type RequestType = ('pingSystem' | 'getSystemVersion' | 'getDeviceInfo' | 'getDeviceParameterInfo' | 'getDeviceParameterValues' | 'getMultiDeviceParameterValues' | 'setDeviceParameterValues' | 'setMultiDeviceParameterValues' | 'getDeviceFileList' | 'getDeviceFile' | 'setDeviceFile' | 'deleteDeviceFile' | 'resetDeviceFault' | 'stopDevice' | 'startDeviceFirmwareInstallation' | 'getDeviceLog' | 'startCoggingTorqueRecording' | 'getCoggingTorqueData' | 'startOffsetDetection' | 'startPlantIdentification' | 'computeAutoTuningGains' | 'setMotionControllerParameters' | 'enableMotionController' | 'disableMotionController' | 'setSignalGeneratorParameters' | 'startSignalGenerator' | 'stopSignalGenerator' | 'startMonitoringDeviceParameterValues' | 'stopMonitoringDeviceParameterValues');
-
-export function filterByDeviceAddress(deviceAddress: number, observable: Observable<{ deviceAddress: number }>) {
-  return observable.pipe(filter((data) => data.deviceAddress === deviceAddress));
-}
 
 export function encodeRequest(request: motionmaster.MotionMasterMessage.IRequest, id?: string): Buffer {
   if (!id) {
@@ -21,9 +15,15 @@ export function decodeMotionMasterMessage(buffer: Buffer): motionmaster.MotionMa
   return motionmaster.MotionMasterMessage.decode(new Uint8Array(buffer));
 }
 
+export interface INotification {
+  topic: string;
+  message: motionmaster.IMotionMasterMessage;
+}
+
 export class MotionMasterClient {
 
   motionMasterMessage$: Observable<motionmaster.MotionMasterMessage>;
+  notification$: Observable<INotification>;
   status$: Observable<motionmaster.MotionMasterMessage.Status>;
   systemVersion$: Observable<motionmaster.MotionMasterMessage.Status.SystemVersion>;
   deviceInfo$: Observable<motionmaster.MotionMasterMessage.Status.DeviceInfo>;
@@ -33,9 +33,23 @@ export class MotionMasterClient {
   constructor(
     private input: Subject<Buffer>,
     private output: Subject<Buffer>,
+    private notification: Subject<[Buffer, Buffer]>,
   ) {
-    this.motionMasterMessage$ = this.input.pipe(map(decodeMotionMasterMessage));
-    this.status$ = this.motionMasterMessage$.pipe(map((message) => message.status)) as Observable<motionmaster.MotionMasterMessage.Status>;
+    this.motionMasterMessage$ = this.input.pipe(
+      map(decodeMotionMasterMessage),
+    );
+
+    this.notification$ = this.notification.pipe(
+      map((notif) => {
+        const topic = notif[0].toString('utf8');
+        const message = decodeMotionMasterMessage(notif[1]);
+        return { topic, message };
+      }),
+    );
+
+    this.status$ = this.motionMasterMessage$.pipe(
+      map((message) => message.status),
+    ) as Observable<motionmaster.MotionMasterMessage.Status>;
 
     this.systemVersion$ = this.status$.pipe(
       filter((status) => !!status.systemVersion),
@@ -125,8 +139,34 @@ export class MotionMasterClient {
       topic,
     });
     const request: motionmaster.MotionMasterMessage.IRequest = { startMonitoringDeviceParameterValues };
-    console.log(request);
     this.sendRequest(request, messageId);
+  }
+
+  getDeviceAtPosition$(position: number) {
+    const messageId = v4();
+    const observable = this.motionMasterMessage$.pipe(
+      filter((message) => message.id === messageId),
+      first(),
+      map((message) => message.status),
+      map((status) => {
+        if (status) {
+          const deviceInfo = status.deviceInfo;
+          if (deviceInfo && deviceInfo.devices) {
+            return deviceInfo.devices[position];
+          }
+        }
+        return null;
+      }),
+    );
+    this.requestGetDeviceInfo(messageId);
+    return observable;
+  }
+
+  filterNotificationByTopic$(topic: string): Observable<INotification> {
+    return this.notification.pipe(
+      filter((notif) => notif[0].toString('utf8') === topic),
+      map((notif) => ({ topic, message: decodeMotionMasterMessage(notif[1]) })),
+    );
   }
 
   // GetMultiDeviceParameterValues get_multi_device_parameter_values = 106;
