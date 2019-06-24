@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import program from 'commander';
 import * as rxjs from 'rxjs';
 import * as util from 'util';
