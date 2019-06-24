@@ -9,6 +9,18 @@ export function filterByDeviceAddress(deviceAddress: number, observable: Observa
   return observable.pipe(filter((data) => data.deviceAddress === deviceAddress));
 }
 
+export function encodeRequest(request: motionmaster.MotionMasterMessage.IRequest, id?: string): Buffer {
+  if (!id) {
+    id = v4();
+  }
+  const message = motionmaster.MotionMasterMessage.create({ id, request });
+  return motionmaster.MotionMasterMessage.encode(message).finish() as Buffer;
+}
+
+export function decodeMotionMasterMessage(buffer: Buffer): motionmaster.MotionMasterMessage {
+  return motionmaster.MotionMasterMessage.decode(new Uint8Array(buffer));
+}
+
 export class MotionMasterClient {
 
   motionMasterMessage$: Observable<motionmaster.MotionMasterMessage>;
@@ -22,7 +34,7 @@ export class MotionMasterClient {
     private input: Subject<Buffer>,
     private output: Subject<Buffer>,
   ) {
-    this.motionMasterMessage$ = this.input.pipe(map(this.decodeMotionMasterMessage));
+    this.motionMasterMessage$ = this.input.pipe(map(decodeMotionMasterMessage));
     this.status$ = this.motionMasterMessage$.pipe(map((message) => message.status)) as Observable<motionmaster.MotionMasterMessage.Status>;
 
     this.systemVersion$ = this.status$.pipe(
@@ -46,11 +58,16 @@ export class MotionMasterClient {
     ) as Observable<motionmaster.MotionMasterMessage.Status.DeviceParameterValues>;
   }
 
+  requestPingSystem(messageId?: string) {
+    const pingSystem = motionmaster.MotionMasterMessage.Request.PingSystem.create();
+    const request: motionmaster.MotionMasterMessage.IRequest = { pingSystem };
+    this.sendRequest(request, messageId);
+  }
+
   requestGetSystemVersion(messageId?: string) {
     const getSystemVersion = motionmaster.MotionMasterMessage.Request.GetSystemVersion.create();
     const request: motionmaster.MotionMasterMessage.IRequest = { getSystemVersion };
-    const message = this.encodeRequest(request, messageId);
-    this.output.next(message);
+    this.sendRequest(request, messageId);
   }
 
   requestGetDeviceInfo(messageId?: string) {
@@ -65,18 +82,53 @@ export class MotionMasterClient {
     this.sendRequest(request, messageId);
   }
 
-  requestGetDeviceParameterValues(deviceAddress: number, messageId?: string) {
-    const getDeviceParameterValues = motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.create({ deviceAddress });
+  requestGetDeviceParameterValues(
+    deviceAddress: number,
+    parameters?: (motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] | null),
+    messageId?: string,
+  ) {
+    const getDeviceParameterValues = motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.create({
+      deviceAddress,
+      parameters,
+    });
     const request: motionmaster.MotionMasterMessage.IRequest = { getDeviceParameterValues };
     this.sendRequest(request, messageId);
   }
 
+  requestSetDeviceParameterValues(
+    deviceAddress: number,
+    parameterValues?: (motionmaster.MotionMasterMessage.Request.SetDeviceParameterValues.IParameterValue[] | null),
+    messageId?: string,
+  ) {
+    const setDeviceParameterValues = motionmaster.MotionMasterMessage.Request.SetDeviceParameterValues.create({
+      deviceAddress,
+      parameterValues,
+    });
+    const request: motionmaster.MotionMasterMessage.IRequest = { setDeviceParameterValues };
+    this.sendRequest(request, messageId);
+  }
+
   sendRequest(request: motionmaster.MotionMasterMessage.IRequest, messageId?: string) {
-    const message = this.encodeRequest(request, messageId);
+    const message = encodeRequest(request, messageId);
     this.output.next(message);
   }
 
-  // PingSystem ping_system = 101;
+  startMonitoringDeviceParameterValues(
+    interval: number,
+    topic: string,
+    getDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IGetDeviceParameterValues,
+    messageId?: string,
+  ) {
+    const startMonitoringDeviceParameterValues = motionmaster.MotionMasterMessage.Request.StartMonitoringDeviceParameterValues.create({
+      getDeviceParameterValues,
+      interval,
+      topic,
+    });
+    const request: motionmaster.MotionMasterMessage.IRequest = { startMonitoringDeviceParameterValues };
+    console.log(request);
+    this.sendRequest(request, messageId);
+  }
+
   // GetMultiDeviceParameterValues get_multi_device_parameter_values = 106;
   // SetDeviceParameterValues set_device_parameter_values = 107;
   // SetMultiDeviceParameterValues set_multi_device_parameter_values = 108;
@@ -99,19 +151,6 @@ export class MotionMasterClient {
   // SetSignalGeneratorParameters set_signal_generator_parameters = 125;
   // StartSignalGenerator start_signal_generator = 126;
   // StopSignalGenerator stop_signal_generator = 127;
-  // StartMonitoringDeviceParameterValues start_monitoring_device_parameter_values = 128;
   // StopMonitoringDeviceParameterValues stop_monitoring_device_parameter_values = 129;
-
-  encodeRequest(request: motionmaster.MotionMasterMessage.IRequest, id?: string): Buffer {
-    if (!id) {
-      id = v4();
-    }
-    const message = motionmaster.MotionMasterMessage.create({ id, request });
-    return motionmaster.MotionMasterMessage.encode(message).finish() as Buffer;
-  }
-
-  decodeMotionMasterMessage(buffer: Buffer): motionmaster.MotionMasterMessage {
-    return motionmaster.MotionMasterMessage.decode(new Uint8Array(buffer));
-  }
 
 }
