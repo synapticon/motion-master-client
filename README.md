@@ -2,6 +2,10 @@
 
 Library and CLI tool for interacting with [Motion Master](https://github.com/synapticon/motion-master).
 
+## Install
+
+    sudo npm --unsafe-perm=true install -g @synapticon/motion-master-client
+
 ## Command line usage
 
     Usage: motion-master-client [options] [command]
@@ -27,10 +31,6 @@ Library and CLI tool for interacting with [Motion Master](https://github.com/syn
     const messageId = v4(); // '4e4d938e-1021-4b68-ad01-38c7ed2c5ee4'
     motionMasterClient.requestGetSystemVersion(messageId);
     motionMasterClient.systemVersion$.subscribe(console.log);
-
-## Install
-
-    sudo npm --unsafe-perm=true install -g @synapticon/motion-master-client
 
 ## Publish
 
