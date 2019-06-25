@@ -1,0 +1,50 @@
+{
+  "fileVersion": "1.0.0",
+  "assembly": {
+    "name": "ACTILINK Motion Node 60/220 EtherCAT",
+    "id": "8432",
+    "version": "03",
+    "serialNumber": "8432-03-940592-1025",
+    "components": [
+      {
+        "name": "Motor 220",
+        "version": "A.2",
+        "serialNumber": "666"
+      },
+      {
+        "name": "BiSS 19-bit",
+        "version": "B.4",
+        "serialNumber": "777"
+      },
+      {
+        "name": "Plastic housing",
+        "version": "C.4",
+        "serialNumber": "888"
+      }
+    ]
+  },
+  "device": {
+    "name": "SOMANET Servo Node 1000 EtherCAT",
+    "id": "9501",
+    "version": "01",
+    "serialNumber": "9501-01-040595-4023",
+    "macAddress": "01-23-45-67-89-AB",
+    "components": [
+      {
+        "name": "Com EtherCAT",
+        "version": "B.1",
+        "serialNumber": "1234-33-3333333-3333"
+      },
+      {
+        "name": "Core C2X",
+        "version": "A.4",
+        "serialNumber": "1111-11-1111111-1111"
+      },
+      {
+        "name": "Drive 1000",
+        "version": "D.2",
+        "serialNumber": "2222-22-2222222-2222"
+      }
+    ]
+  }
+}
