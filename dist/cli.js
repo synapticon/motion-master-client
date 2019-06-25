@@ -66,6 +66,7 @@ var inspectOptions = {
 };
 var cliOptions = {
     pingSystemInterval: 200,
+    motionMasterHeartbeatTimeoutDue: 1000,
     serverEndpoint: 'tcp://127.0.0.1:62524',
     notificationEndpoint: 'tcp://127.0.0.1:62525',
 };
@@ -96,7 +97,12 @@ notificationSocket.on('message', function (topic, message) {
 });
 var motionMasterClient = new motion_master_client_1.MotionMasterClient(input, output, notification);
 pingSystemInterval.subscribe(function () { return motionMasterClient.sendRequest({ pingSystem: {} }); });
-motionMasterClient.filterNotificationByTopic$('heartbeat').pipe(operators_1.timeout(1000), operators_1.catchError(process.exit)).subscribe();
+motionMasterClient.filterNotificationByTopic$('heartbeat').pipe(operators_1.timeout(cliOptions.motionMasterHeartbeatTimeoutDue)).subscribe({
+    error: function (err) {
+        console.error(err.name + ": Heartbeat message not received for more than " + cliOptions.motionMasterHeartbeatTimeoutDue + " ms. Check if Motion Master process is running.");
+        process.exit(-1);
+    },
+});
 // feed buffer data coming from Motion Master to MotionMasterClient
 serverSocket.on('message', function (data) {
     input.next(data);
@@ -387,11 +393,17 @@ function getCommandDeviceAddress(cmd) {
 function exitOnMessageReceived(messageId, exit, due) {
     if (exit === void 0) { exit = true; }
     if (due === void 0) { due = 10000; }
-    motionMasterClient.motionMasterMessage$.pipe(operators_1.filter(function (message) { return message.id === messageId; }), operators_1.first(), operators_1.timeout(due), operators_1.catchError(process.exit)).subscribe(function () {
-        if (exit) {
-            debug("Exit on message received " + messageId);
-            process.exit();
-        }
+    motionMasterClient.motionMasterMessage$.pipe(operators_1.filter(function (message) { return message.id === messageId; }), operators_1.first(), operators_1.timeout(due)).subscribe({
+        next: function () {
+            if (exit) {
+                debug("Exit on message received " + messageId);
+                process.exit(0);
+            }
+        },
+        error: function (err) {
+            console.error(err.name + ": Status message " + messageId + " not received for more than " + due + " ms.");
+            process.exit(-1);
+        },
     });
 }
 function parseOptionValueAsInt(value) {

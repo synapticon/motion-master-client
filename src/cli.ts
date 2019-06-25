@@ -23,6 +23,7 @@ const inspectOptions: util.InspectOptions = {
 
 const cliOptions = {
   pingSystemInterval: 200,
+  motionMasterHeartbeatTimeoutDue: 1000,
   serverEndpoint: 'tcp://127.0.0.1:62524',
   notificationEndpoint: 'tcp://127.0.0.1:62525',
 };
@@ -66,9 +67,13 @@ const motionMasterClient = new MotionMasterClient(input, output, notification);
 pingSystemInterval.subscribe(() => motionMasterClient.sendRequest({ pingSystem: {} }));
 
 motionMasterClient.filterNotificationByTopic$('heartbeat').pipe(
-  timeout(1000),
-  catchError(process.exit),
-).subscribe();
+  timeout(cliOptions.motionMasterHeartbeatTimeoutDue),
+).subscribe({
+  error: (err) => {
+    console.error(`${err.name}: Heartbeat message not received for more than ${cliOptions.motionMasterHeartbeatTimeoutDue} ms. Check if Motion Master process is running.`);
+    process.exit(-1);
+  },
+});
 
 // feed buffer data coming from Motion Master to MotionMasterClient
 serverSocket.on('message', (data) => {
@@ -341,12 +346,17 @@ function exitOnMessageReceived(messageId: string, exit = true, due = 10000): voi
     filter((message) => message.id === messageId),
     first(),
     timeout(due),
-    catchError(process.exit),
-  ).subscribe(() => {
-    if (exit) {
-      debug(`Exit on message received ${messageId}`);
-      process.exit();
-    }
+  ).subscribe({
+    next: () => {
+      if (exit) {
+        debug(`Exit on message received ${messageId}`);
+        process.exit(0);
+      }
+    },
+    error: (err) => {
+      console.error(`${err.name}: Status message ${messageId} not received for more than ${due} ms.`);
+      process.exit(-1);
+    },
   });
 }
 
