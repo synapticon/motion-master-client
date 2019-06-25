@@ -90,74 +90,165 @@ export class MotionMasterClient {
     this.sendRequest(request, messageId);
   }
 
-  requestGetDeviceParameterInfo(deviceAddress: number, messageId?: string) {
-    const getDeviceParameterInfo = motionmaster.MotionMasterMessage.Request.GetDeviceParameterInfo.create({ deviceAddress });
+  requestGetDeviceParameterInfo(properties: motionmaster.MotionMasterMessage.Request.IGetDeviceParameterInfo, messageId?: string) {
+    const getDeviceParameterInfo = motionmaster.MotionMasterMessage.Request.GetDeviceParameterInfo.create(properties);
     const request: motionmaster.MotionMasterMessage.IRequest = { getDeviceParameterInfo };
     this.sendRequest(request, messageId);
   }
 
-  requestGetDeviceParameterValues(
-    deviceAddress: number,
-    parameters?: (motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] | null),
-    messageId?: string,
-  ) {
-    const getDeviceParameterValues = motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.create({
-      deviceAddress,
-      parameters,
-    });
+  requestGetDeviceParameterValues(properties: motionmaster.MotionMasterMessage.Request.IGetDeviceParameterValues, messageId?: string) {
+    const getDeviceParameterValues = motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.create(properties);
     const request: motionmaster.MotionMasterMessage.IRequest = { getDeviceParameterValues };
     this.sendRequest(request, messageId);
   }
 
-  requestSetDeviceParameterValues(
-    deviceAddress: number,
-    parameterValues?: (motionmaster.MotionMasterMessage.Request.SetDeviceParameterValues.IParameterValue[] | null),
-    messageId?: string,
-  ) {
-    const setDeviceParameterValues = motionmaster.MotionMasterMessage.Request.SetDeviceParameterValues.create({
-      deviceAddress,
-      parameterValues,
-    });
+  requestGetMultiDeviceParameterValues(properties: motionmaster.MotionMasterMessage.Request.IGetMultiDeviceParameterValues, messageId?: string) {
+    const getMultiDeviceParameterValues = motionmaster.MotionMasterMessage.Request.GetMultiDeviceParameterValues.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { getMultiDeviceParameterValues };
+    this.sendRequest(request, messageId);
+  }
+
+  requestSetDeviceParameterValues(properties: motionmaster.MotionMasterMessage.Request.ISetDeviceParameterValues, messageId?: string) {
+    const setDeviceParameterValues = motionmaster.MotionMasterMessage.Request.SetDeviceParameterValues.create(properties);
     const request: motionmaster.MotionMasterMessage.IRequest = { setDeviceParameterValues };
     this.sendRequest(request, messageId);
   }
 
-  requestGetDeviceFileList(
-    deviceAddress: number,
-    messageId?: string,
-  ) {
-    const getDeviceFileList = motionmaster.MotionMasterMessage.Request.GetDeviceFileList.create({ deviceAddress });
+  requestSetMultiDeviceParameterValues(properties: motionmaster.MotionMasterMessage.Request.ISetMultiDeviceParameterValues, messageId?: string) {
+    const setMultiDeviceParameterValues = motionmaster.MotionMasterMessage.Request.SetMultiDeviceParameterValues.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { setMultiDeviceParameterValues };
+    this.sendRequest(request, messageId);
+  }
+
+  requestGetDeviceFileList(properties: motionmaster.MotionMasterMessage.Request.IGetDeviceFileList, messageId?: string) {
+    const getDeviceFileList = motionmaster.MotionMasterMessage.Request.GetDeviceFileList.create(properties);
     const request: motionmaster.MotionMasterMessage.IRequest = { getDeviceFileList };
     this.sendRequest(request, messageId);
   }
 
-  requestGetDeviceLog(
-    deviceAddress: number,
-    messageId?: string,
-  ) {
-    const getDeviceLog = motionmaster.MotionMasterMessage.Request.GetDeviceLog.create({ deviceAddress });
+  requestGetDeviceFile(properties: motionmaster.MotionMasterMessage.Request.IGetDeviceFile, messageId?: string) {
+    const getDeviceFile = motionmaster.MotionMasterMessage.Request.GetDeviceFile.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { getDeviceFile };
+    this.sendRequest(request, messageId);
+  }
+
+  requestSetDeviceFile(properties: motionmaster.MotionMasterMessage.Request.ISetDeviceFile, messageId?: string) {
+    const setDeviceFile = motionmaster.MotionMasterMessage.Request.SetDeviceFile.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { setDeviceFile };
+    this.sendRequest(request, messageId);
+  }
+
+  requestDeleteDeviceFile(properties: motionmaster.MotionMasterMessage.Request.IDeleteDeviceFile, messageId?: string) {
+    const deleteDeviceFile = motionmaster.MotionMasterMessage.Request.DeleteDeviceFile.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { deleteDeviceFile };
+    this.sendRequest(request, messageId);
+  }
+
+  requestResetDeviceFault(properties: motionmaster.MotionMasterMessage.Request.IResetDeviceFault, messageId?: string) {
+    const resetDeviceFault = motionmaster.MotionMasterMessage.Request.ResetDeviceFault.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { resetDeviceFault };
+    this.sendRequest(request, messageId);
+  }
+
+  requestStopDevice(properties: motionmaster.MotionMasterMessage.Request.IStopDevice, messageId?: string) {
+    const stopDevice = motionmaster.MotionMasterMessage.Request.StopDevice.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { stopDevice };
+    this.sendRequest(request, messageId);
+  }
+
+  requestStartDeviceFirmwareInstallation(properties: motionmaster.MotionMasterMessage.Request.IStartDeviceFirmwareInstallation, messageId?: string) {
+    const startDeviceFirmwareInstallation = motionmaster.MotionMasterMessage.Request.StartDeviceFirmwareInstallation.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { startDeviceFirmwareInstallation };
+    this.sendRequest(request, messageId);
+  }
+
+  requestGetDeviceLog(properties: motionmaster.MotionMasterMessage.Request.IGetDeviceLog, messageId?: string) {
+    const getDeviceLog = motionmaster.MotionMasterMessage.Request.GetDeviceLog.create(properties);
     const request: motionmaster.MotionMasterMessage.IRequest = { getDeviceLog };
+    this.sendRequest(request, messageId);
+  }
+
+  requestStartCoggingTorqueRecording(properties: motionmaster.MotionMasterMessage.Request.IStartCoggingTorqueRecording, messageId?: string) {
+    const startCoggingTorqueRecording = motionmaster.MotionMasterMessage.Request.StartCoggingTorqueRecording.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { startCoggingTorqueRecording };
+    this.sendRequest(request, messageId);
+  }
+
+  requestGetCoggingTorqueData(properties: motionmaster.MotionMasterMessage.Request.IGetCoggingTorqueData, messageId?: string) {
+    const getCoggingTorqueData = motionmaster.MotionMasterMessage.Request.GetCoggingTorqueData.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { getCoggingTorqueData };
+    this.sendRequest(request, messageId);
+  }
+
+  requestStartOffsetDetection(properties: motionmaster.MotionMasterMessage.Request.IStartOffsetDetection, messageId?: string) {
+    const startOffsetDetection = motionmaster.MotionMasterMessage.Request.StartOffsetDetection.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { startOffsetDetection };
+    this.sendRequest(request, messageId);
+  }
+
+  requestStartPlantIdentification(properties: motionmaster.MotionMasterMessage.Request.IStartPlantIdentification, messageId?: string) {
+    const startPlantIdentification = motionmaster.MotionMasterMessage.Request.StartPlantIdentification.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { startPlantIdentification };
+    this.sendRequest(request, messageId);
+  }
+
+  requestComputeAutoTuningGains(properties: motionmaster.MotionMasterMessage.Request.IComputeAutoTuningGains, messageId?: string) {
+    const computeAutoTuningGains = motionmaster.MotionMasterMessage.Request.ComputeAutoTuningGains.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { computeAutoTuningGains };
+    this.sendRequest(request, messageId);
+  }
+
+  requestSetMotionControllerParameters(properties: motionmaster.MotionMasterMessage.Request.ISetMotionControllerParameters, messageId?: string) {
+    const setMotionControllerParameters = motionmaster.MotionMasterMessage.Request.SetMotionControllerParameters.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { setMotionControllerParameters };
+    this.sendRequest(request, messageId);
+  }
+
+  requestEnableMotionController(properties: motionmaster.MotionMasterMessage.Request.IEnableMotionController, messageId?: string) {
+    const enableMotionController = motionmaster.MotionMasterMessage.Request.EnableMotionController.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { enableMotionController };
+    this.sendRequest(request, messageId);
+  }
+
+  requestDisableMotionController(properties: motionmaster.MotionMasterMessage.Request.IDisableMotionController, messageId?: string) {
+    const disableMotionController = motionmaster.MotionMasterMessage.Request.DisableMotionController.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { disableMotionController };
+    this.sendRequest(request, messageId);
+  }
+
+  requestSetSignalGeneratorParameters(properties: motionmaster.MotionMasterMessage.Request.ISetSignalGeneratorParameters, messageId?: string) {
+    const setSignalGeneratorParameters = motionmaster.MotionMasterMessage.Request.SetSignalGeneratorParameters.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { setSignalGeneratorParameters };
+    this.sendRequest(request, messageId);
+  }
+
+  requestStartSignalGenerator(properties: motionmaster.MotionMasterMessage.Request.IStartSignalGenerator, messageId?: string) {
+    const startSignalGenerator = motionmaster.MotionMasterMessage.Request.StartSignalGenerator.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { startSignalGenerator };
+    this.sendRequest(request, messageId);
+  }
+
+  requestStopSignalGenerator(properties: motionmaster.MotionMasterMessage.Request.IStopSignalGenerator, messageId?: string) {
+    const stopSignalGenerator = motionmaster.MotionMasterMessage.Request.StopSignalGenerator.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { stopSignalGenerator };
+    this.sendRequest(request, messageId);
+  }
+
+  requestStartMonitoringDeviceParameterValues(properties: motionmaster.MotionMasterMessage.Request.IStartMonitoringDeviceParameterValues, messageId?: string) {
+    const startMonitoringDeviceParameterValues = motionmaster.MotionMasterMessage.Request.StartMonitoringDeviceParameterValues.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { startMonitoringDeviceParameterValues };
+    this.sendRequest(request, messageId);
+  }
+
+  requestStopMonitoringDeviceParameterValues(properties: motionmaster.MotionMasterMessage.Request.IStopMonitoringDeviceParameterValues, messageId?: string) {
+    const stopMonitoringDeviceParameterValues = motionmaster.MotionMasterMessage.Request.StopMonitoringDeviceParameterValues.create(properties);
+    const request: motionmaster.MotionMasterMessage.IRequest = { stopMonitoringDeviceParameterValues };
     this.sendRequest(request, messageId);
   }
 
   sendRequest(request: motionmaster.MotionMasterMessage.IRequest, messageId?: string) {
     const message = encodeRequest(request, messageId);
     this.output.next(message);
-  }
-
-  startMonitoringDeviceParameterValues(
-    interval: number,
-    topic: string,
-    getDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IGetDeviceParameterValues,
-    messageId?: string,
-  ) {
-    const startMonitoringDeviceParameterValues = motionmaster.MotionMasterMessage.Request.StartMonitoringDeviceParameterValues.create({
-      getDeviceParameterValues,
-      interval,
-      topic,
-    });
-    const request: motionmaster.MotionMasterMessage.IRequest = { startMonitoringDeviceParameterValues };
-    this.sendRequest(request, messageId);
   }
 
   getDeviceAtPosition$(position: number) {
@@ -186,27 +277,5 @@ export class MotionMasterClient {
       map((notif) => ({ topic, message: decodeMotionMasterMessage(notif[1]) })),
     );
   }
-
-  // GetMultiDeviceParameterValues get_multi_device_parameter_values = 106;
-  // SetMultiDeviceParameterValues set_multi_device_parameter_values = 108;
-  // GetDeviceFile get_device_file = 110;
-  // SetDeviceFile set_device_file = 111;
-  // DeleteDeviceFile delete_device_file = 112;
-  // ResetDeviceFault reset_device_fault = 113;
-  // StopDevice stop_device = 114;
-  // StartDeviceFirmwareInstallation start_device_firmware_installation = 115;
-  // GetDeviceLog get_device_log = 116;
-  // StartCoggingTorqueRecording start_cogging_torque_recording = 117;
-  // GetCoggingTorqueData get_cogging_torque_data = 118;
-  // StartOffsetDetection start_offset_detection = 119;
-  // StartPlantIdentification start_plant_identification = 120;
-  // ComputeAutoTuningGains compute_auto_tuning_gains = 121;
-  // SetMotionControllerParameters set_motion_controller_parameters = 122;
-  // EnableMotionController enable_motion_controller = 123;
-  // DisableMotionController disable_motion_controller = 124;
-  // SetSignalGeneratorParameters set_signal_generator_parameters = 125;
-  // StartSignalGenerator start_signal_generator = 126;
-  // StopSignalGenerator stop_signal_generator = 127;
-  // StopMonitoringDeviceParameterValues stop_monitoring_device_parameter_values = 129;
 
 }

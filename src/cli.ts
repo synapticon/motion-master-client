@@ -109,20 +109,20 @@ program
         motionMasterClient.requestGetDeviceInfo(messageId);
         break;
       case 'GetDeviceParameterInfo':
-        motionMasterClient.requestGetDeviceParameterInfo(deviceAddress, messageId);
+        motionMasterClient.requestGetDeviceParameterInfo({ deviceAddress }, messageId);
         break;
       case 'GetDeviceParameterValues':
         const parameters = args.map(paramToIndexAndSubindex);
-        motionMasterClient.requestGetDeviceParameterValues(deviceAddress, parameters, messageId);
+        motionMasterClient.requestGetDeviceParameterValues({ deviceAddress, parameters }, messageId);
         break;
       case 'GetDeviceFileList':
-        motionMasterClient.requestGetDeviceFileList(deviceAddress);
+        motionMasterClient.requestGetDeviceFileList({ deviceAddress }, messageId);
         break;
       case 'GetDeviceLog':
-        motionMasterClient.requestGetDeviceLog(deviceAddress);
+        motionMasterClient.requestGetDeviceLog({ deviceAddress }, messageId);
         break;
       default:
-        throw new Error(`Request "${program.request}" doesn\'t exist`);
+        throw new Error(`Request "${type}" doesn\'t exist`);
     }
   });
 
@@ -135,7 +135,7 @@ program
     const parameters = params.map(paramToIndexAndSubindex);
     const messageId = v4();
     exitOnMessageReceived(messageId);
-    motionMasterClient.requestGetDeviceParameterValues(deviceAddress, parameters, messageId);
+    motionMasterClient.requestGetDeviceParameterValues({ deviceAddress, parameters }, messageId);
   });
 
 program
@@ -144,10 +144,10 @@ program
   .option('-p, --device-position <value>', 'used when device address is not specified', parseOptionValueAsInt, 0)
   .action(async (paramValues: string[], cmd: Command) => {
     const deviceAddress = await getCommandDeviceAddress(cmd);
-    const parameters = paramValues.map(paramValueToIndexAndSubindex);
+    const parameterValues = paramValues.map(paramValueToIndexAndSubindex);
     const messageId = v4();
     exitOnMessageReceived(messageId);
-    motionMasterClient.requestSetDeviceParameterValues(deviceAddress, parameters, messageId);
+    motionMasterClient.requestSetDeviceParameterValues({ deviceAddress, parameterValues }, messageId);
   });
 
 program
@@ -166,7 +166,9 @@ program
     });
     const interval = cmd.interval;
     const parameters = params.map(paramToIndexAndSubindex);
-    motionMasterClient.startMonitoringDeviceParameterValues(interval, topic, { parameters, deviceAddress });
+    const getDeviceParameterValues = { deviceAddress, parameters };
+    const messageId = v4();
+    motionMasterClient.requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues, interval, topic }, messageId);
   });
 
 program.parse(process.argv);
@@ -188,15 +190,15 @@ function paramValueToIndexAndSubindex(paramValue: string) {
   return { index, subindex, intValue, uintValue, floatValue };
 }
 
-async function getCommandDeviceAddress(command: Command) {
-  if (command.deviceAddress) {
-    return command.deviceAddress;
-  } else if (Number.isInteger(command.devicePosition)) {
-    const device = await motionMasterClient.getDeviceAtPosition$(command.devicePosition).toPromise();
+async function getCommandDeviceAddress(cmd: Command) {
+  if (cmd.deviceAddress) {
+    return cmd.deviceAddress;
+  } else if (Number.isInteger(cmd.devicePosition)) {
+    const device = await motionMasterClient.getDeviceAtPosition$(cmd.devicePosition).toPromise();
     if (device) {
       return device.deviceAddress;
     } else {
-      throw new Error(`There is no device at position ${command.devicePosition}`);
+      throw new Error(`There is no device at position ${cmd.devicePosition}`);
     }
   }
 }
