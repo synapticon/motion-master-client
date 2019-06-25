@@ -20,11 +20,14 @@ export interface INotification {
   message: motionmaster.IMotionMasterMessage;
 }
 
+export type StatusType = ('systemPong' | 'systemVersion' | 'systemEvent' | 'deviceInfo' | 'deviceParameterInfo' | 'deviceParameterValues' | 'multiDeviceParameterValues' | 'deviceFileList' | 'deviceFile' | 'deviceEvent' | 'deviceFirmwareInstallation' | 'deviceLog' | 'deviceFaultReset' | 'coggingTorqueRecording' | 'coggingTorqueData' | 'offsetDetection' | 'plantIdentification' | 'autoTuning' | 'motionController' | 'signalGenerator' | 'monitoringParameterValues');
+
 export class MotionMasterClient {
 
   motionMasterMessage$: Observable<motionmaster.MotionMasterMessage>;
   notification$: Observable<INotification>;
   status$: Observable<motionmaster.MotionMasterMessage.Status>;
+
   systemVersion$: Observable<motionmaster.MotionMasterMessage.Status.SystemVersion>;
   deviceInfo$: Observable<motionmaster.MotionMasterMessage.Status.DeviceInfo>;
   deviceParameterInfo$: Observable<motionmaster.MotionMasterMessage.Status.DeviceParameterInfo>;
@@ -51,30 +54,22 @@ export class MotionMasterClient {
       map((message) => message.status),
     ) as Observable<motionmaster.MotionMasterMessage.Status>;
 
-    this.systemVersion$ = this.status$.pipe(
-      filter((status) => !!status.systemVersion),
-      map((status) => status.systemVersion),
-    ) as Observable<motionmaster.MotionMasterMessage.Status.SystemVersion>;
-
-    this.deviceInfo$ = this.status$.pipe(
-      filter((status) => !!status.deviceInfo),
-      map((status) => status.deviceInfo),
-    ) as Observable<motionmaster.MotionMasterMessage.Status.DeviceInfo>;
-
-    this.deviceParameterInfo$ = this.status$.pipe(
-      filter((status) => !!status.deviceParameterInfo),
-      map((status) => status.deviceParameterInfo),
-    ) as Observable<motionmaster.MotionMasterMessage.Status.DeviceParameterInfo>;
-
-    this.deviceParameterValues$ = this.status$.pipe(
-      filter((status) => !!status.deviceParameterValues),
-      map((status) => status.deviceParameterValues),
-    ) as Observable<motionmaster.MotionMasterMessage.Status.DeviceParameterValues>;
+    this.systemVersion$ = this.selectStatus$('systemVersion') as Observable<motionmaster.MotionMasterMessage.Status.SystemVersion>;
+    this.deviceInfo$ = this.selectStatus$('deviceInfo') as Observable<motionmaster.MotionMasterMessage.Status.DeviceInfo>;
+    this.deviceParameterInfo$ = this.selectStatus$('deviceParameterInfo') as Observable<motionmaster.MotionMasterMessage.Status.DeviceParameterInfo>;
+    this.deviceParameterValues$ = this.selectStatus$('deviceParameterValues') as Observable<motionmaster.MotionMasterMessage.Status.DeviceParameterValues>;
   }
 
   sendRequest(request: motionmaster.MotionMasterMessage.IRequest, messageId?: string) {
     const message = encodeRequest(request, messageId);
     this.output.next(message);
+  }
+
+  selectStatus$(type: StatusType) {
+    return this.status$.pipe(
+      filter((status) => status.type === type),
+      map((status) => status[type]),
+    );
   }
 
   getDeviceAtPosition$(position: number) {

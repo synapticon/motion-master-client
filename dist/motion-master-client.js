@@ -27,14 +27,17 @@ var MotionMasterClient = /** @class */ (function () {
             return { topic: topic, message: message };
         }));
         this.status$ = this.motionMasterMessage$.pipe(operators_1.map(function (message) { return message.status; }));
-        this.systemVersion$ = this.status$.pipe(operators_1.filter(function (status) { return !!status.systemVersion; }), operators_1.map(function (status) { return status.systemVersion; }));
-        this.deviceInfo$ = this.status$.pipe(operators_1.filter(function (status) { return !!status.deviceInfo; }), operators_1.map(function (status) { return status.deviceInfo; }));
-        this.deviceParameterInfo$ = this.status$.pipe(operators_1.filter(function (status) { return !!status.deviceParameterInfo; }), operators_1.map(function (status) { return status.deviceParameterInfo; }));
-        this.deviceParameterValues$ = this.status$.pipe(operators_1.filter(function (status) { return !!status.deviceParameterValues; }), operators_1.map(function (status) { return status.deviceParameterValues; }));
+        this.systemVersion$ = this.selectStatus$('systemVersion');
+        this.deviceInfo$ = this.selectStatus$('deviceInfo');
+        this.deviceParameterInfo$ = this.selectStatus$('deviceParameterInfo');
+        this.deviceParameterValues$ = this.selectStatus$('deviceParameterValues');
     }
     MotionMasterClient.prototype.sendRequest = function (request, messageId) {
         var message = encodeRequest(request, messageId);
         this.output.next(message);
+    };
+    MotionMasterClient.prototype.selectStatus$ = function (type) {
+        return this.status$.pipe(operators_1.filter(function (status) { return status.type === type; }), operators_1.map(function (status) { return status[type]; }));
     };
     MotionMasterClient.prototype.getDeviceAtPosition$ = function (position) {
         var messageId = uuid_1.v4();
