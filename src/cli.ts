@@ -22,7 +22,7 @@ const inspectOptions: util.InspectOptions = {
 };
 
 const cliOptions = {
-  pingSystemInterval: 250,
+  pingSystemInterval: 200,
   serverEndpoint: 'tcp://127.0.0.1:62524',
   notificationEndpoint: 'tcp://127.0.0.1:62525',
 };
@@ -64,6 +64,11 @@ notificationSocket.on('message', (topic: Buffer, message: Buffer) => {
 const motionMasterClient = new MotionMasterClient(input, output, notification);
 
 pingSystemInterval.subscribe(() => motionMasterClient.sendRequest({ pingSystem: {} }));
+
+motionMasterClient.filterNotificationByTopic$('heartbeat').pipe(
+  timeout(1000),
+  catchError(process.exit),
+).subscribe();
 
 // feed buffer data coming from Motion Master to MotionMasterClient
 serverSocket.on('message', (data) => {
@@ -339,6 +344,7 @@ function exitOnMessageReceived(messageId: string, exit = true, due = 10000): voi
     catchError(process.exit),
   ).subscribe(() => {
     if (exit) {
+      debug(`Exit on message received ${messageId}`);
       process.exit();
     }
   });
