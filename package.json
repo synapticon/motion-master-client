@@ -7,6 +7,7 @@
   "scripts": {
     "build": "npx tsc --build tsconfig.json",
     "start": "node dist/cli.js",
+    "motion-master-client": "npm start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
