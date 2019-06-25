@@ -3,7 +3,7 @@
 import program, { Command } from 'commander';
 import { motionmaster } from 'motion-master-proto';
 import * as rxjs from 'rxjs';
-import { catchError, filter, first, timeout } from 'rxjs/operators';
+import { filter, first, timeout } from 'rxjs/operators';
 import * as util from 'util';
 import { v4 } from 'uuid';
 import * as zmq from 'zeromq';
@@ -227,7 +227,13 @@ requestCommand
         throw new Error(`Request "${type}" is not yet implemented`);
       }
       case 'startMonitoringDeviceParameterValues': {
-        throw new Error(`Request "${type}" is not yet implemented`);
+        const parameters = args.slice(1).map(paramToIndexSubindex);
+        const getDeviceParameterValues = { deviceAddress, parameters };
+        const interval = cmd.interval;
+        const topic = args[0];
+
+        requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues, interval, topic });
+        break;
       }
       case 'stopMonitoringDeviceParameterValues': {
         const startMonitoringRequestId = args[0];
@@ -279,28 +285,28 @@ addDeviceOptions(monitorCommmand);
 monitorCommmand
   .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
   .action(async (topic: string, params: string[], cmd: Command) => {
-    const messageId = v4();
-
-    motionMasterClient.filterNotificationByTopic$(topic).subscribe((notif) => {
-      const timestamp = Date.now();
-      const message = notif.message;
-      console.log(
-        util.inspect({ timestamp, topic, message }, inspectOptions),
-      );
-    });
-
     const deviceAddress = await getCommandDeviceAddress(cmd);
     const parameters = params.map(paramToIndexSubindex);
     const getDeviceParameterValues = { deviceAddress, parameters };
     const interval = cmd.interval;
-    const startMonitoringDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IStartMonitoringDeviceParameterValues = {
-      getDeviceParameterValues,
-      interval,
-      topic,
-    };
 
-    motionMasterClient.sendRequest({ startMonitoringDeviceParameterValues }, messageId);
+    requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues, interval, topic });
   });
+
+function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IStartMonitoringDeviceParameterValues) {
+  const messageId = v4();
+
+  motionMasterClient.filterNotificationByTopic$(startMonitoringDeviceParameterValues.topic as string).subscribe((notif) => {
+    const timestamp = Date.now();
+    const topic = startMonitoringDeviceParameterValues.topic;
+    const message = notif.message;
+    console.log(
+      util.inspect({ timestamp, topic, message }, inspectOptions),
+    );
+  });
+
+  motionMasterClient.sendRequest({ startMonitoringDeviceParameterValues }, messageId);
+}
 
 // parse command line arguments
 program.parse(process.argv);

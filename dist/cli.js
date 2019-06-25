@@ -129,7 +129,7 @@ var requestCommand = commander_1.default.command('request <type> [args...]');
 addDeviceOptions(requestCommand);
 requestCommand
     .action(function (type, args, cmd) { return __awaiter(_this, void 0, void 0, function () {
-    var deviceAddress, messageId, pingSystem, getSystemVersion, getDeviceInfo, getDeviceParameterInfo, parameters, getDeviceParameterValues, parameterValues, setDeviceParameterValues, getDeviceFileList, name_1, getDeviceFile, name_2, deleteDeviceFile, resetDeviceFault, stopDevice, getDeviceLog, getCoggingTorqueData, startOffsetDetection, startMonitoringRequestId, stopMonitoringDeviceParameterValues;
+    var deviceAddress, messageId, pingSystem, getSystemVersion, getDeviceInfo, getDeviceParameterInfo, parameters, getDeviceParameterValues, parameterValues, setDeviceParameterValues, getDeviceFileList, name_1, getDeviceFile, name_2, deleteDeviceFile, resetDeviceFault, stopDevice, getDeviceLog, getCoggingTorqueData, startOffsetDetection, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId, stopMonitoringDeviceParameterValues;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, getCommandDeviceAddress(cmd)];
@@ -252,7 +252,12 @@ requestCommand
                         throw new Error("Request \"" + type + "\" is not yet implemented");
                     }
                     case 'startMonitoringDeviceParameterValues': {
-                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                        parameters = args.slice(1).map(paramToIndexSubindex);
+                        getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
+                        interval = cmd.interval;
+                        topic = args[0];
+                        requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues: getDeviceParameterValues, interval: interval, topic: topic });
+                        break;
                     }
                     case 'stopMonitoringDeviceParameterValues': {
                         startMonitoringRequestId = args[0];
@@ -318,32 +323,30 @@ addDeviceOptions(monitorCommmand);
 monitorCommmand
     .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
     .action(function (topic, params, cmd) { return __awaiter(_this, void 0, void 0, function () {
-    var messageId, deviceAddress, parameters, getDeviceParameterValues, interval, startMonitoringDeviceParameterValues;
+    var deviceAddress, parameters, getDeviceParameterValues, interval;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0:
-                messageId = uuid_1.v4();
-                motionMasterClient.filterNotificationByTopic$(topic).subscribe(function (notif) {
-                    var timestamp = Date.now();
-                    var message = notif.message;
-                    console.log(util.inspect({ timestamp: timestamp, topic: topic, message: message }, inspectOptions));
-                });
-                return [4 /*yield*/, getCommandDeviceAddress(cmd)];
+            case 0: return [4 /*yield*/, getCommandDeviceAddress(cmd)];
             case 1:
                 deviceAddress = _a.sent();
                 parameters = params.map(paramToIndexSubindex);
                 getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
                 interval = cmd.interval;
-                startMonitoringDeviceParameterValues = {
-                    getDeviceParameterValues: getDeviceParameterValues,
-                    interval: interval,
-                    topic: topic,
-                };
-                motionMasterClient.sendRequest({ startMonitoringDeviceParameterValues: startMonitoringDeviceParameterValues }, messageId);
+                requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues: getDeviceParameterValues, interval: interval, topic: topic });
                 return [2 /*return*/];
         }
     });
 }); });
+function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParameterValues) {
+    var messageId = uuid_1.v4();
+    motionMasterClient.filterNotificationByTopic$(startMonitoringDeviceParameterValues.topic).subscribe(function (notif) {
+        var timestamp = Date.now();
+        var topic = startMonitoringDeviceParameterValues.topic;
+        var message = notif.message;
+        console.log(util.inspect({ timestamp: timestamp, topic: topic, message: message }, inspectOptions));
+    });
+    motionMasterClient.sendRequest({ startMonitoringDeviceParameterValues: startMonitoringDeviceParameterValues }, messageId);
+}
 // parse command line arguments
 commander_1.default.parse(process.argv);
 //
