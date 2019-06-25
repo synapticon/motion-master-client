@@ -383,9 +383,10 @@ function getCommandDeviceAddress(cmd) {
         });
     });
 }
-function exitOnMessageReceived(messageId, exit) {
+function exitOnMessageReceived(messageId, exit, due) {
     if (exit === void 0) { exit = true; }
-    motionMasterClient.motionMasterMessage$.pipe(operators_1.filter(function (message) { return message.id === messageId; }), operators_1.first()).subscribe(function () {
+    if (due === void 0) { due = 10000; }
+    motionMasterClient.motionMasterMessage$.pipe(operators_1.filter(function (message) { return message.id === messageId; }), operators_1.first(), operators_1.timeout(due), operators_1.catchError(process.exit)).subscribe(function () {
         if (exit) {
             process.exit();
         }

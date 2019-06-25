@@ -3,7 +3,7 @@
 import program, { Command } from 'commander';
 import { motionmaster } from 'motion-master-proto';
 import * as rxjs from 'rxjs';
-import { filter, first } from 'rxjs/operators';
+import { catchError, filter, first, timeout } from 'rxjs/operators';
 import * as util from 'util';
 import { v4 } from 'uuid';
 import * as zmq from 'zeromq';
@@ -331,10 +331,12 @@ async function getCommandDeviceAddress(cmd: Command): Promise<number | null | un
   }
 }
 
-function exitOnMessageReceived(messageId: string, exit: boolean = true): void {
+function exitOnMessageReceived(messageId: string, exit = true, due = 10000): void {
   motionMasterClient.motionMasterMessage$.pipe(
     filter((message) => message.id === messageId),
     first(),
+    timeout(due),
+    catchError(process.exit),
   ).subscribe(() => {
     if (exit) {
       process.exit();
