@@ -100,4 +100,10 @@ export class MotionMasterClient {
     );
   }
 
+  filterMotionMasterMessageById$(messageId: string) {
+    return this.motionMasterMessage$.pipe(
+      filter((message) => message.id === messageId),
+    );
+  }
+
 }

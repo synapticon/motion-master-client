@@ -3,7 +3,7 @@
 import program, { Command } from 'commander';
 import { motionmaster } from 'motion-master-proto';
 import * as rxjs from 'rxjs';
-import { filter, first, timeout } from 'rxjs/operators';
+import { first, map, timeout } from 'rxjs/operators';
 import * as util from 'util';
 import { v4 } from 'uuid';
 import * as zmq from 'zeromq';
@@ -27,6 +27,8 @@ const cliOptions = {
   serverEndpoint: 'tcp://127.0.0.1:62524',
   notificationEndpoint: 'tcp://127.0.0.1:62525',
 };
+
+const deviceParameterInfoMap: Map<number, motionmaster.MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined> = new Map();
 
 const pingSystemInterval = rxjs.interval(cliOptions.pingSystemInterval);
 
@@ -92,15 +94,6 @@ output.subscribe((buffer) => {
   serverSocket.send(buffer);
 });
 
-// log all status messages coming from Motion Master
-motionMasterClient.motionMasterMessage$.subscribe((msg) => {
-  const timestamp = Date.now();
-  const message = msg.toJSON();
-  console.log(
-    util.inspect({ timestamp, message }, inspectOptions),
-  );
-});
-
 program
   .version(version);
 
@@ -109,9 +102,12 @@ const requestCommand = program.command('request <type> [args...]');
 addDeviceOptions(requestCommand);
 requestCommand
   .action(async (type: string, args: string[], cmd: Command) => {
-    const deviceAddress = await getCommandDeviceAddress(cmd);
+    const deviceAddress = await getCommandDeviceAddressAsync(cmd);
     const messageId = v4();
+
+    printOnMessageReceived(messageId);
     exitOnMessageReceived(messageId);
+
     switch (type) {
       case 'pingSystem': {
         const pingSystem: motionmaster.MotionMasterMessage.Request.IPingSystem = {};
@@ -143,7 +139,8 @@ requestCommand
         throw new Error(`Request "${type}" is not yet implemented`);
       }
       case 'setDeviceParameterValues': {
-        const parameterValues = args.map(paramToIndexSubIndexValue);
+        const deviceParameterInfo = await getDeviceParameterInfoAsync(deviceAddress);
+        const parameterValues = args.map((paramValue) => paramToIndexSubIndexValue(paramValue, deviceParameterInfo));
         const setDeviceParameterValues: motionmaster.MotionMasterMessage.Request.ISetDeviceParameterValues = { deviceAddress, parameterValues };
         motionMasterClient.sendRequest({ setDeviceParameterValues }, messageId);
         break;
@@ -253,9 +250,11 @@ addDeviceOptions(uploadCommand);
 uploadCommand
   .action(async (params: string[], cmd: Command) => {
     const messageId = v4();
+
+    printOnMessageReceived(messageId);
     exitOnMessageReceived(messageId);
 
-    const deviceAddress = await getCommandDeviceAddress(cmd);
+    const deviceAddress = await getCommandDeviceAddressAsync(cmd);
     const parameters: motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] = params.map(paramToIndexSubindex);
     const getDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IGetDeviceParameterValues = { deviceAddress, parameters };
 
@@ -270,10 +269,13 @@ downloadCommand
   .option('-p, --device-position <value>', 'used when device address is not specified', parseOptionValueAsInt, 0)
   .action(async (paramValues: string[], cmd: Command) => {
     const messageId = v4();
+
+    printOnMessageReceived(messageId);
     exitOnMessageReceived(messageId);
 
-    const deviceAddress = await getCommandDeviceAddress(cmd);
-    const parameterValues = paramValues.map(paramToIndexSubIndexValue);
+    const deviceAddress = await getCommandDeviceAddressAsync(cmd);
+    const deviceParameterInfo = await getDeviceParameterInfoAsync(deviceAddress);
+    const parameterValues = paramValues.map((paramValue) => paramToIndexSubIndexValue(paramValue, deviceParameterInfo));
     const setDeviceParameterValues: motionmaster.MotionMasterMessage.Request.ISetDeviceParameterValues = { deviceAddress, parameterValues };
 
     motionMasterClient.sendRequest({ setDeviceParameterValues }, messageId);
@@ -285,7 +287,7 @@ addDeviceOptions(monitorCommmand);
 monitorCommmand
   .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
   .action(async (topic: string, params: string[], cmd: Command) => {
-    const deviceAddress = await getCommandDeviceAddress(cmd);
+    const deviceAddress = await getCommandDeviceAddressAsync(cmd);
     const parameters = params.map(paramToIndexSubindex);
     const getDeviceParameterValues = { deviceAddress, parameters };
     const interval = cmd.interval;
@@ -315,24 +317,83 @@ program.parse(process.argv);
 // helper functions
 //
 
+async function getDeviceParameterInfoAsync(deviceAddress: number | null | undefined) {
+  if (!deviceAddress) {
+    return null;
+  }
+
+  if (deviceParameterInfoMap.has(deviceAddress)) {
+    return deviceParameterInfoMap.get(deviceAddress); // retrieve from cache
+  }
+
+  const getDeviceParameterInfo = { deviceAddress };
+  const messageId = v4();
+  motionMasterClient.sendRequest({ getDeviceParameterInfo }, messageId);
+
+  const deviceParameterInfo = await motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(
+    first(),
+    map((message) => message && message.status ? message.status.deviceParameterInfo : null),
+  ).toPromise();
+
+  deviceParameterInfoMap.set(deviceAddress, deviceParameterInfo); // cache
+
+  return deviceParameterInfo;
+}
+
 function paramToIndexSubindex(paramValue: string) {
   const [indexStr, subindexStr] = paramValue.split(':');
   const index = parseInt(indexStr, 16);
-  const subindex = parseInt(subindexStr, 10);
+  const subindex = parseInt(subindexStr, 10) || 0;
   return { index, subindex };
 }
 
-function paramToIndexSubIndexValue(paramValue: string) {
-  const [param, valueStr] = paramValue.split('=');
+function paramToIndexSubIndexValue(paramValue: string, deviceParameterInfo: motionmaster.MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined) {
+  const [param, value] = paramValue.split('=');
   const { index, subindex } = paramToIndexSubindex(param);
-  const value = parseFloat(valueStr);
-  const intValue = value;
-  const uintValue = value;
-  const floatValue = value;
-  return { index, subindex, intValue, uintValue, floatValue };
+
+  const parameterValue: motionmaster.MotionMasterMessage.Status.DeviceParameterValues.IParameterValue = { index, subindex };
+
+  if (deviceParameterInfo) {
+    if (deviceParameterInfo.parameters) {
+      const parameter = deviceParameterInfo.parameters.find((p) => p.index === index && p.subindex === subindex);
+      if (parameter) {
+        const VT = motionmaster.MotionMasterMessage.Status.DeviceParameterInfo.Parameter.ValueType;
+        switch (parameter.valueType) {
+          case VT.UNSPECIFIED:
+          case VT.INTEGER8:
+          case VT.INTEGER16:
+          case VT.INTEGER32: {
+            parameterValue.intValue = parseInt(value, 10);
+            break;
+          }
+          case VT.BOOLEAN:
+          case VT.UNSIGNED8:
+          case VT.UNSIGNED16:
+          case VT.UNSIGNED32: {
+            // TODO: Change back to uintValue
+            parameterValue.intValue = parseInt(value, 10);
+            break;
+          }
+          case VT.REAL32: {
+            parameterValue.floatValue = parseFloat(value);
+            break;
+          }
+          case VT.VISIBLE_STRING:
+          case VT.OCTET_STRING:
+          case VT.UNICODE_STRING:
+          case VT.TIME_OF_DAY: {
+            parameterValue.stringValue = value;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  return parameterValue;
 }
 
-async function getCommandDeviceAddress(cmd: Command): Promise<number | null | undefined> {
+async function getCommandDeviceAddressAsync(cmd: Command): Promise<number | null | undefined> {
   if (cmd.deviceAddress) {
     return cmd.deviceAddress;
   } else if (Number.isInteger(cmd.devicePosition)) {
@@ -348,8 +409,7 @@ async function getCommandDeviceAddress(cmd: Command): Promise<number | null | un
 }
 
 function exitOnMessageReceived(messageId: string, exit = true, due = 10000): void {
-  motionMasterClient.motionMasterMessage$.pipe(
-    filter((message) => message.id === messageId),
+  motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(
     first(),
     timeout(due),
   ).subscribe({
@@ -363,6 +423,16 @@ function exitOnMessageReceived(messageId: string, exit = true, due = 10000): voi
       console.error(`${err.name}: Status message ${messageId} not received for more than ${due} ms.`);
       process.exit(-1);
     },
+  });
+}
+
+function printOnMessageReceived(messageId: string) {
+  motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(first()).subscribe((msg) => {
+    const timestamp = Date.now();
+    const message = msg.toJSON();
+    console.log(
+      util.inspect({ timestamp, message }, inspectOptions),
+    );
   });
 }
 

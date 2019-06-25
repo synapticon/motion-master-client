@@ -57,6 +57,9 @@ var MotionMasterClient = /** @class */ (function () {
     MotionMasterClient.prototype.filterNotificationByTopic$ = function (topic) {
         return this.notification.pipe(operators_1.filter(function (notif) { return notif[0].toString('utf8') === topic; }), operators_1.map(function (notif) { return ({ topic: topic, message: decodeMotionMasterMessage(notif[1]) }); }));
     };
+    MotionMasterClient.prototype.filterMotionMasterMessageById$ = function (messageId) {
+        return this.motionMasterMessage$.pipe(operators_1.filter(function (message) { return message.id === messageId; }));
+    };
     return MotionMasterClient;
 }());
 exports.MotionMasterClient = MotionMasterClient;
