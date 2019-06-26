@@ -72,6 +72,12 @@ var inspectOptions = {
     colors: true,
     maxArrayLength: null,
 };
+// map to cache device parameter info per device
+var deviceParameterInfoMap = new Map();
+var input = new rxjs.Subject();
+var output = new rxjs.Subject();
+var notification = new rxjs.Subject();
+var motionMasterClient = new motion_master_client_1.MotionMasterClient(input, output, notification);
 var config = {
     pingSystemInterval: 200,
     motionMasterHeartbeatTimeoutDue: 1000,
@@ -79,27 +85,6 @@ var config = {
     notificationEndpoint: 'tcp://127.0.0.1:62525',
     identity: uuid_1.v4(),
 };
-// map to cache device parameter info per device
-var deviceParameterInfoMap = new Map();
-var input = new rxjs.Subject();
-var output = new rxjs.Subject();
-var notification = new rxjs.Subject();
-var motionMasterClient = new motion_master_client_1.MotionMasterClient(input, output, notification);
-// connect to server endpoint
-var serverSocket = zmq.socket('dealer');
-debug("Identity: " + config.identity);
-serverSocket.identity = config.identity;
-serverSocket.connect(config.serverEndpoint);
-debug("ZeroMQ DEALER socket is connected to server endpoint: " + config.serverEndpoint);
-// connnect to notification endpoint
-var notificationSocket = zmq.socket('sub').connect(config.notificationEndpoint);
-debug("ZeroMQ SUB socket connected to notification endpoint: " + config.notificationEndpoint);
-// subscribe to all topics
-notificationSocket.subscribe('');
-// feed notification buffer data coming from Motion Master to MotionMasterClient
-notificationSocket.on('message', function (topic, message) {
-    notification.next([topic, message]);
-});
 // ping Motion Master in regular intervals
 var pingSystemInterval = rxjs.interval(config.pingSystemInterval);
 pingSystemInterval.subscribe(function () { return motionMasterClient.sendRequest({ pingSystem: {} }); });
@@ -110,6 +95,12 @@ motionMasterClient.filterNotificationByTopic$('heartbeat').pipe(operators_1.time
         process.exit(-1);
     },
 });
+// connect to server endpoint
+var serverSocket = zmq.socket('dealer');
+debug("Identity: " + config.identity);
+serverSocket.identity = config.identity;
+serverSocket.connect(config.serverEndpoint);
+debug("ZeroMQ DEALER socket is connected to server endpoint: " + config.serverEndpoint);
 // feed buffer data coming from Motion Master to MotionMasterClient
 serverSocket.on('message', function (data) {
     input.next(data);
@@ -122,6 +113,15 @@ output.subscribe(function (buffer) {
         debug(util.inspect(motion_master_client_1.decodeMotionMasterMessage(buffer).toJSON(), inspectOptions));
     }
     serverSocket.send(buffer);
+});
+// connnect to notification endpoint
+var notificationSocket = zmq.socket('sub').connect(config.notificationEndpoint);
+debug("ZeroMQ SUB socket connected to notification endpoint: " + config.notificationEndpoint);
+// subscribe to all topics
+notificationSocket.subscribe('');
+// feed notification buffer data coming from Motion Master to MotionMasterClient
+notificationSocket.on('message', function (topic, message) {
+    notification.next([topic, message]);
 });
 //
 // program and commands

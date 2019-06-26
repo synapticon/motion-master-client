@@ -31,14 +31,6 @@ const inspectOptions: util.InspectOptions = {
   maxArrayLength: null,
 };
 
-const config = {
-  pingSystemInterval: 200, // ping Motion Master at regular intervals
-  motionMasterHeartbeatTimeoutDue: 1000, // exit process when Motion Master doesn't send a heartbeat message in time specified
-  serverEndpoint: 'tcp://127.0.0.1:62524', // request and receive status messages (response)
-  notificationEndpoint: 'tcp://127.0.0.1:62525', // subscribe to a topic and receive published status messages (heartbeat and monitoring)
-  identity: v4(), // ZeroMQ DEALER socket identity
-};
-
 // map to cache device parameter info per device
 const deviceParameterInfoMap: Map<number, motionmaster.MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined> = new Map();
 
@@ -47,24 +39,13 @@ const output = new rxjs.Subject<Buffer>();
 const notification = new rxjs.Subject<[Buffer, Buffer]>();
 const motionMasterClient = new MotionMasterClient(input, output, notification);
 
-// connect to server endpoint
-const serverSocket = zmq.socket('dealer');
-debug(`Identity: ${config.identity}`);
-serverSocket.identity = config.identity;
-serverSocket.connect(config.serverEndpoint);
-debug(`ZeroMQ DEALER socket is connected to server endpoint: ${config.serverEndpoint}`);
-
-// connnect to notification endpoint
-const notificationSocket = zmq.socket('sub').connect(config.notificationEndpoint);
-debug(`ZeroMQ SUB socket connected to notification endpoint: ${config.notificationEndpoint}`);
-
-// subscribe to all topics
-notificationSocket.subscribe('');
-
-// feed notification buffer data coming from Motion Master to MotionMasterClient
-notificationSocket.on('message', (topic: Buffer, message: Buffer) => {
-  notification.next([topic, message]);
-});
+const config = {
+  pingSystemInterval: 200, // ping Motion Master at regular intervals
+  motionMasterHeartbeatTimeoutDue: 1000, // exit process when Motion Master doesn't send a heartbeat message in time specified
+  serverEndpoint: 'tcp://127.0.0.1:62524', // request and receive status messages (response)
+  notificationEndpoint: 'tcp://127.0.0.1:62525', // subscribe to a topic and receive published status messages (heartbeat and monitoring)
+  identity: v4(), // ZeroMQ DEALER socket identity
+};
 
 // ping Motion Master in regular intervals
 const pingSystemInterval = rxjs.interval(config.pingSystemInterval);
@@ -79,6 +60,13 @@ motionMasterClient.filterNotificationByTopic$('heartbeat').pipe(
     process.exit(-1);
   },
 });
+
+// connect to server endpoint
+const serverSocket = zmq.socket('dealer');
+debug(`Identity: ${config.identity}`);
+serverSocket.identity = config.identity;
+serverSocket.connect(config.serverEndpoint);
+debug(`ZeroMQ DEALER socket is connected to server endpoint: ${config.serverEndpoint}`);
 
 // feed buffer data coming from Motion Master to MotionMasterClient
 serverSocket.on('message', (data) => {
@@ -95,6 +83,18 @@ output.subscribe((buffer) => {
     );
   }
   serverSocket.send(buffer);
+});
+
+// connnect to notification endpoint
+const notificationSocket = zmq.socket('sub').connect(config.notificationEndpoint);
+debug(`ZeroMQ SUB socket connected to notification endpoint: ${config.notificationEndpoint}`);
+
+// subscribe to all topics
+notificationSocket.subscribe('');
+
+// feed notification buffer data coming from Motion Master to MotionMasterClient
+notificationSocket.on('message', (topic: Buffer, message: Buffer) => {
+  notification.next([topic, message]);
 });
 
 //
