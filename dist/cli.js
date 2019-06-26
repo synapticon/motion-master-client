@@ -45,7 +45,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var commander_1 = __importDefault(require("commander"));
 var motion_master_proto_1 = require("motion-master-proto");
@@ -59,29 +58,6 @@ var motion_master_client_1 = require("./motion-master-client");
 var debug = require('debug')('motion-master-client');
 var version = require('../package.json')['version'];
 // tslint:enable-next-line: no-var-requires
-var inspectOptions = {
-    showHidden: false,
-    depth: null,
-    colors: true,
-    maxArrayLength: null,
-};
-var cliOptions = {
-    pingSystemInterval: 200,
-    motionMasterHeartbeatTimeoutDue: 1000,
-    serverEndpoint: 'tcp://127.0.0.1:62524',
-    notificationEndpoint: 'tcp://127.0.0.1:62525',
-};
-var deviceParameterInfoMap = new Map();
-var pingSystemInterval = rxjs.interval(cliOptions.pingSystemInterval);
-var identity = uuid_1.v4();
-debug("Identity: " + identity);
-var serverSocket = zmq.socket('dealer');
-serverSocket.identity = identity;
-serverSocket.connect(cliOptions.serverEndpoint);
-debug("ZeroMQ DEALER socket is connected to server endpoint: " + cliOptions.serverEndpoint);
-var notificationSocket = zmq.socket('sub').connect(cliOptions.notificationEndpoint);
-debug("ZeroMQ SUB socket connected to notification endpoint: " + cliOptions.notificationEndpoint);
-notificationSocket.subscribe('');
 process.on('uncaughtException', function (err) {
     console.error('Caught exception: ' + err);
     process.exit();
@@ -90,18 +66,47 @@ process.on('unhandledRejection', function (reason) {
     console.error('Unhandled rejection reason: ', reason);
     process.exit();
 });
+var inspectOptions = {
+    showHidden: false,
+    depth: null,
+    colors: true,
+    maxArrayLength: null,
+};
+var config = {
+    pingSystemInterval: 200,
+    motionMasterHeartbeatTimeoutDue: 1000,
+    serverEndpoint: 'tcp://127.0.0.1:62524',
+    notificationEndpoint: 'tcp://127.0.0.1:62525',
+    identity: uuid_1.v4(),
+};
+// map to cache device parameter info per device
+var deviceParameterInfoMap = new Map();
 var input = new rxjs.Subject();
 var output = new rxjs.Subject();
 var notification = new rxjs.Subject();
+var motionMasterClient = new motion_master_client_1.MotionMasterClient(input, output, notification);
+// connect to server endpoint
+var serverSocket = zmq.socket('dealer');
+debug("Identity " + config.identity);
+serverSocket.identity = config.identity;
+serverSocket.connect(config.serverEndpoint);
+debug("ZeroMQ DEALER socket is connected to server endpoint: " + config.serverEndpoint);
+// connnect to notification endpoint
+var notificationSocket = zmq.socket('sub').connect(config.notificationEndpoint);
+debug("ZeroMQ SUB socket connected to notification endpoint: " + config.notificationEndpoint);
+// subscribe to all topics
+notificationSocket.subscribe('');
 // feed notification buffer data coming from Motion Master to MotionMasterClient
 notificationSocket.on('message', function (topic, message) {
     notification.next([topic, message]);
 });
-var motionMasterClient = new motion_master_client_1.MotionMasterClient(input, output, notification);
+// ping Motion Master in regular intervals
+var pingSystemInterval = rxjs.interval(config.pingSystemInterval);
 pingSystemInterval.subscribe(function () { return motionMasterClient.sendRequest({ pingSystem: {} }); });
-motionMasterClient.filterNotificationByTopic$('heartbeat').pipe(operators_1.timeout(cliOptions.motionMasterHeartbeatTimeoutDue)).subscribe({
+// exit process when a heartbeat message is not received for more than the time specified
+motionMasterClient.filterNotificationByTopic$('heartbeat').pipe(operators_1.timeout(config.motionMasterHeartbeatTimeoutDue)).subscribe({
     error: function (err) {
-        console.error(err.name + ": Heartbeat message not received for more than " + cliOptions.motionMasterHeartbeatTimeoutDue + " ms. Check if Motion Master process is running.");
+        console.error(err.name + ": Heartbeat message not received for more than " + config.motionMasterHeartbeatTimeoutDue + " ms. Check if Motion Master process is running.");
         process.exit(-1);
     },
 });
@@ -118,315 +123,334 @@ output.subscribe(function (buffer) {
     }
     serverSocket.send(buffer);
 });
+//
+// program and commands
+//
 commander_1.default
     .version(version);
-// request
 var requestCommand = commander_1.default.command('request <type> [args...]');
 addDeviceOptions(requestCommand);
 requestCommand
-    .action(function (type, args, cmd) { return __awaiter(_this, void 0, void 0, function () {
-    var deviceAddress, messageId, _a, pingSystem, getSystemVersion, getDeviceInfo, getDeviceParameterInfo, parameters, getDeviceParameterValues, deviceParameterInfo_1, parameterValues, setDeviceParameterValues, getDeviceFileList, name_1, getDeviceFile, name_2, deleteDeviceFile, resetDeviceFault, stopDevice, getDeviceLog, getCoggingTorqueData, startOffsetDetection, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId, stopMonitoringDeviceParameterValues;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0: return [4 /*yield*/, getCommandDeviceAddressAsync(cmd)];
-            case 1:
-                deviceAddress = _b.sent();
-                messageId = uuid_1.v4();
-                printOnMessageReceived(messageId);
-                exitOnMessageReceived(messageId);
-                _a = type;
-                switch (_a) {
-                    case 'pingSystem': return [3 /*break*/, 2];
-                    case 'getSystemVersion': return [3 /*break*/, 3];
-                    case 'getDeviceInfo': return [3 /*break*/, 4];
-                    case 'getDeviceParameterInfo': return [3 /*break*/, 5];
-                    case 'getDeviceParameterValues': return [3 /*break*/, 6];
-                    case 'getMultiDeviceParameterValues': return [3 /*break*/, 7];
-                    case 'setDeviceParameterValues': return [3 /*break*/, 8];
-                    case 'setMultiDeviceParameterValues': return [3 /*break*/, 10];
-                    case 'getDeviceFileList': return [3 /*break*/, 11];
-                    case 'getDeviceFile': return [3 /*break*/, 12];
-                    case 'setDeviceFile': return [3 /*break*/, 13];
-                    case 'deleteDeviceFile': return [3 /*break*/, 14];
-                    case 'resetDeviceFault': return [3 /*break*/, 15];
-                    case 'stopDevice': return [3 /*break*/, 16];
-                    case 'startDeviceFirmwareInstallation': return [3 /*break*/, 17];
-                    case 'getDeviceLog': return [3 /*break*/, 18];
-                    case 'startCoggingTorqueRecording': return [3 /*break*/, 19];
-                    case 'getCoggingTorqueData': return [3 /*break*/, 20];
-                    case 'startOffsetDetection': return [3 /*break*/, 21];
-                    case 'startPlantIdentification': return [3 /*break*/, 22];
-                    case 'computeAutoTuningGains': return [3 /*break*/, 23];
-                    case 'setMotionControllerParameters': return [3 /*break*/, 24];
-                    case 'enableMotionController': return [3 /*break*/, 25];
-                    case 'disableMotionController': return [3 /*break*/, 26];
-                    case 'setSignalGeneratorParameters': return [3 /*break*/, 27];
-                    case 'startSignalGenerator': return [3 /*break*/, 28];
-                    case 'stopSignalGenerator': return [3 /*break*/, 29];
-                    case 'startMonitoringDeviceParameterValues': return [3 /*break*/, 30];
-                    case 'stopMonitoringDeviceParameterValues': return [3 /*break*/, 31];
-                }
-                return [3 /*break*/, 32];
-            case 2:
-                {
-                    pingSystem = {};
-                    motionMasterClient.sendRequest({ pingSystem: pingSystem }, messageId);
-                    return [3 /*break*/, 33];
-                }
-                _b.label = 3;
-            case 3:
-                {
-                    getSystemVersion = {};
-                    motionMasterClient.sendRequest({ getSystemVersion: getSystemVersion }, messageId);
-                    return [3 /*break*/, 33];
-                }
-                _b.label = 4;
-            case 4:
-                {
-                    getDeviceInfo = {};
-                    motionMasterClient.sendRequest({ getDeviceInfo: getDeviceInfo }, messageId);
-                    return [3 /*break*/, 33];
-                }
-                _b.label = 5;
-            case 5:
-                {
-                    getDeviceParameterInfo = { deviceAddress: deviceAddress };
-                    motionMasterClient.sendRequest({ getDeviceParameterInfo: getDeviceParameterInfo }, messageId);
-                    return [3 /*break*/, 33];
-                }
-                _b.label = 6;
-            case 6:
-                {
-                    parameters = args.map(paramToIndexSubindex);
-                    getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
-                    motionMasterClient.sendRequest({ getDeviceParameterValues: getDeviceParameterValues }, messageId);
-                    return [3 /*break*/, 33];
-                }
-                _b.label = 7;
-            case 7:
-                {
-                    throw new Error("Request \"" + type + "\" is not yet implemented");
-                }
-                _b.label = 8;
-            case 8: return [4 /*yield*/, getDeviceParameterInfoAsync(deviceAddress)];
-            case 9:
-                deviceParameterInfo_1 = _b.sent();
-                parameterValues = args.map(function (paramValue) { return paramToIndexSubIndexValue(paramValue, deviceParameterInfo_1); });
-                setDeviceParameterValues = { deviceAddress: deviceAddress, parameterValues: parameterValues };
-                motionMasterClient.sendRequest({ setDeviceParameterValues: setDeviceParameterValues }, messageId);
-                return [3 /*break*/, 33];
-            case 10:
-                {
-                    throw new Error("Request \"" + type + "\" is not yet implemented");
-                }
-                _b.label = 11;
-            case 11:
-                {
-                    getDeviceFileList = { deviceAddress: deviceAddress };
-                    motionMasterClient.sendRequest({ getDeviceFileList: getDeviceFileList }, messageId);
-                    return [3 /*break*/, 33];
-                }
-                _b.label = 12;
-            case 12:
-                {
-                    name_1 = args[0];
-                    getDeviceFile = { deviceAddress: deviceAddress, name: name_1 };
-                    motionMasterClient.sendRequest({ getDeviceFile: getDeviceFile }, messageId);
-                    return [3 /*break*/, 33];
-                }
-                _b.label = 13;
-            case 13:
-                {
-                    throw new Error("Request \"" + type + "\" is not yet implemented");
-                }
-                _b.label = 14;
-            case 14:
-                {
-                    name_2 = args[0];
-                    deleteDeviceFile = { deviceAddress: deviceAddress, name: name_2 };
-                    motionMasterClient.sendRequest({ deleteDeviceFile: deleteDeviceFile }, messageId);
-                    return [3 /*break*/, 33];
-                }
-                _b.label = 15;
-            case 15:
-                {
-                    resetDeviceFault = { deviceAddress: deviceAddress };
-                    motionMasterClient.sendRequest({ resetDeviceFault: resetDeviceFault }, messageId);
-                    return [3 /*break*/, 33];
-                }
-                _b.label = 16;
-            case 16:
-                {
-                    stopDevice = { deviceAddress: deviceAddress };
-                    motionMasterClient.sendRequest({ stopDevice: stopDevice }, messageId);
-                    return [3 /*break*/, 33];
-                }
-                _b.label = 17;
-            case 17:
-                {
-                    throw new Error("Request \"" + type + "\" is not yet implemented");
-                }
-                _b.label = 18;
-            case 18:
-                {
-                    getDeviceLog = { deviceAddress: deviceAddress };
-                    motionMasterClient.sendRequest({ getDeviceLog: getDeviceLog }, messageId);
-                    return [3 /*break*/, 33];
-                }
-                _b.label = 19;
-            case 19:
-                {
-                    throw new Error("Request \"" + type + "\" is not yet implemented");
-                }
-                _b.label = 20;
-            case 20:
-                {
-                    getCoggingTorqueData = { deviceAddress: deviceAddress };
-                    motionMasterClient.sendRequest({ getCoggingTorqueData: getCoggingTorqueData }, messageId);
-                    return [3 /*break*/, 33];
-                }
-                _b.label = 21;
-            case 21:
-                {
-                    startOffsetDetection = { deviceAddress: deviceAddress };
-                    motionMasterClient.sendRequest({ startOffsetDetection: startOffsetDetection }, messageId);
-                    return [3 /*break*/, 33];
-                }
-                _b.label = 22;
-            case 22:
-                {
-                    throw new Error("Request \"" + type + "\" is not yet implemented");
-                }
-                _b.label = 23;
-            case 23:
-                {
-                    throw new Error("Request \"" + type + "\" is not yet implemented");
-                }
-                _b.label = 24;
-            case 24:
-                {
-                    throw new Error("Request \"" + type + "\" is not yet implemented");
-                }
-                _b.label = 25;
-            case 25:
-                {
-                    throw new Error("Request \"" + type + "\" is not yet implemented");
-                }
-                _b.label = 26;
-            case 26:
-                {
-                    throw new Error("Request \"" + type + "\" is not yet implemented");
-                }
-                _b.label = 27;
-            case 27:
-                {
-                    throw new Error("Request \"" + type + "\" is not yet implemented");
-                }
-                _b.label = 28;
-            case 28:
-                {
-                    throw new Error("Request \"" + type + "\" is not yet implemented");
-                }
-                _b.label = 29;
-            case 29:
-                {
-                    throw new Error("Request \"" + type + "\" is not yet implemented");
-                }
-                _b.label = 30;
-            case 30:
-                {
-                    parameters = args.slice(1).map(paramToIndexSubindex);
-                    getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
-                    interval = cmd.interval;
-                    topic = args[0];
-                    requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues: getDeviceParameterValues, interval: interval, topic: topic });
-                    return [3 /*break*/, 33];
-                }
-                _b.label = 31;
-            case 31:
-                {
-                    startMonitoringRequestId = args[0];
-                    stopMonitoringDeviceParameterValues = { startMonitoringRequestId: startMonitoringRequestId };
-                    motionMasterClient.sendRequest({ stopMonitoringDeviceParameterValues: stopMonitoringDeviceParameterValues }, messageId);
-                    return [3 /*break*/, 33];
-                }
-                _b.label = 32;
-            case 32:
-                {
-                    throw new Error("Request \"" + type + "\" doesn't exist");
-                }
-                _b.label = 33;
-            case 33: return [2 /*return*/];
-        }
-    });
-}); });
-// upload
+    .action(requestAction);
 var uploadCommand = commander_1.default.command('upload [params...]');
 addDeviceOptions(uploadCommand);
 uploadCommand
-    .action(function (params, cmd) { return __awaiter(_this, void 0, void 0, function () {
-    var messageId, deviceAddress, parameters, getDeviceParameterValues;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                messageId = uuid_1.v4();
-                printOnMessageReceived(messageId);
-                exitOnMessageReceived(messageId);
-                return [4 /*yield*/, getCommandDeviceAddressAsync(cmd)];
-            case 1:
-                deviceAddress = _a.sent();
-                parameters = params.map(paramToIndexSubindex);
-                getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
-                motionMasterClient.sendRequest({ getDeviceParameterValues: getDeviceParameterValues }, messageId);
-                return [2 /*return*/];
-        }
-    });
-}); });
-// download
+    .action(uploadAction);
 var downloadCommand = commander_1.default.command('download [paramValues...]');
 addDeviceOptions(downloadCommand);
 downloadCommand
-    .action(function (paramValues, cmd) { return __awaiter(_this, void 0, void 0, function () {
-    var messageId, deviceAddress, deviceParameterInfo, parameterValues, setDeviceParameterValues;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                messageId = uuid_1.v4();
-                printOnMessageReceived(messageId);
-                exitOnMessageReceived(messageId);
-                return [4 /*yield*/, getCommandDeviceAddressAsync(cmd)];
-            case 1:
-                deviceAddress = _a.sent();
-                return [4 /*yield*/, getDeviceParameterInfoAsync(deviceAddress)];
-            case 2:
-                deviceParameterInfo = _a.sent();
-                parameterValues = paramValues.map(function (paramValue) { return paramToIndexSubIndexValue(paramValue, deviceParameterInfo); });
-                setDeviceParameterValues = { deviceAddress: deviceAddress, parameterValues: parameterValues };
-                motionMasterClient.sendRequest({ setDeviceParameterValues: setDeviceParameterValues }, messageId);
-                return [2 /*return*/];
-        }
-    });
-}); });
-// monitor
+    .action(downloadAction);
 var monitorCommmand = commander_1.default.command('monitor <topic> [params...]');
 addDeviceOptions(monitorCommmand);
 monitorCommmand
     .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
-    .action(function (topic, params, cmd) { return __awaiter(_this, void 0, void 0, function () {
-    var deviceAddress, parameters, getDeviceParameterValues, interval;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, getCommandDeviceAddressAsync(cmd)];
-            case 1:
-                deviceAddress = _a.sent();
-                parameters = params.map(paramToIndexSubindex);
-                getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
-                interval = cmd.interval;
-                requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues: getDeviceParameterValues, interval: interval, topic: topic });
-                return [2 /*return*/];
-        }
+    .action(monitorAction);
+// parse command line arguments and execute the command action
+commander_1.default.parse(process.argv);
+//
+// command action functions
+//
+function requestAction(type, args, cmd) {
+    return __awaiter(this, void 0, void 0, function () {
+        var deviceAddress, messageId, _a, pingSystem, getSystemVersion, getDeviceInfo, getDeviceParameterInfo, parameters, getDeviceParameterValues, deviceParameterInfo_1, parameterValues, setDeviceParameterValues, getDeviceFileList, name_1, getDeviceFile, name_2, deleteDeviceFile, resetDeviceFault, stopDevice, getDeviceLog, getCoggingTorqueData, startOffsetDetection, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId, stopMonitoringDeviceParameterValues;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0: return [4 /*yield*/, getCommandDeviceAddressAsync(cmd)];
+                case 1:
+                    deviceAddress = _b.sent();
+                    messageId = uuid_1.v4();
+                    printOnMessageReceived(messageId);
+                    exitOnMessageReceived(messageId);
+                    _a = type;
+                    switch (_a) {
+                        case 'pingSystem': return [3 /*break*/, 2];
+                        case 'getSystemVersion': return [3 /*break*/, 3];
+                        case 'getDeviceInfo': return [3 /*break*/, 4];
+                        case 'getDeviceParameterInfo': return [3 /*break*/, 5];
+                        case 'getDeviceParameterValues': return [3 /*break*/, 6];
+                        case 'getMultiDeviceParameterValues': return [3 /*break*/, 7];
+                        case 'setDeviceParameterValues': return [3 /*break*/, 8];
+                        case 'setMultiDeviceParameterValues': return [3 /*break*/, 10];
+                        case 'getDeviceFileList': return [3 /*break*/, 11];
+                        case 'getDeviceFile': return [3 /*break*/, 12];
+                        case 'setDeviceFile': return [3 /*break*/, 13];
+                        case 'deleteDeviceFile': return [3 /*break*/, 14];
+                        case 'resetDeviceFault': return [3 /*break*/, 15];
+                        case 'stopDevice': return [3 /*break*/, 16];
+                        case 'startDeviceFirmwareInstallation': return [3 /*break*/, 17];
+                        case 'getDeviceLog': return [3 /*break*/, 18];
+                        case 'startCoggingTorqueRecording': return [3 /*break*/, 19];
+                        case 'getCoggingTorqueData': return [3 /*break*/, 20];
+                        case 'startOffsetDetection': return [3 /*break*/, 21];
+                        case 'startPlantIdentification': return [3 /*break*/, 22];
+                        case 'computeAutoTuningGains': return [3 /*break*/, 23];
+                        case 'setMotionControllerParameters': return [3 /*break*/, 24];
+                        case 'enableMotionController': return [3 /*break*/, 25];
+                        case 'disableMotionController': return [3 /*break*/, 26];
+                        case 'setSignalGeneratorParameters': return [3 /*break*/, 27];
+                        case 'startSignalGenerator': return [3 /*break*/, 28];
+                        case 'stopSignalGenerator': return [3 /*break*/, 29];
+                        case 'startMonitoringDeviceParameterValues': return [3 /*break*/, 30];
+                        case 'stopMonitoringDeviceParameterValues': return [3 /*break*/, 31];
+                    }
+                    return [3 /*break*/, 32];
+                case 2:
+                    {
+                        pingSystem = {};
+                        motionMasterClient.sendRequest({ pingSystem: pingSystem }, messageId);
+                        return [3 /*break*/, 33];
+                    }
+                    _b.label = 3;
+                case 3:
+                    {
+                        getSystemVersion = {};
+                        motionMasterClient.sendRequest({ getSystemVersion: getSystemVersion }, messageId);
+                        return [3 /*break*/, 33];
+                    }
+                    _b.label = 4;
+                case 4:
+                    {
+                        getDeviceInfo = {};
+                        motionMasterClient.sendRequest({ getDeviceInfo: getDeviceInfo }, messageId);
+                        return [3 /*break*/, 33];
+                    }
+                    _b.label = 5;
+                case 5:
+                    {
+                        getDeviceParameterInfo = { deviceAddress: deviceAddress };
+                        motionMasterClient.sendRequest({ getDeviceParameterInfo: getDeviceParameterInfo }, messageId);
+                        return [3 /*break*/, 33];
+                    }
+                    _b.label = 6;
+                case 6:
+                    {
+                        parameters = args.map(paramToIndexSubindex);
+                        getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
+                        motionMasterClient.sendRequest({ getDeviceParameterValues: getDeviceParameterValues }, messageId);
+                        return [3 /*break*/, 33];
+                    }
+                    _b.label = 7;
+                case 7:
+                    {
+                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                    }
+                    _b.label = 8;
+                case 8: return [4 /*yield*/, getDeviceParameterInfoAsync(deviceAddress)];
+                case 9:
+                    deviceParameterInfo_1 = _b.sent();
+                    parameterValues = args.map(function (paramValue) { return paramToIndexSubIndexValue(paramValue, deviceParameterInfo_1); });
+                    setDeviceParameterValues = { deviceAddress: deviceAddress, parameterValues: parameterValues };
+                    motionMasterClient.sendRequest({ setDeviceParameterValues: setDeviceParameterValues }, messageId);
+                    return [3 /*break*/, 33];
+                case 10:
+                    {
+                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                    }
+                    _b.label = 11;
+                case 11:
+                    {
+                        getDeviceFileList = { deviceAddress: deviceAddress };
+                        motionMasterClient.sendRequest({ getDeviceFileList: getDeviceFileList }, messageId);
+                        return [3 /*break*/, 33];
+                    }
+                    _b.label = 12;
+                case 12:
+                    {
+                        name_1 = args[0];
+                        getDeviceFile = { deviceAddress: deviceAddress, name: name_1 };
+                        motionMasterClient.sendRequest({ getDeviceFile: getDeviceFile }, messageId);
+                        return [3 /*break*/, 33];
+                    }
+                    _b.label = 13;
+                case 13:
+                    {
+                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                    }
+                    _b.label = 14;
+                case 14:
+                    {
+                        name_2 = args[0];
+                        deleteDeviceFile = { deviceAddress: deviceAddress, name: name_2 };
+                        motionMasterClient.sendRequest({ deleteDeviceFile: deleteDeviceFile }, messageId);
+                        return [3 /*break*/, 33];
+                    }
+                    _b.label = 15;
+                case 15:
+                    {
+                        resetDeviceFault = { deviceAddress: deviceAddress };
+                        motionMasterClient.sendRequest({ resetDeviceFault: resetDeviceFault }, messageId);
+                        return [3 /*break*/, 33];
+                    }
+                    _b.label = 16;
+                case 16:
+                    {
+                        stopDevice = { deviceAddress: deviceAddress };
+                        motionMasterClient.sendRequest({ stopDevice: stopDevice }, messageId);
+                        return [3 /*break*/, 33];
+                    }
+                    _b.label = 17;
+                case 17:
+                    {
+                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                    }
+                    _b.label = 18;
+                case 18:
+                    {
+                        getDeviceLog = { deviceAddress: deviceAddress };
+                        motionMasterClient.sendRequest({ getDeviceLog: getDeviceLog }, messageId);
+                        return [3 /*break*/, 33];
+                    }
+                    _b.label = 19;
+                case 19:
+                    {
+                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                    }
+                    _b.label = 20;
+                case 20:
+                    {
+                        getCoggingTorqueData = { deviceAddress: deviceAddress };
+                        motionMasterClient.sendRequest({ getCoggingTorqueData: getCoggingTorqueData }, messageId);
+                        return [3 /*break*/, 33];
+                    }
+                    _b.label = 21;
+                case 21:
+                    {
+                        startOffsetDetection = { deviceAddress: deviceAddress };
+                        motionMasterClient.sendRequest({ startOffsetDetection: startOffsetDetection }, messageId);
+                        return [3 /*break*/, 33];
+                    }
+                    _b.label = 22;
+                case 22:
+                    {
+                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                    }
+                    _b.label = 23;
+                case 23:
+                    {
+                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                    }
+                    _b.label = 24;
+                case 24:
+                    {
+                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                    }
+                    _b.label = 25;
+                case 25:
+                    {
+                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                    }
+                    _b.label = 26;
+                case 26:
+                    {
+                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                    }
+                    _b.label = 27;
+                case 27:
+                    {
+                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                    }
+                    _b.label = 28;
+                case 28:
+                    {
+                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                    }
+                    _b.label = 29;
+                case 29:
+                    {
+                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                    }
+                    _b.label = 30;
+                case 30:
+                    {
+                        parameters = args.slice(1).map(paramToIndexSubindex);
+                        getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
+                        interval = cmd.interval;
+                        topic = args[0];
+                        requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues: getDeviceParameterValues, interval: interval, topic: topic });
+                        return [3 /*break*/, 33];
+                    }
+                    _b.label = 31;
+                case 31:
+                    {
+                        startMonitoringRequestId = args[0];
+                        stopMonitoringDeviceParameterValues = { startMonitoringRequestId: startMonitoringRequestId };
+                        motionMasterClient.sendRequest({ stopMonitoringDeviceParameterValues: stopMonitoringDeviceParameterValues }, messageId);
+                        return [3 /*break*/, 33];
+                    }
+                    _b.label = 32;
+                case 32:
+                    {
+                        throw new Error("Request \"" + type + "\" doesn't exist");
+                    }
+                    _b.label = 33;
+                case 33: return [2 /*return*/];
+            }
+        });
     });
-}); });
+}
+function uploadAction(params, cmd) {
+    return __awaiter(this, void 0, void 0, function () {
+        var messageId, deviceAddress, parameters, getDeviceParameterValues;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    messageId = uuid_1.v4();
+                    printOnMessageReceived(messageId);
+                    exitOnMessageReceived(messageId);
+                    return [4 /*yield*/, getCommandDeviceAddressAsync(cmd)];
+                case 1:
+                    deviceAddress = _a.sent();
+                    parameters = params.map(paramToIndexSubindex);
+                    getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
+                    motionMasterClient.sendRequest({ getDeviceParameterValues: getDeviceParameterValues }, messageId);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function downloadAction(paramValues, cmd) {
+    return __awaiter(this, void 0, void 0, function () {
+        var messageId, deviceAddress, deviceParameterInfo, parameterValues, setDeviceParameterValues;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    messageId = uuid_1.v4();
+                    printOnMessageReceived(messageId);
+                    exitOnMessageReceived(messageId);
+                    return [4 /*yield*/, getCommandDeviceAddressAsync(cmd)];
+                case 1:
+                    deviceAddress = _a.sent();
+                    return [4 /*yield*/, getDeviceParameterInfoAsync(deviceAddress)];
+                case 2:
+                    deviceParameterInfo = _a.sent();
+                    parameterValues = paramValues.map(function (paramValue) { return paramToIndexSubIndexValue(paramValue, deviceParameterInfo); });
+                    setDeviceParameterValues = { deviceAddress: deviceAddress, parameterValues: parameterValues };
+                    motionMasterClient.sendRequest({ setDeviceParameterValues: setDeviceParameterValues }, messageId);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function monitorAction(topic, params, cmd) {
+    return __awaiter(this, void 0, void 0, function () {
+        var deviceAddress, parameters, getDeviceParameterValues, interval;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, getCommandDeviceAddressAsync(cmd)];
+                case 1:
+                    deviceAddress = _a.sent();
+                    parameters = params.map(paramToIndexSubindex);
+                    getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
+                    interval = cmd.interval;
+                    requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues: getDeviceParameterValues, interval: interval, topic: topic });
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+//
+// helper functions
+//
 function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParameterValues) {
     var messageId = uuid_1.v4();
     motionMasterClient.filterNotificationByTopic$(startMonitoringDeviceParameterValues.topic).subscribe(function (notif) {
@@ -437,11 +461,6 @@ function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParame
     });
     motionMasterClient.sendRequest({ startMonitoringDeviceParameterValues: startMonitoringDeviceParameterValues }, messageId);
 }
-// parse command line arguments
-commander_1.default.parse(process.argv);
-//
-// helper functions
-//
 function getDeviceParameterInfoAsync(deviceAddress) {
     return __awaiter(this, void 0, void 0, function () {
         var getDeviceParameterInfo, messageId, deviceParameterInfo;

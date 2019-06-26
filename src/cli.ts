@@ -14,37 +14,6 @@ const debug = require('debug')('motion-master-client');
 const version = require('../package.json')['version'];
 // tslint:enable-next-line: no-var-requires
 
-const inspectOptions: util.InspectOptions = {
-  showHidden: false,
-  depth: null,
-  colors: true,
-  maxArrayLength: null,
-};
-
-const cliOptions = {
-  pingSystemInterval: 200,
-  motionMasterHeartbeatTimeoutDue: 1000,
-  serverEndpoint: 'tcp://127.0.0.1:62524',
-  notificationEndpoint: 'tcp://127.0.0.1:62525',
-};
-
-const deviceParameterInfoMap: Map<number, motionmaster.MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined> = new Map();
-
-const pingSystemInterval = rxjs.interval(cliOptions.pingSystemInterval);
-
-const identity = v4();
-debug(`Identity: ${identity}`);
-
-const serverSocket = zmq.socket('dealer');
-serverSocket.identity = identity;
-serverSocket.connect(cliOptions.serverEndpoint);
-debug(`ZeroMQ DEALER socket is connected to server endpoint: ${cliOptions.serverEndpoint}`);
-
-const notificationSocket = zmq.socket('sub').connect(cliOptions.notificationEndpoint);
-debug(`ZeroMQ SUB socket connected to notification endpoint: ${cliOptions.notificationEndpoint}`);
-
-notificationSocket.subscribe('');
-
 process.on('uncaughtException', (err) => {
   console.error('Caught exception: ' + err);
   process.exit();
@@ -55,24 +24,58 @@ process.on('unhandledRejection', (reason) => {
   process.exit();
 });
 
+const inspectOptions: util.InspectOptions = {
+  showHidden: false,
+  depth: null,
+  colors: true,
+  maxArrayLength: null,
+};
+
+const config = {
+  pingSystemInterval: 200, // ping Motion Master at regular intervals
+  motionMasterHeartbeatTimeoutDue: 1000, // exit process when Motion Master doesn't send a heartbeat message in time specified
+  serverEndpoint: 'tcp://127.0.0.1:62524', // request and receive status messages (response)
+  notificationEndpoint: 'tcp://127.0.0.1:62525', // subscribe to a topic and receive published status messages (heartbeat and monitoring)
+  identity: v4(), // ZeroMQ DEALER socket identity
+};
+
+// map to cache device parameter info per device
+const deviceParameterInfoMap: Map<number, motionmaster.MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined> = new Map();
+
 const input = new rxjs.Subject<Buffer>();
 const output = new rxjs.Subject<Buffer>();
 const notification = new rxjs.Subject<[Buffer, Buffer]>();
+const motionMasterClient = new MotionMasterClient(input, output, notification);
+
+// connect to server endpoint
+const serverSocket = zmq.socket('dealer');
+debug(`Identity ${config.identity}`);
+serverSocket.identity = config.identity;
+serverSocket.connect(config.serverEndpoint);
+debug(`ZeroMQ DEALER socket is connected to server endpoint: ${config.serverEndpoint}`);
+
+// connnect to notification endpoint
+const notificationSocket = zmq.socket('sub').connect(config.notificationEndpoint);
+debug(`ZeroMQ SUB socket connected to notification endpoint: ${config.notificationEndpoint}`);
+
+// subscribe to all topics
+notificationSocket.subscribe('');
 
 // feed notification buffer data coming from Motion Master to MotionMasterClient
 notificationSocket.on('message', (topic: Buffer, message: Buffer) => {
   notification.next([topic, message]);
 });
 
-const motionMasterClient = new MotionMasterClient(input, output, notification);
-
+// ping Motion Master in regular intervals
+const pingSystemInterval = rxjs.interval(config.pingSystemInterval);
 pingSystemInterval.subscribe(() => motionMasterClient.sendRequest({ pingSystem: {} }));
 
+// exit process when a heartbeat message is not received for more than the time specified
 motionMasterClient.filterNotificationByTopic$('heartbeat').pipe(
-  timeout(cliOptions.motionMasterHeartbeatTimeoutDue),
+  timeout(config.motionMasterHeartbeatTimeoutDue),
 ).subscribe({
   error: (err) => {
-    console.error(`${err.name}: Heartbeat message not received for more than ${cliOptions.motionMasterHeartbeatTimeoutDue} ms. Check if Motion Master process is running.`);
+    console.error(`${err.name}: Heartbeat message not received for more than ${config.motionMasterHeartbeatTimeoutDue} ms. Check if Motion Master process is running.`);
     process.exit(-1);
   },
 });
@@ -94,204 +97,223 @@ output.subscribe((buffer) => {
   serverSocket.send(buffer);
 });
 
+//
+// program and commands
+//
+
 program
   .version(version);
 
-// request
 const requestCommand = program.command('request <type> [args...]');
 addDeviceOptions(requestCommand);
 requestCommand
-  .action(async (type: string, args: string[], cmd: Command) => {
-    const deviceAddress = await getCommandDeviceAddressAsync(cmd);
-    const messageId = v4();
+  .action(requestAction);
 
-    printOnMessageReceived(messageId);
-    exitOnMessageReceived(messageId);
-
-    switch (type) {
-      case 'pingSystem': {
-        const pingSystem: motionmaster.MotionMasterMessage.Request.IPingSystem = {};
-        motionMasterClient.sendRequest({ pingSystem }, messageId);
-        break;
-      }
-      case 'getSystemVersion': {
-        const getSystemVersion: motionmaster.MotionMasterMessage.Request.IGetSystemVersion = {};
-        motionMasterClient.sendRequest({ getSystemVersion }, messageId);
-        break;
-      }
-      case 'getDeviceInfo': {
-        const getDeviceInfo: motionmaster.MotionMasterMessage.Request.IGetDeviceInfo = {};
-        motionMasterClient.sendRequest({ getDeviceInfo }, messageId);
-        break;
-      }
-      case 'getDeviceParameterInfo': {
-        const getDeviceParameterInfo: motionmaster.MotionMasterMessage.Request.IGetDeviceParameterInfo = { deviceAddress };
-        motionMasterClient.sendRequest({ getDeviceParameterInfo }, messageId);
-        break;
-      }
-      case 'getDeviceParameterValues': {
-        const parameters: motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] = args.map(paramToIndexSubindex);
-        const getDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IGetDeviceParameterValues = { deviceAddress, parameters };
-        motionMasterClient.sendRequest({ getDeviceParameterValues }, messageId);
-        break;
-      }
-      case 'getMultiDeviceParameterValues': {
-        throw new Error(`Request "${type}" is not yet implemented`);
-      }
-      case 'setDeviceParameterValues': {
-        const deviceParameterInfo = await getDeviceParameterInfoAsync(deviceAddress);
-        const parameterValues = args.map((paramValue) => paramToIndexSubIndexValue(paramValue, deviceParameterInfo));
-        const setDeviceParameterValues: motionmaster.MotionMasterMessage.Request.ISetDeviceParameterValues = { deviceAddress, parameterValues };
-        motionMasterClient.sendRequest({ setDeviceParameterValues }, messageId);
-        break;
-      }
-      case 'setMultiDeviceParameterValues': {
-        throw new Error(`Request "${type}" is not yet implemented`);
-      }
-      case 'getDeviceFileList': {
-        const getDeviceFileList: motionmaster.MotionMasterMessage.Request.IGetDeviceFileList = { deviceAddress };
-        motionMasterClient.sendRequest({ getDeviceFileList }, messageId);
-        break;
-      }
-      case 'getDeviceFile': {
-        const name = args[0];
-        const getDeviceFile: motionmaster.MotionMasterMessage.Request.IGetDeviceFile = { deviceAddress, name };
-        motionMasterClient.sendRequest({ getDeviceFile }, messageId);
-        break;
-      }
-      case 'setDeviceFile': {
-        throw new Error(`Request "${type}" is not yet implemented`);
-      }
-      case 'deleteDeviceFile': {
-        const name = args[0];
-        const deleteDeviceFile: motionmaster.MotionMasterMessage.Request.IDeleteDeviceFile = { deviceAddress, name };
-        motionMasterClient.sendRequest({ deleteDeviceFile }, messageId);
-        break;
-      }
-      case 'resetDeviceFault': {
-        const resetDeviceFault: motionmaster.MotionMasterMessage.Request.IResetDeviceFault = { deviceAddress };
-        motionMasterClient.sendRequest({ resetDeviceFault }, messageId);
-        break;
-      }
-      case 'stopDevice': {
-        const stopDevice: motionmaster.MotionMasterMessage.Request.IStopDevice = { deviceAddress };
-        motionMasterClient.sendRequest({ stopDevice }, messageId);
-        break;
-      }
-      case 'startDeviceFirmwareInstallation': {
-        throw new Error(`Request "${type}" is not yet implemented`);
-      }
-      case 'getDeviceLog': {
-        const getDeviceLog: motionmaster.MotionMasterMessage.Request.IGetDeviceLog = { deviceAddress };
-        motionMasterClient.sendRequest({ getDeviceLog }, messageId);
-        break;
-      }
-      case 'startCoggingTorqueRecording': {
-        throw new Error(`Request "${type}" is not yet implemented`);
-      }
-      case 'getCoggingTorqueData': {
-        const getCoggingTorqueData: motionmaster.MotionMasterMessage.Request.IGetCoggingTorqueData = { deviceAddress };
-        motionMasterClient.sendRequest({ getCoggingTorqueData }, messageId);
-        break;
-      }
-      case 'startOffsetDetection': {
-        const startOffsetDetection: motionmaster.MotionMasterMessage.Request.IStartOffsetDetection = { deviceAddress };
-        motionMasterClient.sendRequest({ startOffsetDetection }, messageId);
-        break;
-      }
-      case 'startPlantIdentification': {
-        throw new Error(`Request "${type}" is not yet implemented`);
-      }
-      case 'computeAutoTuningGains': {
-        throw new Error(`Request "${type}" is not yet implemented`);
-      }
-      case 'setMotionControllerParameters': {
-        throw new Error(`Request "${type}" is not yet implemented`);
-      }
-      case 'enableMotionController': {
-        throw new Error(`Request "${type}" is not yet implemented`);
-      }
-      case 'disableMotionController': {
-        throw new Error(`Request "${type}" is not yet implemented`);
-      }
-      case 'setSignalGeneratorParameters': {
-        throw new Error(`Request "${type}" is not yet implemented`);
-      }
-      case 'startSignalGenerator': {
-        throw new Error(`Request "${type}" is not yet implemented`);
-      }
-      case 'stopSignalGenerator': {
-        throw new Error(`Request "${type}" is not yet implemented`);
-      }
-      case 'startMonitoringDeviceParameterValues': {
-        const parameters = args.slice(1).map(paramToIndexSubindex);
-        const getDeviceParameterValues = { deviceAddress, parameters };
-        const interval = cmd.interval;
-        const topic = args[0];
-
-        requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues, interval, topic });
-        break;
-      }
-      case 'stopMonitoringDeviceParameterValues': {
-        const startMonitoringRequestId = args[0];
-        const stopMonitoringDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IStopMonitoringDeviceParameterValues = { startMonitoringRequestId };
-        motionMasterClient.sendRequest({ stopMonitoringDeviceParameterValues }, messageId);
-        break;
-      }
-      default: {
-        throw new Error(`Request "${type}" doesn\'t exist`);
-      }
-    }
-  });
-
-// upload
 const uploadCommand = program.command('upload [params...]');
 addDeviceOptions(uploadCommand);
 uploadCommand
-  .action(async (params: string[], cmd: Command) => {
-    const messageId = v4();
+  .action(uploadAction);
 
-    printOnMessageReceived(messageId);
-    exitOnMessageReceived(messageId);
-
-    const deviceAddress = await getCommandDeviceAddressAsync(cmd);
-    const parameters: motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] = params.map(paramToIndexSubindex);
-    const getDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IGetDeviceParameterValues = { deviceAddress, parameters };
-
-    motionMasterClient.sendRequest({ getDeviceParameterValues }, messageId);
-  });
-
-// download
 const downloadCommand = program.command('download [paramValues...]');
 addDeviceOptions(downloadCommand);
 downloadCommand
-  .action(async (paramValues: string[], cmd: Command) => {
-    const messageId = v4();
+  .action(downloadAction);
 
-    printOnMessageReceived(messageId);
-    exitOnMessageReceived(messageId);
-
-    const deviceAddress = await getCommandDeviceAddressAsync(cmd);
-    const deviceParameterInfo = await getDeviceParameterInfoAsync(deviceAddress);
-    const parameterValues = paramValues.map((paramValue) => paramToIndexSubIndexValue(paramValue, deviceParameterInfo));
-    const setDeviceParameterValues: motionmaster.MotionMasterMessage.Request.ISetDeviceParameterValues = { deviceAddress, parameterValues };
-
-    motionMasterClient.sendRequest({ setDeviceParameterValues }, messageId);
-  });
-
-// monitor
 const monitorCommmand = program.command('monitor <topic> [params...]');
 addDeviceOptions(monitorCommmand);
 monitorCommmand
   .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
-  .action(async (topic: string, params: string[], cmd: Command) => {
-    const deviceAddress = await getCommandDeviceAddressAsync(cmd);
-    const parameters = params.map(paramToIndexSubindex);
-    const getDeviceParameterValues = { deviceAddress, parameters };
-    const interval = cmd.interval;
+  .action(monitorAction);
 
-    requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues, interval, topic });
-  });
+// parse command line arguments and execute the command action
+program.parse(process.argv);
+
+//
+// command action functions
+//
+
+async function requestAction(type: string, args: string[], cmd: Command) {
+  const deviceAddress = await getCommandDeviceAddressAsync(cmd);
+  const messageId = v4();
+
+  printOnMessageReceived(messageId);
+  exitOnMessageReceived(messageId);
+
+  switch (type) {
+    case 'pingSystem': {
+      const pingSystem: motionmaster.MotionMasterMessage.Request.IPingSystem = {};
+      motionMasterClient.sendRequest({ pingSystem }, messageId);
+      break;
+    }
+    case 'getSystemVersion': {
+      const getSystemVersion: motionmaster.MotionMasterMessage.Request.IGetSystemVersion = {};
+      motionMasterClient.sendRequest({ getSystemVersion }, messageId);
+      break;
+    }
+    case 'getDeviceInfo': {
+      const getDeviceInfo: motionmaster.MotionMasterMessage.Request.IGetDeviceInfo = {};
+      motionMasterClient.sendRequest({ getDeviceInfo }, messageId);
+      break;
+    }
+    case 'getDeviceParameterInfo': {
+      const getDeviceParameterInfo: motionmaster.MotionMasterMessage.Request.IGetDeviceParameterInfo = { deviceAddress };
+      motionMasterClient.sendRequest({ getDeviceParameterInfo }, messageId);
+      break;
+    }
+    case 'getDeviceParameterValues': {
+      const parameters: motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] = args.map(paramToIndexSubindex);
+      const getDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IGetDeviceParameterValues = { deviceAddress, parameters };
+      motionMasterClient.sendRequest({ getDeviceParameterValues }, messageId);
+      break;
+    }
+    case 'getMultiDeviceParameterValues': {
+      throw new Error(`Request "${type}" is not yet implemented`);
+    }
+    case 'setDeviceParameterValues': {
+      const deviceParameterInfo = await getDeviceParameterInfoAsync(deviceAddress);
+      const parameterValues = args.map((paramValue) => paramToIndexSubIndexValue(paramValue, deviceParameterInfo));
+      const setDeviceParameterValues: motionmaster.MotionMasterMessage.Request.ISetDeviceParameterValues = { deviceAddress, parameterValues };
+      motionMasterClient.sendRequest({ setDeviceParameterValues }, messageId);
+      break;
+    }
+    case 'setMultiDeviceParameterValues': {
+      throw new Error(`Request "${type}" is not yet implemented`);
+    }
+    case 'getDeviceFileList': {
+      const getDeviceFileList: motionmaster.MotionMasterMessage.Request.IGetDeviceFileList = { deviceAddress };
+      motionMasterClient.sendRequest({ getDeviceFileList }, messageId);
+      break;
+    }
+    case 'getDeviceFile': {
+      const name = args[0];
+      const getDeviceFile: motionmaster.MotionMasterMessage.Request.IGetDeviceFile = { deviceAddress, name };
+      motionMasterClient.sendRequest({ getDeviceFile }, messageId);
+      break;
+    }
+    case 'setDeviceFile': {
+      throw new Error(`Request "${type}" is not yet implemented`);
+    }
+    case 'deleteDeviceFile': {
+      const name = args[0];
+      const deleteDeviceFile: motionmaster.MotionMasterMessage.Request.IDeleteDeviceFile = { deviceAddress, name };
+      motionMasterClient.sendRequest({ deleteDeviceFile }, messageId);
+      break;
+    }
+    case 'resetDeviceFault': {
+      const resetDeviceFault: motionmaster.MotionMasterMessage.Request.IResetDeviceFault = { deviceAddress };
+      motionMasterClient.sendRequest({ resetDeviceFault }, messageId);
+      break;
+    }
+    case 'stopDevice': {
+      const stopDevice: motionmaster.MotionMasterMessage.Request.IStopDevice = { deviceAddress };
+      motionMasterClient.sendRequest({ stopDevice }, messageId);
+      break;
+    }
+    case 'startDeviceFirmwareInstallation': {
+      throw new Error(`Request "${type}" is not yet implemented`);
+    }
+    case 'getDeviceLog': {
+      const getDeviceLog: motionmaster.MotionMasterMessage.Request.IGetDeviceLog = { deviceAddress };
+      motionMasterClient.sendRequest({ getDeviceLog }, messageId);
+      break;
+    }
+    case 'startCoggingTorqueRecording': {
+      throw new Error(`Request "${type}" is not yet implemented`);
+    }
+    case 'getCoggingTorqueData': {
+      const getCoggingTorqueData: motionmaster.MotionMasterMessage.Request.IGetCoggingTorqueData = { deviceAddress };
+      motionMasterClient.sendRequest({ getCoggingTorqueData }, messageId);
+      break;
+    }
+    case 'startOffsetDetection': {
+      const startOffsetDetection: motionmaster.MotionMasterMessage.Request.IStartOffsetDetection = { deviceAddress };
+      motionMasterClient.sendRequest({ startOffsetDetection }, messageId);
+      break;
+    }
+    case 'startPlantIdentification': {
+      throw new Error(`Request "${type}" is not yet implemented`);
+    }
+    case 'computeAutoTuningGains': {
+      throw new Error(`Request "${type}" is not yet implemented`);
+    }
+    case 'setMotionControllerParameters': {
+      throw new Error(`Request "${type}" is not yet implemented`);
+    }
+    case 'enableMotionController': {
+      throw new Error(`Request "${type}" is not yet implemented`);
+    }
+    case 'disableMotionController': {
+      throw new Error(`Request "${type}" is not yet implemented`);
+    }
+    case 'setSignalGeneratorParameters': {
+      throw new Error(`Request "${type}" is not yet implemented`);
+    }
+    case 'startSignalGenerator': {
+      throw new Error(`Request "${type}" is not yet implemented`);
+    }
+    case 'stopSignalGenerator': {
+      throw new Error(`Request "${type}" is not yet implemented`);
+    }
+    case 'startMonitoringDeviceParameterValues': {
+      const parameters = args.slice(1).map(paramToIndexSubindex);
+      const getDeviceParameterValues = { deviceAddress, parameters };
+      const interval = cmd.interval;
+      const topic = args[0];
+
+      requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues, interval, topic });
+      break;
+    }
+    case 'stopMonitoringDeviceParameterValues': {
+      const startMonitoringRequestId = args[0];
+      const stopMonitoringDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IStopMonitoringDeviceParameterValues = { startMonitoringRequestId };
+      motionMasterClient.sendRequest({ stopMonitoringDeviceParameterValues }, messageId);
+      break;
+    }
+    default: {
+      throw new Error(`Request "${type}" doesn\'t exist`);
+    }
+  }
+}
+
+async function uploadAction(params: string[], cmd: Command) {
+  const messageId = v4();
+
+  printOnMessageReceived(messageId);
+  exitOnMessageReceived(messageId);
+
+  const deviceAddress = await getCommandDeviceAddressAsync(cmd);
+  const parameters: motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] = params.map(paramToIndexSubindex);
+  const getDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IGetDeviceParameterValues = { deviceAddress, parameters };
+
+  motionMasterClient.sendRequest({ getDeviceParameterValues }, messageId);
+}
+
+async function downloadAction(paramValues: string[], cmd: Command) {
+  const messageId = v4();
+
+  printOnMessageReceived(messageId);
+  exitOnMessageReceived(messageId);
+
+  const deviceAddress = await getCommandDeviceAddressAsync(cmd);
+  const deviceParameterInfo = await getDeviceParameterInfoAsync(deviceAddress);
+  const parameterValues = paramValues.map((paramValue) => paramToIndexSubIndexValue(paramValue, deviceParameterInfo));
+  const setDeviceParameterValues: motionmaster.MotionMasterMessage.Request.ISetDeviceParameterValues = { deviceAddress, parameterValues };
+
+  motionMasterClient.sendRequest({ setDeviceParameterValues }, messageId);
+}
+
+async function monitorAction(topic: string, params: string[], cmd: Command) {
+  const deviceAddress = await getCommandDeviceAddressAsync(cmd);
+  const parameters = params.map(paramToIndexSubindex);
+  const getDeviceParameterValues = { deviceAddress, parameters };
+  const interval = cmd.interval;
+
+  requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues, interval, topic });
+}
+
+//
+// helper functions
+//
 
 function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IStartMonitoringDeviceParameterValues) {
   const messageId = v4();
@@ -307,13 +329,6 @@ function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParame
 
   motionMasterClient.sendRequest({ startMonitoringDeviceParameterValues }, messageId);
 }
-
-// parse command line arguments
-program.parse(process.argv);
-
-//
-// helper functions
-//
 
 async function getDeviceParameterInfoAsync(deviceAddress: number | null | undefined) {
   if (!deviceAddress) {
