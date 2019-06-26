@@ -383,8 +383,7 @@ function paramToIndexSubIndexValue(paramValue: string, deviceParameterInfo: moti
           case VT.UNSIGNED8:
           case VT.UNSIGNED16:
           case VT.UNSIGNED32: {
-            // TODO: Change back to uintValue
-            parameterValue.intValue = parseInt(value, 10);
+            parameterValue.uintValue = parseInt(value, 10);
             break;
           }
           case VT.REAL32: {
