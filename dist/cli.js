@@ -87,7 +87,7 @@ var notification = new rxjs.Subject();
 var motionMasterClient = new motion_master_client_1.MotionMasterClient(input, output, notification);
 // connect to server endpoint
 var serverSocket = zmq.socket('dealer');
-debug("Identity " + config.identity);
+debug("Identity: " + config.identity);
 serverSocket.identity = config.identity;
 serverSocket.connect(config.serverEndpoint);
 debug("ZeroMQ DEALER socket is connected to server endpoint: " + config.serverEndpoint);

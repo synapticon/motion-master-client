@@ -49,7 +49,7 @@ const motionMasterClient = new MotionMasterClient(input, output, notification);
 
 // connect to server endpoint
 const serverSocket = zmq.socket('dealer');
-debug(`Identity ${config.identity}`);
+debug(`Identity: ${config.identity}`);
 serverSocket.identity = config.identity;
 serverSocket.connect(config.serverEndpoint);
 debug(`ZeroMQ DEALER socket is connected to server endpoint: ${config.serverEndpoint}`);
