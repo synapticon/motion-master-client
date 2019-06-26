@@ -6,7 +6,7 @@
   "main": "dist/cli.js",
   "scripts": {
     "build": "npx tsc --build tsconfig.json",
-    "watch": "npx tsc --watch tsconfig.json",
+    "watch": "npx tsc --watch",
     "motion-master-client": "node dist/cli.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
