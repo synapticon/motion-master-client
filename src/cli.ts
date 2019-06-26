@@ -286,16 +286,6 @@ function connectToMotionMaster(cmd: Command) {
   const pingSystemInterval = rxjs.interval(config.pingSystemInterval);
   pingSystemInterval.subscribe(() => motionMasterClient.sendRequest({ pingSystem: {} }));
 
-  // exit process when a heartbeat message is not received for more than the time specified
-  motionMasterClient.filterNotificationByTopic$('heartbeat').pipe(
-    timeout(config.motionMasterHeartbeatTimeoutDue),
-  ).subscribe({
-    error: (err) => {
-      console.error(`${err.name}: Heartbeat message not received for more than ${config.motionMasterHeartbeatTimeoutDue} ms. Check if Motion Master process is running.`);
-      process.exit(-1);
-    },
-  });
-
   // connect to server endpoint
   const serverSocket = zmq.socket('dealer');
   debug(`Identity: ${config.identity}`);
@@ -326,6 +316,16 @@ function connectToMotionMaster(cmd: Command) {
 
   // subscribe to all topics
   notificationSocket.subscribe('');
+
+  // exit process when a heartbeat message is not received for more than the time specified
+  motionMasterClient.filterNotificationByTopic$('heartbeat').pipe(
+    timeout(config.motionMasterHeartbeatTimeoutDue),
+  ).subscribe({
+    error: (err) => {
+      console.error(`${err.name}: Heartbeat message not received for more than ${config.motionMasterHeartbeatTimeoutDue} ms. Check if Motion Master process is running.`);
+      process.exit(-1);
+    },
+  });
 
   // feed notification buffer data coming from Motion Master to MotionMasterClient
   notificationSocket.on('message', (topic: Buffer, message: Buffer) => {
