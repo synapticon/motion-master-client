@@ -60,6 +60,7 @@ program
 
 program
   .command('request <type> [args...]')
+  .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
   .action(requestAction);
 
 program
@@ -88,7 +89,10 @@ async function requestAction(type: string, args: string[], cmd: Command) {
 
   const messageId = v4();
   printOnMessageReceived(messageId);
-  exitOnMessageReceived(messageId);
+
+  if (!(type === 'startMonitoringDeviceParameterValues')) {
+    exitOnMessageReceived(messageId);
+  }
 
   switch (type) {
     case 'pingSystem': {

@@ -96,6 +96,7 @@ commander_1.default
     .option('-p, --device-position <value>', 'used when device address is not specified', parseOptionValueAsInt, 0);
 commander_1.default
     .command('request <type> [args...]')
+    .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
     .action(requestAction);
 commander_1.default
     .command('upload [params...]')
@@ -124,7 +125,9 @@ function requestAction(type, args, cmd) {
                     deviceAddress = _b.sent();
                     messageId = uuid_1.v4();
                     printOnMessageReceived(messageId);
-                    exitOnMessageReceived(messageId);
+                    if (!(type === 'startMonitoringDeviceParameterValues')) {
+                        exitOnMessageReceived(messageId);
+                    }
                     _a = type;
                     switch (_a) {
                         case 'pingSystem': return [3 /*break*/, 2];
