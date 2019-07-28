@@ -172,7 +172,11 @@ async function requestAction(type: string, args: string[], cmd: Command) {
       break;
     }
     case 'startDeviceFirmwareInstallation': {
-      throw new Error(`Request "${type}" is not yet implemented`);
+      const filepath = args[0];
+      const firmwarePackageContent = fs.readFileSync(filepath);
+      const startDeviceFirmwareInstallation: motionmaster.MotionMasterMessage.Request.IStartDeviceFirmwareInstallation = { deviceAddress, firmwarePackageContent };
+      motionMasterClient.sendRequest({ startDeviceFirmwareInstallation }, messageId);
+      break;
     }
     case 'getDeviceLog': {
       const getDeviceLog: motionmaster.MotionMasterMessage.Request.IGetDeviceLog = { deviceAddress };
