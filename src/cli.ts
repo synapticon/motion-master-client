@@ -282,8 +282,50 @@ async function requestAction(type: RequestKey, args: string[], cmd: Command) {
       break;
     }
     case 'computeAutoTuningGains': {
-      // work, work
-      throw new Error(`Request "${type}" is not yet implemented`);
+      if (args[0] === 'position') {
+        exitOnMessageReceived(messageId, 10000, motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.POSITION_DONE);
+
+        const controllerType = parseInt(args[1], 10);
+        const settlingTime = parseFloat(args[2]);
+        const positionDamping = parseFloat(args[3]);
+        const alphaMult = parseInt(args[4], 10);
+        const order = parseInt(args[5], 10);
+        const lb = parseFloat(args[6]);
+        const ub = parseFloat(args[7]);
+
+        const computeAutoTuningGains: motionmaster.MotionMasterMessage.Request.IComputeAutoTuningGains = {
+          deviceAddress,
+          positionParameters: {
+            controllerType,
+            settlingTime,
+            positionDamping,
+            alphaMult,
+            order,
+            lb,
+            ub,
+          },
+        };
+
+        motionMasterClient.sendRequest({ computeAutoTuningGains }, messageId);
+      } else if (args[0] === 'velocity') {
+        exitOnMessageReceived(messageId, 10000, motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.VELOCITY_DONE);
+
+        const velocityLoopBandwidth = parseFloat(args[1]);
+        const velocityDamping = parseFloat(args[2]);
+
+        const computeAutoTuningGains: motionmaster.MotionMasterMessage.Request.IComputeAutoTuningGains = {
+          deviceAddress,
+          velocityParameters: {
+            velocityLoopBandwidth,
+            velocityDamping,
+          },
+        };
+
+        motionMasterClient.sendRequest({ computeAutoTuningGains }, messageId);
+      } else {
+        throw new Error(`Unknown compute auto-tuning gains "${args[0]}" type.`);
+      }
+      break;
     }
     case 'setMotionControllerParameters': {
       throw new Error(`Request "${type}" is not yet implemented`);

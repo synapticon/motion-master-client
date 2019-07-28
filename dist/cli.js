@@ -126,7 +126,7 @@ commander_1.default.parse(process.argv);
 //
 function requestAction(type, args, cmd) {
     return __awaiter(this, void 0, void 0, function () {
-        var deviceAddress, messageId, _a, pingSystem, getSystemVersion, getDeviceInfo, getDeviceParameterInfo, parameters, getDeviceParameterValues, deviceParameterInfo_1, parameterValues, setDeviceParameterValues, getDeviceFileList, name_1, getDeviceFile, filepath, content, name_2, overwrite, setDeviceFile, name_3, deleteDeviceFile, resetDeviceFault, stopDevice, filepath, firmwarePackageContent, startDeviceFirmwareInstallation, getDeviceLog, skipAutoTuning, startCoggingTorqueRecording, getCoggingTorqueData, startOffsetDetection, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, startPlantIdentification, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId, stopMonitoringDeviceParameterValues;
+        var deviceAddress, messageId, _a, pingSystem, getSystemVersion, getDeviceInfo, getDeviceParameterInfo, parameters, getDeviceParameterValues, deviceParameterInfo_1, parameterValues, setDeviceParameterValues, getDeviceFileList, name_1, getDeviceFile, filepath, content, name_2, overwrite, setDeviceFile, name_3, deleteDeviceFile, resetDeviceFault, stopDevice, filepath, firmwarePackageContent, startDeviceFirmwareInstallation, getDeviceLog, skipAutoTuning, startCoggingTorqueRecording, getCoggingTorqueData, startOffsetDetection, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, startPlantIdentification, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId, stopMonitoringDeviceParameterValues;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -348,8 +348,46 @@ function requestAction(type, args, cmd) {
                     _b.label = 23;
                 case 23:
                     {
-                        // work, work
-                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                        if (args[0] === 'position') {
+                            exitOnMessageReceived(messageId, 10000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.POSITION_DONE);
+                            controllerType = parseInt(args[1], 10);
+                            settlingTime = parseFloat(args[2]);
+                            positionDamping = parseFloat(args[3]);
+                            alphaMult = parseInt(args[4], 10);
+                            order = parseInt(args[5], 10);
+                            lb = parseFloat(args[6]);
+                            ub = parseFloat(args[7]);
+                            computeAutoTuningGains = {
+                                deviceAddress: deviceAddress,
+                                positionParameters: {
+                                    controllerType: controllerType,
+                                    settlingTime: settlingTime,
+                                    positionDamping: positionDamping,
+                                    alphaMult: alphaMult,
+                                    order: order,
+                                    lb: lb,
+                                    ub: ub,
+                                },
+                            };
+                            motionMasterClient.sendRequest({ computeAutoTuningGains: computeAutoTuningGains }, messageId);
+                        }
+                        else if (args[0] === 'velocity') {
+                            exitOnMessageReceived(messageId, 10000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.VELOCITY_DONE);
+                            velocityLoopBandwidth = parseFloat(args[1]);
+                            velocityDamping = parseFloat(args[2]);
+                            computeAutoTuningGains = {
+                                deviceAddress: deviceAddress,
+                                velocityParameters: {
+                                    velocityLoopBandwidth: velocityLoopBandwidth,
+                                    velocityDamping: velocityDamping,
+                                },
+                            };
+                            motionMasterClient.sendRequest({ computeAutoTuningGains: computeAutoTuningGains }, messageId);
+                        }
+                        else {
+                            throw new Error("Unknown compute auto-tuning gains \"" + args[0] + "\" type.");
+                        }
+                        return [3 /*break*/, 33];
                     }
                     _b.label = 24;
                 case 24:
