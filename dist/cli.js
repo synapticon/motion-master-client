@@ -106,12 +106,15 @@ commander_1.default
     .command('download [paramValues...]')
     .action(downloadAction);
 commander_1.default
-    .command('start-offset-detection')
-    .action(startOffsetDetectionAction);
-commander_1.default
-    .command('start-cogging-torque-recording')
+    .command('startCoggingTorqueRecording')
     .option('-s, --skip-auto-tuning')
     .action(startCoggingTorqueRecordingAction);
+commander_1.default
+    .command('startOffsetDetection')
+    .action(startOffsetDetectionAction);
+commander_1.default
+    .command('startPlantIdentification <durationSeconds> <torqueAmplitude> <startFrequency> <endFrequency> <cutoffFrequency>')
+    .action(startPlantIdentificationAction);
 commander_1.default
     .command('monitor <topic> [params...]')
     .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
@@ -491,6 +494,33 @@ function startCoggingTorqueRecordingAction(cmd) {
                     skipAutoTuning = cmd.skipAutoTuning;
                     startCoggingTorqueRecording = { deviceAddress: deviceAddress, skipAutoTuning: skipAutoTuning };
                     motionMasterClient.sendRequest({ startCoggingTorqueRecording: startCoggingTorqueRecording }, messageId);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function startPlantIdentificationAction(durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, cmd) {
+    return __awaiter(this, void 0, void 0, function () {
+        var deviceAddress, messageId, startPlantIdentification;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    connectToMotionMaster(cmd.parent);
+                    return [4 /*yield*/, getCommandDeviceAddressAsync(cmd.parent)];
+                case 1:
+                    deviceAddress = _a.sent();
+                    messageId = uuid_1.v4();
+                    printOnMessageReceived(messageId);
+                    exitOnMessageReceived(messageId, 60000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.PlantIdentification.Success.Code.DONE);
+                    startPlantIdentification = {
+                        deviceAddress: deviceAddress,
+                        durationSeconds: durationSeconds,
+                        torqueAmplitude: torqueAmplitude,
+                        startFrequency: startFrequency,
+                        endFrequency: endFrequency,
+                        cutoffFrequency: cutoffFrequency,
+                    };
+                    motionMasterClient.sendRequest({ startPlantIdentification: startPlantIdentification }, messageId);
                     return [2 /*return*/];
             }
         });

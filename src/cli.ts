@@ -76,13 +76,17 @@ program
   .action(downloadAction);
 
 program
-  .command('start-offset-detection')
+  .command('startCoggingTorqueRecording')
+  .option('-s, --skip-auto-tuning')
+  .action(startCoggingTorqueRecordingAction);
+
+program
+  .command('startOffsetDetection')
   .action(startOffsetDetectionAction);
 
 program
-  .command('start-cogging-torque-recording')
-  .option('-s, --skip-auto-tuning')
-  .action(startCoggingTorqueRecordingAction);
+  .command('startPlantIdentification <durationSeconds> <torqueAmplitude> <startFrequency> <endFrequency> <cutoffFrequency>')
+  .action(startPlantIdentificationAction);
 
 program
   .command('monitor <topic> [params...]')
@@ -378,6 +382,33 @@ async function startCoggingTorqueRecordingAction(cmd: Command) {
   const startCoggingTorqueRecording: motionmaster.MotionMasterMessage.Request.IStartCoggingTorqueRecording = { deviceAddress, skipAutoTuning };
 
   motionMasterClient.sendRequest({ startCoggingTorqueRecording }, messageId);
+}
+
+async function startPlantIdentificationAction(
+  durationSeconds: number,
+  torqueAmplitude: number,
+  startFrequency: number,
+  endFrequency: number,
+  cutoffFrequency: number,
+  cmd: Command,
+) {
+  connectToMotionMaster(cmd.parent);
+  const deviceAddress = await getCommandDeviceAddressAsync(cmd.parent);
+
+  const messageId = v4();
+  printOnMessageReceived(messageId);
+  exitOnMessageReceived(messageId, 60000, motionmaster.MotionMasterMessage.Status.PlantIdentification.Success.Code.DONE);
+
+  const startPlantIdentification: motionmaster.MotionMasterMessage.Request.IStartPlantIdentification = {
+    deviceAddress,
+    durationSeconds,
+    torqueAmplitude,
+    startFrequency,
+    endFrequency,
+    cutoffFrequency,
+  };
+
+  motionMasterClient.sendRequest({ startPlantIdentification }, messageId);
 }
 
 async function monitorAction(topic: string, params: string[], cmd: Command) {
