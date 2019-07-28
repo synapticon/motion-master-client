@@ -106,6 +106,13 @@ commander_1.default
     .command('download [paramValues...]')
     .action(downloadAction);
 commander_1.default
+    .command('start-offset-detection')
+    .action(startOffsetDetectionAction);
+commander_1.default
+    .command('start-cogging-torque-recording')
+    .option('-s, --skip-auto-tuning')
+    .action(startCoggingTorqueRecordingAction);
+commander_1.default
     .command('monitor <topic> [params...]')
     .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
     .action(monitorAction);
@@ -116,7 +123,7 @@ commander_1.default.parse(process.argv);
 //
 function requestAction(type, args, cmd) {
     return __awaiter(this, void 0, void 0, function () {
-        var deviceAddress, messageId, _a, pingSystem, getSystemVersion, getDeviceInfo, getDeviceParameterInfo, parameters, getDeviceParameterValues, deviceParameterInfo_1, parameterValues, setDeviceParameterValues, getDeviceFileList, name_1, getDeviceFile, filepath, content, name_2, overwrite, setDeviceFile, name_3, deleteDeviceFile, resetDeviceFault, stopDevice, filepath, firmwarePackageContent, startDeviceFirmwareInstallation, getDeviceLog, getCoggingTorqueData, startOffsetDetection, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId, stopMonitoringDeviceParameterValues;
+        var deviceAddress, messageId, _a, pingSystem, getSystemVersion, getDeviceInfo, getDeviceParameterInfo, parameters, getDeviceParameterValues, deviceParameterInfo_1, parameterValues, setDeviceParameterValues, getDeviceFileList, name_1, getDeviceFile, filepath, content, name_2, overwrite, setDeviceFile, name_3, deleteDeviceFile, resetDeviceFault, stopDevice, filepath, firmwarePackageContent, startDeviceFirmwareInstallation, getDeviceLog, skipAutoTuning, startCoggingTorqueRecording, getCoggingTorqueData, startOffsetDetection, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, startPlantIdentification, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId, stopMonitoringDeviceParameterValues;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -126,9 +133,6 @@ function requestAction(type, args, cmd) {
                     deviceAddress = _b.sent();
                     messageId = uuid_1.v4();
                     printOnMessageReceived(messageId);
-                    if (!(type === 'startMonitoringDeviceParameterValues')) {
-                        exitOnMessageReceived(messageId);
-                    }
                     _a = type;
                     switch (_a) {
                         case 'pingSystem': return [3 /*break*/, 2];
@@ -166,11 +170,13 @@ function requestAction(type, args, cmd) {
                     {
                         pingSystem = {};
                         motionMasterClient.sendRequest({ pingSystem: pingSystem }, messageId);
+                        process.exit(0);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 3;
                 case 3:
                     {
+                        exitOnMessageReceived(messageId);
                         getSystemVersion = {};
                         motionMasterClient.sendRequest({ getSystemVersion: getSystemVersion }, messageId);
                         return [3 /*break*/, 33];
@@ -178,6 +184,7 @@ function requestAction(type, args, cmd) {
                     _b.label = 4;
                 case 4:
                     {
+                        exitOnMessageReceived(messageId);
                         getDeviceInfo = {};
                         motionMasterClient.sendRequest({ getDeviceInfo: getDeviceInfo }, messageId);
                         return [3 /*break*/, 33];
@@ -185,6 +192,7 @@ function requestAction(type, args, cmd) {
                     _b.label = 5;
                 case 5:
                     {
+                        exitOnMessageReceived(messageId);
                         getDeviceParameterInfo = { deviceAddress: deviceAddress };
                         motionMasterClient.sendRequest({ getDeviceParameterInfo: getDeviceParameterInfo }, messageId);
                         return [3 /*break*/, 33];
@@ -192,6 +200,7 @@ function requestAction(type, args, cmd) {
                     _b.label = 6;
                 case 6:
                     {
+                        exitOnMessageReceived(messageId);
                         parameters = args.map(paramToIndexSubindex);
                         getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
                         motionMasterClient.sendRequest({ getDeviceParameterValues: getDeviceParameterValues }, messageId);
@@ -203,7 +212,9 @@ function requestAction(type, args, cmd) {
                         throw new Error("Request \"" + type + "\" is not yet implemented");
                     }
                     _b.label = 8;
-                case 8: return [4 /*yield*/, getDeviceParameterInfoAsync(deviceAddress)];
+                case 8:
+                    exitOnMessageReceived(messageId);
+                    return [4 /*yield*/, getDeviceParameterInfoAsync(deviceAddress)];
                 case 9:
                     deviceParameterInfo_1 = _b.sent();
                     parameterValues = args.map(function (paramValue) { return paramToIndexSubIndexValue(paramValue, deviceParameterInfo_1); });
@@ -217,6 +228,7 @@ function requestAction(type, args, cmd) {
                     _b.label = 11;
                 case 11:
                     {
+                        exitOnMessageReceived(messageId);
                         getDeviceFileList = { deviceAddress: deviceAddress };
                         motionMasterClient.sendRequest({ getDeviceFileList: getDeviceFileList }, messageId);
                         return [3 /*break*/, 33];
@@ -224,6 +236,7 @@ function requestAction(type, args, cmd) {
                     _b.label = 12;
                 case 12:
                     {
+                        exitOnMessageReceived(messageId);
                         name_1 = args[0];
                         getDeviceFile = { deviceAddress: deviceAddress, name: name_1 };
                         motionMasterClient.sendRequest({ getDeviceFile: getDeviceFile }, messageId);
@@ -232,6 +245,7 @@ function requestAction(type, args, cmd) {
                     _b.label = 13;
                 case 13:
                     {
+                        exitOnMessageReceived(messageId);
                         filepath = args[0];
                         content = fs_1.default.readFileSync(filepath);
                         name_2 = path_1.default.basename(filepath);
@@ -243,6 +257,7 @@ function requestAction(type, args, cmd) {
                     _b.label = 14;
                 case 14:
                     {
+                        exitOnMessageReceived(messageId);
                         name_3 = args[0];
                         deleteDeviceFile = { deviceAddress: deviceAddress, name: name_3 };
                         motionMasterClient.sendRequest({ deleteDeviceFile: deleteDeviceFile }, messageId);
@@ -251,6 +266,7 @@ function requestAction(type, args, cmd) {
                     _b.label = 15;
                 case 15:
                     {
+                        exitOnMessageReceived(messageId);
                         resetDeviceFault = { deviceAddress: deviceAddress };
                         motionMasterClient.sendRequest({ resetDeviceFault: resetDeviceFault }, messageId);
                         return [3 /*break*/, 33];
@@ -260,11 +276,13 @@ function requestAction(type, args, cmd) {
                     {
                         stopDevice = { deviceAddress: deviceAddress };
                         motionMasterClient.sendRequest({ stopDevice: stopDevice }, messageId);
+                        process.exit(0);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 17;
                 case 17:
                     {
+                        exitOnMessageReceived(messageId, 120000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.DeviceFirmwareInstallation.Success.Code.DONE);
                         filepath = args[0];
                         firmwarePackageContent = fs_1.default.readFileSync(filepath);
                         startDeviceFirmwareInstallation = { deviceAddress: deviceAddress, firmwarePackageContent: firmwarePackageContent };
@@ -274,6 +292,7 @@ function requestAction(type, args, cmd) {
                     _b.label = 18;
                 case 18:
                     {
+                        exitOnMessageReceived(messageId);
                         getDeviceLog = { deviceAddress: deviceAddress };
                         motionMasterClient.sendRequest({ getDeviceLog: getDeviceLog }, messageId);
                         return [3 /*break*/, 33];
@@ -281,11 +300,16 @@ function requestAction(type, args, cmd) {
                     _b.label = 19;
                 case 19:
                     {
-                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                        exitOnMessageReceived(messageId, 300000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.CoggingTorqueRecording.Success.Code.DONE);
+                        skipAutoTuning = args[0] === 'true' || false;
+                        startCoggingTorqueRecording = { deviceAddress: deviceAddress, skipAutoTuning: skipAutoTuning };
+                        motionMasterClient.sendRequest({ startCoggingTorqueRecording: startCoggingTorqueRecording }, messageId);
+                        return [3 /*break*/, 33];
                     }
                     _b.label = 20;
                 case 20:
                     {
+                        exitOnMessageReceived(messageId);
                         getCoggingTorqueData = { deviceAddress: deviceAddress };
                         motionMasterClient.sendRequest({ getCoggingTorqueData: getCoggingTorqueData }, messageId);
                         return [3 /*break*/, 33];
@@ -293,6 +317,7 @@ function requestAction(type, args, cmd) {
                     _b.label = 21;
                 case 21:
                     {
+                        exitOnMessageReceived(messageId, 180000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.OffsetDetection.Success.Code.DONE);
                         startOffsetDetection = { deviceAddress: deviceAddress };
                         motionMasterClient.sendRequest({ startOffsetDetection: startOffsetDetection }, messageId);
                         return [3 /*break*/, 33];
@@ -300,11 +325,27 @@ function requestAction(type, args, cmd) {
                     _b.label = 22;
                 case 22:
                     {
-                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                        exitOnMessageReceived(messageId, 60000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.PlantIdentification.Success.Code.DONE);
+                        durationSeconds = parseFloat(args[0]);
+                        torqueAmplitude = parseInt(args[1], 10);
+                        startFrequency = parseInt(args[1], 10);
+                        endFrequency = parseInt(args[1], 10);
+                        cutoffFrequency = parseInt(args[1], 10);
+                        startPlantIdentification = {
+                            deviceAddress: deviceAddress,
+                            durationSeconds: durationSeconds,
+                            torqueAmplitude: torqueAmplitude,
+                            startFrequency: startFrequency,
+                            endFrequency: endFrequency,
+                            cutoffFrequency: cutoffFrequency,
+                        };
+                        motionMasterClient.sendRequest({ startPlantIdentification: startPlantIdentification }, messageId);
+                        return [3 /*break*/, 33];
                     }
                     _b.label = 23;
                 case 23:
                     {
+                        // work, work
                         throw new Error("Request \"" + type + "\" is not yet implemented");
                     }
                     _b.label = 24;
@@ -315,11 +356,13 @@ function requestAction(type, args, cmd) {
                     _b.label = 25;
                 case 25:
                     {
+                        // work, work
                         throw new Error("Request \"" + type + "\" is not yet implemented");
                     }
                     _b.label = 26;
                 case 26:
                     {
+                        // work, work
                         throw new Error("Request \"" + type + "\" is not yet implemented");
                     }
                     _b.label = 27;
@@ -353,6 +396,7 @@ function requestAction(type, args, cmd) {
                         startMonitoringRequestId = args[0];
                         stopMonitoringDeviceParameterValues = { startMonitoringRequestId: startMonitoringRequestId };
                         motionMasterClient.sendRequest({ stopMonitoringDeviceParameterValues: stopMonitoringDeviceParameterValues }, messageId);
+                        process.exit(0);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 32;
@@ -406,6 +450,47 @@ function downloadAction(paramValues, cmd) {
                     parameterValues = paramValues.map(function (paramValue) { return paramToIndexSubIndexValue(paramValue, deviceParameterInfo); });
                     setDeviceParameterValues = { deviceAddress: deviceAddress, parameterValues: parameterValues };
                     motionMasterClient.sendRequest({ setDeviceParameterValues: setDeviceParameterValues }, messageId);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function startOffsetDetectionAction(cmd) {
+    return __awaiter(this, void 0, void 0, function () {
+        var messageId, deviceAddress, startOffsetDetection;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    connectToMotionMaster(cmd.parent);
+                    messageId = uuid_1.v4();
+                    printOnMessageReceived(messageId);
+                    exitOnMessageReceived(messageId, 180000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.OffsetDetection.Success.Code.DONE);
+                    return [4 /*yield*/, getCommandDeviceAddressAsync(cmd.parent)];
+                case 1:
+                    deviceAddress = _a.sent();
+                    startOffsetDetection = { deviceAddress: deviceAddress };
+                    motionMasterClient.sendRequest({ startOffsetDetection: startOffsetDetection }, messageId);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function startCoggingTorqueRecordingAction(cmd) {
+    return __awaiter(this, void 0, void 0, function () {
+        var messageId, deviceAddress, skipAutoTuning, startCoggingTorqueRecording;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    connectToMotionMaster(cmd.parent);
+                    messageId = uuid_1.v4();
+                    printOnMessageReceived(messageId);
+                    exitOnMessageReceived(messageId, 300000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.CoggingTorqueRecording.Success.Code.DONE);
+                    return [4 /*yield*/, getCommandDeviceAddressAsync(cmd.parent)];
+                case 1:
+                    deviceAddress = _a.sent();
+                    skipAutoTuning = cmd.skipAutoTuning;
+                    startCoggingTorqueRecording = { deviceAddress: deviceAddress, skipAutoTuning: skipAutoTuning };
+                    motionMasterClient.sendRequest({ startCoggingTorqueRecording: startCoggingTorqueRecording }, messageId);
                     return [2 /*return*/];
             }
         });
@@ -585,15 +670,26 @@ function getCommandDeviceAddressAsync(cmd) {
         });
     });
 }
-function exitOnMessageReceived(messageId, exit, due) {
-    if (exit === void 0) { exit = true; }
+function exitOnMessageReceived(messageId, due, exitOnSuccessCode) {
     if (due === void 0) { due = 10000; }
-    motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(operators_1.first(), operators_1.timeout(due)).subscribe({
-        next: function () {
-            if (exit) {
-                debug("Exit on message received " + messageId);
-                process.exit(0);
+    motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(operators_1.first(function (message) {
+        if (exitOnSuccessCode === undefined) {
+            return true;
+        }
+        else {
+            if (message && message.status) {
+                var key = Object.keys(message.status)[0];
+                var status_1 = message.status[key];
+                if (status_1 && (status_1.success.code === exitOnSuccessCode || status_1.error)) {
+                    return true;
+                }
             }
+            return false;
+        }
+    }), operators_1.timeout(due)).subscribe({
+        next: function () {
+            debug("Exit on message received " + messageId);
+            process.exit(0);
         },
         error: function (err) {
             console.error(err.name + ": Status message " + messageId + " not received for more than " + due + " ms.");
@@ -602,7 +698,7 @@ function exitOnMessageReceived(messageId, exit, due) {
     });
 }
 function printOnMessageReceived(messageId) {
-    motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(operators_1.first()).subscribe(function (msg) {
+    motionMasterClient.filterMotionMasterMessageById$(messageId).subscribe(function (msg) {
         var timestamp = Date.now();
         var message = msg.toJSON();
         console.log(util_1.default.inspect({ timestamp: timestamp, message: message }, inspectOptions));
