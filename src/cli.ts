@@ -261,9 +261,9 @@ async function requestAction(type: RequestKey, args: string[], cmd: Command) {
 
       const durationSeconds = parseFloat(args[0]);
       const torqueAmplitude = parseInt(args[1], 10);
-      const startFrequency = parseInt(args[1], 10);
-      const endFrequency = parseInt(args[1], 10);
-      const cutoffFrequency = parseInt(args[1], 10);
+      const startFrequency = parseInt(args[2], 10);
+      const endFrequency = parseInt(args[3], 10);
+      const cutoffFrequency = parseInt(args[4], 10);
 
       const startPlantIdentification: motionmaster.MotionMasterMessage.Request.IStartPlantIdentification = {
         deviceAddress,

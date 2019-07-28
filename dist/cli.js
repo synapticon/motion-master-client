@@ -328,9 +328,9 @@ function requestAction(type, args, cmd) {
                         exitOnMessageReceived(messageId, 60000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.PlantIdentification.Success.Code.DONE);
                         durationSeconds = parseFloat(args[0]);
                         torqueAmplitude = parseInt(args[1], 10);
-                        startFrequency = parseInt(args[1], 10);
-                        endFrequency = parseInt(args[1], 10);
-                        cutoffFrequency = parseInt(args[1], 10);
+                        startFrequency = parseInt(args[2], 10);
+                        endFrequency = parseInt(args[3], 10);
+                        cutoffFrequency = parseInt(args[4], 10);
                         startPlantIdentification = {
                             deviceAddress: deviceAddress,
                             durationSeconds: durationSeconds,
