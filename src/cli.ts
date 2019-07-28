@@ -1,13 +1,14 @@
 #!/usr/bin/env node
-
 import program, { Command } from 'commander';
-import * as fs from 'fs';
+import fs from 'fs';
 import { motionmaster } from 'motion-master-proto';
+import path from 'path';
 import * as rxjs from 'rxjs';
 import { first, map, timeout } from 'rxjs/operators';
-import * as util from 'util';
+import util from 'util';
 import { v4 } from 'uuid';
-import * as zmq from 'zeromq';
+import zmq from 'zeromq';
+
 import { decodeMotionMasterMessage, MotionMasterClient } from './motion-master-client';
 
 // tslint:disable: no-var-requires
@@ -146,7 +147,13 @@ async function requestAction(type: string, args: string[], cmd: Command) {
       break;
     }
     case 'setDeviceFile': {
-      throw new Error(`Request "${type}" is not yet implemented`);
+      const filepath = args[0];
+      const content = fs.readFileSync(filepath);
+      const name = path.basename(filepath);
+      const overwrite = true;
+      const setDeviceFile: motionmaster.MotionMasterMessage.Request.ISetDeviceFile = { deviceAddress, name, content, overwrite };
+      motionMasterClient.sendRequest({ setDeviceFile }, messageId);
+      break;
     }
     case 'deleteDeviceFile': {
       const name = args[0];

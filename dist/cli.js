@@ -47,13 +47,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var commander_1 = __importDefault(require("commander"));
-var fs = __importStar(require("fs"));
+var fs_1 = __importDefault(require("fs"));
 var motion_master_proto_1 = require("motion-master-proto");
+var path_1 = __importDefault(require("path"));
 var rxjs = __importStar(require("rxjs"));
 var operators_1 = require("rxjs/operators");
-var util = __importStar(require("util"));
+var util_1 = __importDefault(require("util"));
 var uuid_1 = require("uuid");
-var zmq = __importStar(require("zeromq"));
+var zeromq_1 = __importDefault(require("zeromq"));
 var motion_master_client_1 = require("./motion-master-client");
 // tslint:disable: no-var-requires
 var debug = require('debug')('motion-master-client');
@@ -115,7 +116,7 @@ commander_1.default.parse(process.argv);
 //
 function requestAction(type, args, cmd) {
     return __awaiter(this, void 0, void 0, function () {
-        var deviceAddress, messageId, _a, pingSystem, getSystemVersion, getDeviceInfo, getDeviceParameterInfo, parameters, getDeviceParameterValues, deviceParameterInfo_1, parameterValues, setDeviceParameterValues, getDeviceFileList, name_1, getDeviceFile, name_2, deleteDeviceFile, resetDeviceFault, stopDevice, getDeviceLog, getCoggingTorqueData, startOffsetDetection, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId, stopMonitoringDeviceParameterValues;
+        var deviceAddress, messageId, _a, pingSystem, getSystemVersion, getDeviceInfo, getDeviceParameterInfo, parameters, getDeviceParameterValues, deviceParameterInfo_1, parameterValues, setDeviceParameterValues, getDeviceFileList, name_1, getDeviceFile, filepath, content, name_2, overwrite, setDeviceFile, name_3, deleteDeviceFile, resetDeviceFault, stopDevice, getDeviceLog, getCoggingTorqueData, startOffsetDetection, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId, stopMonitoringDeviceParameterValues;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -231,13 +232,19 @@ function requestAction(type, args, cmd) {
                     _b.label = 13;
                 case 13:
                     {
-                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                        filepath = args[0];
+                        content = fs_1.default.readFileSync(filepath);
+                        name_2 = path_1.default.basename(filepath);
+                        overwrite = true;
+                        setDeviceFile = { deviceAddress: deviceAddress, name: name_2, content: content, overwrite: overwrite };
+                        motionMasterClient.sendRequest({ setDeviceFile: setDeviceFile }, messageId);
+                        return [3 /*break*/, 33];
                     }
                     _b.label = 14;
                 case 14:
                     {
-                        name_2 = args[0];
-                        deleteDeviceFile = { deviceAddress: deviceAddress, name: name_2 };
+                        name_3 = args[0];
+                        deleteDeviceFile = { deviceAddress: deviceAddress, name: name_3 };
                         motionMasterClient.sendRequest({ deleteDeviceFile: deleteDeviceFile }, messageId);
                         return [3 /*break*/, 33];
                     }
@@ -424,7 +431,7 @@ function monitorAction(topic, params, cmd) {
 //
 function connectToMotionMaster(cmd) {
     if (cmd.config) {
-        var contents = fs.readFileSync(cmd.config, { encoding: 'utf8' });
+        var contents = fs_1.default.readFileSync(cmd.config, { encoding: 'utf8' });
         var json = JSON.parse(contents);
         Object.assign(config, json);
     }
@@ -432,7 +439,7 @@ function connectToMotionMaster(cmd) {
     var pingSystemInterval = rxjs.interval(config.pingSystemInterval);
     pingSystemInterval.subscribe(function () { return motionMasterClient.sendRequest({ pingSystem: {} }); });
     // connect to server endpoint
-    var serverSocket = zmq.socket('dealer');
+    var serverSocket = zeromq_1.default.socket('dealer');
     debug("Identity: " + config.identity);
     serverSocket.identity = config.identity;
     serverSocket.connect(config.serverEndpoint);
@@ -446,12 +453,12 @@ function connectToMotionMaster(cmd) {
         var message = motion_master_client_1.decodeMotionMasterMessage(buffer);
         // log outgoing messages and skip ping messages
         if (!(message && message.request && message.request.pingSystem)) {
-            debug(util.inspect(motion_master_client_1.decodeMotionMasterMessage(buffer).toJSON(), inspectOptions));
+            debug(util_1.default.inspect(motion_master_client_1.decodeMotionMasterMessage(buffer).toJSON(), inspectOptions));
         }
         serverSocket.send(buffer);
     });
     // connnect to notification endpoint
-    var notificationSocket = zmq.socket('sub').connect(config.notificationEndpoint);
+    var notificationSocket = zeromq_1.default.socket('sub').connect(config.notificationEndpoint);
     debug("ZeroMQ SUB socket connected to notification endpoint: " + config.notificationEndpoint);
     // subscribe to all topics
     notificationSocket.subscribe('');
@@ -473,7 +480,7 @@ function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParame
         var timestamp = Date.now();
         var topic = startMonitoringDeviceParameterValues.topic;
         var message = notif.message;
-        console.log(util.inspect({ timestamp: timestamp, topic: topic, message: message }, inspectOptions));
+        console.log(util_1.default.inspect({ timestamp: timestamp, topic: topic, message: message }, inspectOptions));
     });
     motionMasterClient.sendRequest({ startMonitoringDeviceParameterValues: startMonitoringDeviceParameterValues }, messageId);
 }
@@ -594,7 +601,7 @@ function printOnMessageReceived(messageId) {
     motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(operators_1.first()).subscribe(function (msg) {
         var timestamp = Date.now();
         var message = msg.toJSON();
-        console.log(util.inspect({ timestamp: timestamp, message: message }, inspectOptions));
+        console.log(util_1.default.inspect({ timestamp: timestamp, message: message }, inspectOptions));
     });
 }
 function parseOptionValueAsInt(value) {
