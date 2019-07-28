@@ -346,8 +346,11 @@ async function requestAction(type: RequestKey, args: string[], cmd: Command) {
       break;
     }
     case 'disableMotionController': {
-      // work, work
-      throw new Error(`Request "${type}" is not yet implemented`);
+      const disableMotionController: motionmaster.MotionMasterMessage.Request.IDisableMotionController = { deviceAddress };
+
+      motionMasterClient.sendRequest({ disableMotionController }, messageId);
+      process.exit(0);
+      break;
     }
     case 'setSignalGeneratorParameters': {
       throw new Error(`Request "${type}" is not yet implemented`);
