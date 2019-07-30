@@ -354,7 +354,16 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       break;
     }
     case 'setMotionControllerParameters': {
-      throw new Error(`Request "${type}" is not yet implemented`);
+      const target = parseInt(args[0], 10);
+
+      const setMotionControllerParameters: motionmaster.MotionMasterMessage.Request.ISetMotionControllerParameters = {
+        deviceAddress,
+        target,
+      };
+
+      motionMasterClient.sendRequest({ setMotionControllerParameters }, messageId);
+      process.exit(0);
+      break;
     }
     case 'enableMotionController': {
       exitOnMessageReceived(messageId);
