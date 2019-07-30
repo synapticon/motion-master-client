@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+#
+# Requests
+#
+
 DEBUG=* npx node ./dist/cli.js request pingSystem
 DEBUG=* npx node ./dist/cli.js request getSystemVersion
 DEBUG=* npx node ./dist/cli.js -f json request getSystemVersion
@@ -22,14 +26,70 @@ DEBUG=* npx node ./dist/cli.js request deleteDeviceFile heroes.json
 DEBUG=* npx node ./dist/cli.js request resetDeviceFault
 DEBUG=* npx node ./dist/cli.js request stopDevice
 DEBUG=* npx node ./dist/cli.js request getDeviceLog
-DEBUG=* npx node ./dist/cli.js request startCoggingTorqueRecording true # skipAutoTuning
+DEBUG=* npx node ./dist/cli.js request startCoggingTorqueRecording 1 # skipAutoTuning
 DEBUG=* npx node ./dist/cli.js request getCoggingTorqueData
 DEBUG=* npx node ./dist/cli.js request startOffsetDetection
 DEBUG=* npx node ./dist/cli.js request startPlantIdentification 3 300 2 60 30 # durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency
-DEBUG=* npx node ./dist/cli.js request computeAutoTuningGains position 2 0.2 2.0 1 4 2 314 # controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub
-DEBUG=* npx node ./dist/cli.js request computeAutoTuningGains velocity 100 100 # controllerType, velocityLoopBandwidth, velocityDamping
+DEBUG=* npx node ./dist/cli.js request computeAutoTuningGains positionParameters 2 0.2 2.0 1 4 2 314 # controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub
+DEBUG=* npx node ./dist/cli.js request computeAutoTuningGains velocityParameters 100 100 # controllerType, velocityLoopBandwidth, velocityDamping
 DEBUG=* npx node ./dist/cli.js request startMonitoringDeviceParameterValues some-topic 0x6064:0 0x230A:0
 DEBUG=* npx node ./dist/cli.js request stopMonitoringDeviceParameterValues f02fbeda-c3e5-4d1e-a294-3f7e3b83be6b
+
+#
+# Requests: Position Signal Generator
+#
+
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters positionStepResponse 1334 500 # target, sustainTime
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters positionAdvancedStepResponse 1334 500 0 # target, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters positionAdvancedStepResponse 1334 500 1 # target, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters positionRamp 1000 500 1000 1000 500 # target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters positionTrapezoidal 1000 500 1000 1000 500 0 # target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters positionTrapezoidal 1000 500 1000 1000 500 1 # target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters positionBidirectional 1000 500 1000 1000 500 0 # target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters positionBidirectional 1000 500 1000 1000 500 1 # target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters positionSineWave 1000 1 0 # amplitude, frequency, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters positionSineWave 1000 1 1 # amplitude, frequency, repeat
+
+#
+# Requests: Velocity Signal Generator
+#
+
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters velocityStepResponse 1000 500 # target, sustainTime
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters velocityAdvancedStepResponse 1000 500 0 # target, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters velocityAdvancedStepResponse 1000 500 1 # target, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters velocityRamp 1000 500 1000 1000 # target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters velocityTrapezoidal 1000 1000 1000 500 0 # target, profileAcceleration, profileDeceleration, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters velocityTrapezoidal 1000 1000 1000 500 1 # target, profileAcceleration, profileDeceleration, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters velocityBidirectional 1000 1000 1000 500 0 # target, profileAcceleration, profileDeceleration, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters velocityBidirectional 1000 1000 1000 500 1 # target, profileAcceleration, profileDeceleration, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters velocitySineWave 1000 1 0 # amplitude, frequency, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters velocitySineWave 1000 1 1 # amplitude, frequency, repeat
+
+#
+# Requests: Torque Signal Generator
+#
+
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters torqueStepResponse 500 500 # target, sustainTime
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters torqueAdvancedStepResponse 500 500 0 # target, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters torqueAdvancedStepResponse 500 500 1 # target, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters torqueRamp 500 500 500 # target, torqueSlope, sustainTime
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters torqueTrapezoidal 500 500 500 0 # target, torqueSlope, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters torqueTrapezoidal 500 500 500 1 # target, torqueSlope, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters torqueBidirectional 500 500 500 0 # target, torqueSlope, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters torqueBidirectional 500 500 500 1 # target, torqueSlope, sustainTime, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters torqueSineWave 500 1 0 # amplitude, frequency, repeat
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters torqueSineWave 500 1 1 # amplitude, frequency, repeat
+
+#
+# Commands
+#
+
 DEBUG=* npx node ./dist/cli.js upload 0x6064:0 0x230A:0
 DEBUG=* npx node ./dist/cli.js download 0x2705:0=1
+DEBUG=* npx node ./dist/cli.js getDeviceFileContent config.csv
+DEBUG=* npx node ./dist/cli.js getDeviceLogContent
+DEBUG=* npx node ./dist/cli.js getCoggingTorqueData
+DEBUG=* npx node ./dist/cli.js startCoggingTorqueRecording --skip-auto-tuning
+DEBUG=* npx node ./dist/cli.js startOffsetDetection
+DEBUG=* npx node ./dist/cli.js startPlantIdentification 3 300 2 60 30
 DEBUG=* npx node ./dist/cli.js monitor some-topic 0x6064:0 0x230A:0

@@ -12,9 +12,11 @@ import YAML from 'yaml';
 import zmq from 'zeromq';
 
 import {
+  ComputeAutoTuningGainsType,
   decodeMotionMasterMessage,
   MotionMasterClient,
   RequestType,
+  SignalGeneratorType,
   StatusType,
 } from './motion-master-client';
 
@@ -264,7 +266,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
     case 'startCoggingTorqueRecording': {
       exitOnMessageReceived(messageId, 300000, motionmaster.MotionMasterMessage.Status.CoggingTorqueRecording.Success.Code.DONE);
 
-      const skipAutoTuning = args[0] === 'true' || false;
+      const skipAutoTuning = parseInt(args[0], 10) !== 0;
       const startCoggingTorqueRecording: motionmaster.MotionMasterMessage.Request.IStartCoggingTorqueRecording = { deviceAddress, skipAutoTuning };
 
       motionMasterClient.sendRequest({ startCoggingTorqueRecording }, messageId);
@@ -308,48 +310,55 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       break;
     }
     case 'computeAutoTuningGains': {
-      if (args[0] === 'position') {
-        exitOnMessageReceived(messageId, 10000, motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.POSITION_DONE);
+      const computeAutoTuningGainsType = args[0] as ComputeAutoTuningGainsType;
+      switch (computeAutoTuningGainsType) {
+        case 'positionParameters': {
+          exitOnMessageReceived(messageId, 10000, motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.POSITION_DONE);
 
-        const controllerType = parseInt(args[1], 10);
-        const settlingTime = parseFloat(args[2]);
-        const positionDamping = parseFloat(args[3]);
-        const alphaMult = parseInt(args[4], 10);
-        const order = parseInt(args[5], 10);
-        const lb = parseFloat(args[6]);
-        const ub = parseFloat(args[7]);
+          const controllerType = parseInt(args[1], 10);
+          const settlingTime = parseFloat(args[2]);
+          const positionDamping = parseFloat(args[3]);
+          const alphaMult = parseInt(args[4], 10);
+          const order = parseInt(args[5], 10);
+          const lb = parseFloat(args[6]);
+          const ub = parseFloat(args[7]);
 
-        const computeAutoTuningGains: motionmaster.MotionMasterMessage.Request.IComputeAutoTuningGains = {
-          deviceAddress,
-          positionParameters: {
-            controllerType,
-            settlingTime,
-            positionDamping,
-            alphaMult,
-            order,
-            lb,
-            ub,
-          },
-        };
+          const computeAutoTuningGains: motionmaster.MotionMasterMessage.Request.IComputeAutoTuningGains = {
+            deviceAddress,
+            positionParameters: {
+              controllerType,
+              settlingTime,
+              positionDamping,
+              alphaMult,
+              order,
+              lb,
+              ub,
+            },
+          };
 
-        motionMasterClient.sendRequest({ computeAutoTuningGains }, messageId);
-      } else if (args[0] === 'velocity') {
-        exitOnMessageReceived(messageId, 10000, motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.VELOCITY_DONE);
+          motionMasterClient.sendRequest({ computeAutoTuningGains }, messageId);
+          break;
+        }
+        case 'velocityParameters': {
+          exitOnMessageReceived(messageId, 10000, motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.VELOCITY_DONE);
 
-        const velocityLoopBandwidth = parseFloat(args[1]);
-        const velocityDamping = parseFloat(args[2]);
+          const velocityLoopBandwidth = parseFloat(args[1]);
+          const velocityDamping = parseFloat(args[2]);
 
-        const computeAutoTuningGains: motionmaster.MotionMasterMessage.Request.IComputeAutoTuningGains = {
-          deviceAddress,
-          velocityParameters: {
-            velocityLoopBandwidth,
-            velocityDamping,
-          },
-        };
+          const computeAutoTuningGains: motionmaster.MotionMasterMessage.Request.IComputeAutoTuningGains = {
+            deviceAddress,
+            velocityParameters: {
+              velocityLoopBandwidth,
+              velocityDamping,
+            },
+          };
 
-        motionMasterClient.sendRequest({ computeAutoTuningGains }, messageId);
-      } else {
-        throw new Error(`Unknown compute auto-tuning gains "${args[0]}" type`);
+          motionMasterClient.sendRequest({ computeAutoTuningGains }, messageId);
+          break;
+        }
+        default: {
+          throw new Error(`Unknown compute auto-tuning gains type: ${computeAutoTuningGainsType}`);
+        }
       }
       break;
     }
@@ -369,7 +378,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       exitOnMessageReceived(messageId);
 
       const controllerType = parseInt(args[0], 10);
-      const filter = args[1] === 'true' || false;
+      const filter = parseInt(args[1], 10) !== 0;
 
       const enableMotionController: motionmaster.MotionMasterMessage.Request.IEnableMotionController = {
         deviceAddress,
@@ -388,7 +397,259 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       break;
     }
     case 'setSignalGeneratorParameters': {
-      throw new Error(`Request "${type}" is not yet implemented`);
+      const signalGeneratorType = args[0] as SignalGeneratorType;
+
+      const setSignalGeneratorParameters: motionmaster.MotionMasterMessage.Request.ISetSignalGeneratorParameters = { deviceAddress };
+
+      switch (signalGeneratorType) {
+        case 'positionStepResponse': {
+          const target = parseInt(args[1], 10);
+          const sustainTime = parseInt(args[2], 10);
+
+          setSignalGeneratorParameters.positionStepResponse = {
+            target,
+            sustainTime,
+          };
+          break;
+        }
+        case 'positionAdvancedStepResponse': {
+          const target = parseInt(args[1], 10);
+          const sustainTime = parseInt(args[2], 10);
+          const repeat = parseInt(args[3], 10) !== 0;
+
+          setSignalGeneratorParameters.positionAdvancedStepResponse = {
+            target,
+            sustainTime,
+            repeat,
+          };
+          break;
+        }
+        case 'positionRamp': {
+          const target = parseInt(args[1], 10);
+          const profileVelocity = parseInt(args[2], 10);
+          const profileAcceleration = parseInt(args[3], 10);
+          const profileDeceleration = parseInt(args[4], 10);
+          const sustainTime = parseInt(args[5], 10);
+
+          setSignalGeneratorParameters.positionRamp = {
+            target,
+            profileVelocity,
+            profileAcceleration,
+            profileDeceleration,
+            sustainTime,
+          };
+          break;
+        }
+        case 'positionTrapezoidal': {
+          const target = parseInt(args[1], 10);
+          const profileVelocity = parseInt(args[2], 10);
+          const profileAcceleration = parseInt(args[3], 10);
+          const profileDeceleration = parseInt(args[4], 10);
+          const sustainTime = parseInt(args[5], 10);
+          const repeat = parseInt(args[6], 10) !== 0;
+
+          setSignalGeneratorParameters.positionTrapezoidal = {
+            target,
+            profileVelocity,
+            profileAcceleration,
+            profileDeceleration,
+            sustainTime,
+            repeat,
+          };
+          break;
+        }
+        case 'positionBidirectional': {
+          const target = parseInt(args[1], 10);
+          const profileVelocity = parseInt(args[2], 10);
+          const profileAcceleration = parseInt(args[3], 10);
+          const profileDeceleration = parseInt(args[4], 10);
+          const sustainTime = parseInt(args[5], 10);
+          const repeat = parseInt(args[6], 10) !== 0;
+
+          setSignalGeneratorParameters.positionBidirectional = {
+            target,
+            profileVelocity,
+            profileAcceleration,
+            profileDeceleration,
+            sustainTime,
+            repeat,
+          };
+          break;
+        }
+        case 'positionSineWave': {
+          const amplitude = parseInt(args[1], 10);
+          const frequency = parseFloat(args[2]);
+          const repeat = parseInt(args[3], 10) !== 0;
+
+          setSignalGeneratorParameters.positionSineWave = {
+            amplitude,
+            frequency,
+            repeat,
+          };
+          break;
+        }
+        case 'velocityStepResponse': {
+          const target = parseInt(args[1], 10);
+          const sustainTime = parseInt(args[2], 10);
+
+          setSignalGeneratorParameters.velocityStepResponse = {
+            target,
+            sustainTime,
+          };
+          break;
+        }
+        case 'velocityAdvancedStepResponse': {
+          const target = parseInt(args[1], 10);
+          const sustainTime = parseInt(args[2], 10);
+          const repeat = parseInt(args[3], 10) !== 0;
+
+          setSignalGeneratorParameters.velocityAdvancedStepResponse = {
+            target,
+            sustainTime,
+            repeat,
+          };
+          break;
+        }
+        case 'velocityRamp': {
+          const target = parseInt(args[1], 10);
+          const profileAcceleration = parseInt(args[2], 10);
+          const profileDeceleration = parseInt(args[3], 10);
+          const sustainTime = parseInt(args[4], 10);
+
+          setSignalGeneratorParameters.velocityRamp = {
+            target,
+            profileAcceleration,
+            profileDeceleration,
+            sustainTime,
+          };
+          break;
+        }
+        case 'velocityTrapezoidal': {
+          const target = parseInt(args[1], 10);
+          const profileAcceleration = parseInt(args[2], 10);
+          const profileDeceleration = parseInt(args[3], 10);
+          const sustainTime = parseInt(args[4], 10);
+          const repeat = parseInt(args[5], 10) !== 0;
+
+          setSignalGeneratorParameters.velocityTrapezoidal = {
+            target,
+            profileAcceleration,
+            profileDeceleration,
+            sustainTime,
+            repeat,
+          };
+          break;
+        }
+        case 'velocityBidirectional': {
+          const target = parseInt(args[1], 10);
+          const profileAcceleration = parseInt(args[2], 10);
+          const profileDeceleration = parseInt(args[3], 10);
+          const sustainTime = parseInt(args[4], 10);
+          const repeat = parseInt(args[5], 10) !== 0;
+
+          setSignalGeneratorParameters.velocityBidirectional = {
+            target,
+            profileAcceleration,
+            profileDeceleration,
+            sustainTime,
+            repeat,
+          };
+          break;
+        }
+        case 'velocitySineWave': {
+          const amplitude = parseInt(args[1], 10);
+          const frequency = parseFloat(args[2]);
+          const repeat = parseInt(args[3], 10) !== 0;
+
+          setSignalGeneratorParameters.velocitySineWave = {
+            amplitude,
+            frequency,
+            repeat,
+          };
+          break;
+        }
+        case 'torqueStepResponse': {
+          const target = parseInt(args[1], 10);
+          const sustainTime = parseInt(args[2], 10);
+
+          setSignalGeneratorParameters.torqueStepResponse = {
+            target,
+            sustainTime,
+          };
+          break;
+        }
+        case 'torqueAdvancedStepResponse': {
+          const target = parseInt(args[1], 10);
+          const sustainTime = parseInt(args[2], 10);
+          const repeat = parseInt(args[3], 10) !== 0;
+
+          setSignalGeneratorParameters.torqueAdvancedStepResponse = {
+            target,
+            sustainTime,
+            repeat,
+          };
+          break;
+        }
+        case 'torqueRamp': {
+          const target = parseInt(args[1], 10);
+          const torqueSlope = parseInt(args[2], 10);
+          const sustainTime = parseInt(args[3], 10);
+
+          setSignalGeneratorParameters.torqueRamp = {
+            target,
+            torqueSlope,
+            sustainTime,
+          };
+          break;
+        }
+        case 'torqueTrapezoidal': {
+          const target = parseInt(args[1], 10);
+          const torqueSlope = parseInt(args[2], 10);
+          const sustainTime = parseInt(args[3], 10);
+          const repeat = parseInt(args[4], 10) !== 0;
+
+          setSignalGeneratorParameters.torqueTrapezoidal = {
+            target,
+            torqueSlope,
+            sustainTime,
+            repeat,
+          };
+          break;
+        }
+        case 'torqueBidirectional': {
+          const target = parseInt(args[1], 10);
+          const torqueSlope = parseInt(args[2], 10);
+          const sustainTime = parseInt(args[3], 10);
+          const repeat = parseInt(args[4], 10) !== 0;
+
+          setSignalGeneratorParameters.torqueBidirectional = {
+            target,
+            torqueSlope,
+            sustainTime,
+            repeat,
+          };
+          break;
+        }
+        case 'torqueSineWave': {
+          const amplitude = parseInt(args[1], 10);
+          const frequency = parseFloat(args[2]);
+          const repeat = parseInt(args[3], 10) !== 0;
+
+          setSignalGeneratorParameters.torqueSineWave = {
+            amplitude,
+            frequency,
+            repeat,
+          };
+          break;
+        }
+        default: {
+          throw new Error(`Unknown set signal generator parameters type: ${signalGeneratorType}`);
+        }
+      }
+
+      motionMasterClient.sendRequest({ setSignalGeneratorParameters }, messageId);
+      process.exit(0);
+      break;
     }
     case 'startSignalGenerator': {
       exitOnMessageReceived(messageId, 2147483647, motionmaster.MotionMasterMessage.Status.SignalGenerator.Success.Code.DONE);

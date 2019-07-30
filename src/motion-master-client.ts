@@ -22,6 +22,8 @@ export interface INotification {
 
 export type RequestType = keyof motionmaster.MotionMasterMessage.IRequest;
 export type StatusType = keyof motionmaster.MotionMasterMessage.IStatus;
+export type SignalGeneratorType = keyof motionmaster.MotionMasterMessage.Request.ISetSignalGeneratorParameters;
+export type ComputeAutoTuningGainsType = keyof motionmaster.MotionMasterMessage.Request.IComputeAutoTuningGains;
 
 export class MotionMasterClient {
 

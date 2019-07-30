@@ -145,7 +145,7 @@ commander_1.default.parse(process.argv);
 //
 function requestAction(type, args, cmd) {
     return __awaiter(this, void 0, void 0, function () {
-        var deviceAddress, messageId, _a, pingSystem, getSystemVersion, getDeviceInfo, getDeviceParameterInfo, parameters, getDeviceParameterValues, deviceParameterInfo_1, parameterValues, setDeviceParameterValues, getDeviceFileList, name_1, getDeviceFile, filepath, content, name_2, overwrite, setDeviceFile, name_3, deleteDeviceFile, resetDeviceFault, stopDevice, filepath, firmwarePackageContent, startDeviceFirmwareInstallation, getDeviceLog, skipAutoTuning, startCoggingTorqueRecording, getCoggingTorqueData, startOffsetDetection, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, startPlantIdentification, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, enableMotionController, disableMotionController, startSignalGenerator, stopSignalGenerator, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId, stopMonitoringDeviceParameterValues;
+        var deviceAddress, messageId, _a, pingSystem, getSystemVersion, getDeviceInfo, getDeviceParameterInfo, parameters, getDeviceParameterValues, deviceParameterInfo_1, parameterValues, setDeviceParameterValues, getDeviceFileList, name_1, getDeviceFile, filepath, content, name_2, overwrite, setDeviceFile, name_3, deleteDeviceFile, resetDeviceFault, stopDevice, filepath, firmwarePackageContent, startDeviceFirmwareInstallation, getDeviceLog, skipAutoTuning, startCoggingTorqueRecording, getCoggingTorqueData, startOffsetDetection, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, startPlantIdentification, computeAutoTuningGainsType, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, enableMotionController, disableMotionController, signalGeneratorType, setSignalGeneratorParameters, target, sustainTime, target, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, target, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, torqueSlope, sustainTime, target, torqueSlope, sustainTime, repeat, target, torqueSlope, sustainTime, repeat, amplitude, frequency, repeat, startSignalGenerator, stopSignalGenerator, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId, stopMonitoringDeviceParameterValues;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -323,7 +323,7 @@ function requestAction(type, args, cmd) {
                 case 19:
                     {
                         exitOnMessageReceived(messageId, 300000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.CoggingTorqueRecording.Success.Code.DONE);
-                        skipAutoTuning = args[0] === 'true' || false;
+                        skipAutoTuning = parseInt(args[0], 10) !== 0;
                         startCoggingTorqueRecording = { deviceAddress: deviceAddress, skipAutoTuning: skipAutoTuning };
                         motionMasterClient.sendRequest({ startCoggingTorqueRecording: startCoggingTorqueRecording }, messageId);
                         return [3 /*break*/, 33];
@@ -367,44 +367,49 @@ function requestAction(type, args, cmd) {
                     _b.label = 23;
                 case 23:
                     {
-                        if (args[0] === 'position') {
-                            exitOnMessageReceived(messageId, 10000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.POSITION_DONE);
-                            controllerType = parseInt(args[1], 10);
-                            settlingTime = parseFloat(args[2]);
-                            positionDamping = parseFloat(args[3]);
-                            alphaMult = parseInt(args[4], 10);
-                            order = parseInt(args[5], 10);
-                            lb = parseFloat(args[6]);
-                            ub = parseFloat(args[7]);
-                            computeAutoTuningGains = {
-                                deviceAddress: deviceAddress,
-                                positionParameters: {
-                                    controllerType: controllerType,
-                                    settlingTime: settlingTime,
-                                    positionDamping: positionDamping,
-                                    alphaMult: alphaMult,
-                                    order: order,
-                                    lb: lb,
-                                    ub: ub,
-                                },
-                            };
-                            motionMasterClient.sendRequest({ computeAutoTuningGains: computeAutoTuningGains }, messageId);
-                        }
-                        else if (args[0] === 'velocity') {
-                            exitOnMessageReceived(messageId, 10000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.VELOCITY_DONE);
-                            velocityLoopBandwidth = parseFloat(args[1]);
-                            velocityDamping = parseFloat(args[2]);
-                            computeAutoTuningGains = {
-                                deviceAddress: deviceAddress,
-                                velocityParameters: {
-                                    velocityLoopBandwidth: velocityLoopBandwidth,
-                                    velocityDamping: velocityDamping,
-                                },
-                            };
-                            motionMasterClient.sendRequest({ computeAutoTuningGains: computeAutoTuningGains }, messageId);
-                        }
-                        else {
-                            throw new Error("Unknown compute auto-tuning gains \"" + args[0] + "\" type");
+                        computeAutoTuningGainsType = args[0];
+                        switch (computeAutoTuningGainsType) {
+                            case 'positionParameters': {
+                                exitOnMessageReceived(messageId, 10000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.POSITION_DONE);
+                                controllerType = parseInt(args[1], 10);
+                                settlingTime = parseFloat(args[2]);
+                                positionDamping = parseFloat(args[3]);
+                                alphaMult = parseInt(args[4], 10);
+                                order = parseInt(args[5], 10);
+                                lb = parseFloat(args[6]);
+                                ub = parseFloat(args[7]);
+                                computeAutoTuningGains = {
+                                    deviceAddress: deviceAddress,
+                                    positionParameters: {
+                                        controllerType: controllerType,
+                                        settlingTime: settlingTime,
+                                        positionDamping: positionDamping,
+                                        alphaMult: alphaMult,
+                                        order: order,
+                                        lb: lb,
+                                        ub: ub,
+                                    },
+                                };
+                                motionMasterClient.sendRequest({ computeAutoTuningGains: computeAutoTuningGains }, messageId);
+                                break;
+                            }
+                            case 'velocityParameters': {
+                                exitOnMessageReceived(messageId, 10000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.VELOCITY_DONE);
+                                velocityLoopBandwidth = parseFloat(args[1]);
+                                velocityDamping = parseFloat(args[2]);
+                                computeAutoTuningGains = {
+                                    deviceAddress: deviceAddress,
+                                    velocityParameters: {
+                                        velocityLoopBandwidth: velocityLoopBandwidth,
+                                        velocityDamping: velocityDamping,
+                                    },
+                                };
+                                motionMasterClient.sendRequest({ computeAutoTuningGains: computeAutoTuningGains }, messageId);
+                                break;
+                            }
+                            default: {
+                                throw new Error("Unknown compute auto-tuning gains type: " + computeAutoTuningGainsType);
+                            }
                         }
                         return [3 /*break*/, 33];
                     }
@@ -425,7 +430,7 @@ function requestAction(type, args, cmd) {
                     {
                         exitOnMessageReceived(messageId);
                         controllerType = parseInt(args[0], 10);
-                        filter = args[1] === 'true' || false;
+                        filter = parseInt(args[1], 10) !== 0;
                         enableMotionController = {
                             deviceAddress: deviceAddress,
                             controllerType: controllerType,
@@ -445,7 +450,238 @@ function requestAction(type, args, cmd) {
                     _b.label = 27;
                 case 27:
                     {
-                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                        signalGeneratorType = args[0];
+                        setSignalGeneratorParameters = { deviceAddress: deviceAddress };
+                        switch (signalGeneratorType) {
+                            case 'positionStepResponse': {
+                                target = parseInt(args[1], 10);
+                                sustainTime = parseInt(args[2], 10);
+                                setSignalGeneratorParameters.positionStepResponse = {
+                                    target: target,
+                                    sustainTime: sustainTime,
+                                };
+                                break;
+                            }
+                            case 'positionAdvancedStepResponse': {
+                                target = parseInt(args[1], 10);
+                                sustainTime = parseInt(args[2], 10);
+                                repeat = parseInt(args[3], 10) !== 0;
+                                setSignalGeneratorParameters.positionAdvancedStepResponse = {
+                                    target: target,
+                                    sustainTime: sustainTime,
+                                    repeat: repeat,
+                                };
+                                break;
+                            }
+                            case 'positionRamp': {
+                                target = parseInt(args[1], 10);
+                                profileVelocity = parseInt(args[2], 10);
+                                profileAcceleration = parseInt(args[3], 10);
+                                profileDeceleration = parseInt(args[4], 10);
+                                sustainTime = parseInt(args[5], 10);
+                                setSignalGeneratorParameters.positionRamp = {
+                                    target: target,
+                                    profileVelocity: profileVelocity,
+                                    profileAcceleration: profileAcceleration,
+                                    profileDeceleration: profileDeceleration,
+                                    sustainTime: sustainTime,
+                                };
+                                break;
+                            }
+                            case 'positionTrapezoidal': {
+                                target = parseInt(args[1], 10);
+                                profileVelocity = parseInt(args[2], 10);
+                                profileAcceleration = parseInt(args[3], 10);
+                                profileDeceleration = parseInt(args[4], 10);
+                                sustainTime = parseInt(args[5], 10);
+                                repeat = parseInt(args[6], 10) !== 0;
+                                setSignalGeneratorParameters.positionTrapezoidal = {
+                                    target: target,
+                                    profileVelocity: profileVelocity,
+                                    profileAcceleration: profileAcceleration,
+                                    profileDeceleration: profileDeceleration,
+                                    sustainTime: sustainTime,
+                                    repeat: repeat,
+                                };
+                                break;
+                            }
+                            case 'positionBidirectional': {
+                                target = parseInt(args[1], 10);
+                                profileVelocity = parseInt(args[2], 10);
+                                profileAcceleration = parseInt(args[3], 10);
+                                profileDeceleration = parseInt(args[4], 10);
+                                sustainTime = parseInt(args[5], 10);
+                                repeat = parseInt(args[6], 10) !== 0;
+                                setSignalGeneratorParameters.positionBidirectional = {
+                                    target: target,
+                                    profileVelocity: profileVelocity,
+                                    profileAcceleration: profileAcceleration,
+                                    profileDeceleration: profileDeceleration,
+                                    sustainTime: sustainTime,
+                                    repeat: repeat,
+                                };
+                                break;
+                            }
+                            case 'positionSineWave': {
+                                amplitude = parseInt(args[1], 10);
+                                frequency = parseFloat(args[2]);
+                                repeat = parseInt(args[3], 10) !== 0;
+                                setSignalGeneratorParameters.positionSineWave = {
+                                    amplitude: amplitude,
+                                    frequency: frequency,
+                                    repeat: repeat,
+                                };
+                                break;
+                            }
+                            case 'velocityStepResponse': {
+                                target = parseInt(args[1], 10);
+                                sustainTime = parseInt(args[2], 10);
+                                setSignalGeneratorParameters.velocityStepResponse = {
+                                    target: target,
+                                    sustainTime: sustainTime,
+                                };
+                                break;
+                            }
+                            case 'velocityAdvancedStepResponse': {
+                                target = parseInt(args[1], 10);
+                                sustainTime = parseInt(args[2], 10);
+                                repeat = parseInt(args[3], 10) !== 0;
+                                setSignalGeneratorParameters.velocityAdvancedStepResponse = {
+                                    target: target,
+                                    sustainTime: sustainTime,
+                                    repeat: repeat,
+                                };
+                                break;
+                            }
+                            case 'velocityRamp': {
+                                target = parseInt(args[1], 10);
+                                profileAcceleration = parseInt(args[2], 10);
+                                profileDeceleration = parseInt(args[3], 10);
+                                sustainTime = parseInt(args[4], 10);
+                                setSignalGeneratorParameters.velocityRamp = {
+                                    target: target,
+                                    profileAcceleration: profileAcceleration,
+                                    profileDeceleration: profileDeceleration,
+                                    sustainTime: sustainTime,
+                                };
+                                break;
+                            }
+                            case 'velocityTrapezoidal': {
+                                target = parseInt(args[1], 10);
+                                profileAcceleration = parseInt(args[2], 10);
+                                profileDeceleration = parseInt(args[3], 10);
+                                sustainTime = parseInt(args[4], 10);
+                                repeat = parseInt(args[5], 10) !== 0;
+                                setSignalGeneratorParameters.velocityTrapezoidal = {
+                                    target: target,
+                                    profileAcceleration: profileAcceleration,
+                                    profileDeceleration: profileDeceleration,
+                                    sustainTime: sustainTime,
+                                    repeat: repeat,
+                                };
+                                break;
+                            }
+                            case 'velocityBidirectional': {
+                                target = parseInt(args[1], 10);
+                                profileAcceleration = parseInt(args[2], 10);
+                                profileDeceleration = parseInt(args[3], 10);
+                                sustainTime = parseInt(args[4], 10);
+                                repeat = parseInt(args[5], 10) !== 0;
+                                setSignalGeneratorParameters.velocityBidirectional = {
+                                    target: target,
+                                    profileAcceleration: profileAcceleration,
+                                    profileDeceleration: profileDeceleration,
+                                    sustainTime: sustainTime,
+                                    repeat: repeat,
+                                };
+                                break;
+                            }
+                            case 'velocitySineWave': {
+                                amplitude = parseInt(args[1], 10);
+                                frequency = parseFloat(args[2]);
+                                repeat = parseInt(args[3], 10) !== 0;
+                                setSignalGeneratorParameters.velocitySineWave = {
+                                    amplitude: amplitude,
+                                    frequency: frequency,
+                                    repeat: repeat,
+                                };
+                                break;
+                            }
+                            case 'torqueStepResponse': {
+                                target = parseInt(args[1], 10);
+                                sustainTime = parseInt(args[2], 10);
+                                setSignalGeneratorParameters.torqueStepResponse = {
+                                    target: target,
+                                    sustainTime: sustainTime,
+                                };
+                                break;
+                            }
+                            case 'torqueAdvancedStepResponse': {
+                                target = parseInt(args[1], 10);
+                                sustainTime = parseInt(args[2], 10);
+                                repeat = parseInt(args[3], 10) !== 0;
+                                setSignalGeneratorParameters.torqueAdvancedStepResponse = {
+                                    target: target,
+                                    sustainTime: sustainTime,
+                                    repeat: repeat,
+                                };
+                                break;
+                            }
+                            case 'torqueRamp': {
+                                target = parseInt(args[1], 10);
+                                torqueSlope = parseInt(args[2], 10);
+                                sustainTime = parseInt(args[3], 10);
+                                setSignalGeneratorParameters.torqueRamp = {
+                                    target: target,
+                                    torqueSlope: torqueSlope,
+                                    sustainTime: sustainTime,
+                                };
+                                break;
+                            }
+                            case 'torqueTrapezoidal': {
+                                target = parseInt(args[1], 10);
+                                torqueSlope = parseInt(args[2], 10);
+                                sustainTime = parseInt(args[3], 10);
+                                repeat = parseInt(args[4], 10) !== 0;
+                                setSignalGeneratorParameters.torqueTrapezoidal = {
+                                    target: target,
+                                    torqueSlope: torqueSlope,
+                                    sustainTime: sustainTime,
+                                    repeat: repeat,
+                                };
+                                break;
+                            }
+                            case 'torqueBidirectional': {
+                                target = parseInt(args[1], 10);
+                                torqueSlope = parseInt(args[2], 10);
+                                sustainTime = parseInt(args[3], 10);
+                                repeat = parseInt(args[4], 10) !== 0;
+                                setSignalGeneratorParameters.torqueBidirectional = {
+                                    target: target,
+                                    torqueSlope: torqueSlope,
+                                    sustainTime: sustainTime,
+                                    repeat: repeat,
+                                };
+                                break;
+                            }
+                            case 'torqueSineWave': {
+                                amplitude = parseInt(args[1], 10);
+                                frequency = parseFloat(args[2]);
+                                repeat = parseInt(args[3], 10) !== 0;
+                                setSignalGeneratorParameters.torqueSineWave = {
+                                    amplitude: amplitude,
+                                    frequency: frequency,
+                                    repeat: repeat,
+                                };
+                                break;
+                            }
+                            default: {
+                                throw new Error("Unknown set signal generator parameters type: " + signalGeneratorType);
+                            }
+                        }
+                        motionMasterClient.sendRequest({ setSignalGeneratorParameters: setSignalGeneratorParameters }, messageId);
+                        process.exit(0);
+                        return [3 /*break*/, 33];
                     }
                     _b.label = 28;
                 case 28:
