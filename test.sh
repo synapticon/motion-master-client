@@ -2,6 +2,10 @@
 
 DEBUG=* npx node ./dist/cli.js request pingSystem
 DEBUG=* npx node ./dist/cli.js request getSystemVersion
+DEBUG=* npx node ./dist/cli.js -f json request getSystemVersion
+DEBUG=* npx node ./dist/cli.js -f yaml request getSystemVersion
+DEBUG=* npx node ./dist/cli.js --output-format json request getSystemVersion
+DEBUG=* npx node ./dist/cli.js --output-format yaml request getSystemVersion
 DEBUG=* npx node ./dist/cli.js -c ./motion-master-client.config.json request getSystemVersion # using custom config
 DEBUG=* npx node ./dist/cli.js request getDeviceInfo
 DEBUG=* npx node ./dist/cli.js request getDeviceParameterInfo # default device at position 0

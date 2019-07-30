@@ -21,6 +21,7 @@
     "motion-master-proto": "^2.8.2-motion-master-client.2",
     "rxjs": "^6.5.2",
     "uuid": "^3.3.2",
+    "yaml": "^1.6.0",
     "zeromq": "^5.1.0"
   },
   "devDependencies": {
