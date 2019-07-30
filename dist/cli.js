@@ -52,6 +52,7 @@ var motion_master_proto_1 = require("motion-master-proto");
 var path_1 = __importDefault(require("path"));
 var rxjs = __importStar(require("rxjs"));
 var operators_1 = require("rxjs/operators");
+var string_decoder_1 = require("string_decoder");
 var util_1 = __importDefault(require("util"));
 var uuid_1 = require("uuid");
 var yaml_1 = __importDefault(require("yaml"));
@@ -114,6 +115,9 @@ commander_1.default
 commander_1.default
     .command('download [paramValues...]')
     .action(downloadAction);
+commander_1.default
+    .command('getDeviceFileContent <filename>')
+    .action(getDeviceFileContentAction);
 commander_1.default
     .command('startCoggingTorqueRecording')
     .option('-s, --skip-auto-tuning')
@@ -510,6 +514,41 @@ function downloadAction(paramValues, cmd) {
                     parameterValues = paramValues.map(function (paramValue) { return paramToIndexSubIndexValue(paramValue, deviceParameterInfo); });
                     setDeviceParameterValues = { deviceAddress: deviceAddress, parameterValues: parameterValues };
                     motionMasterClient.sendRequest({ setDeviceParameterValues: setDeviceParameterValues }, messageId);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function getDeviceFileContentAction(name, cmd) {
+    return __awaiter(this, void 0, void 0, function () {
+        var deviceAddress, messageId, getDeviceFile;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    connectToMotionMaster(cmd.parent);
+                    return [4 /*yield*/, getCommandDeviceAddressAsync(cmd.parent)];
+                case 1:
+                    deviceAddress = _a.sent();
+                    messageId = uuid_1.v4();
+                    motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(operators_1.first()).subscribe(function (message) {
+                        if (message && message.status && message.status.deviceFile) {
+                            var error = message.status.deviceFile.error;
+                            if (error) {
+                                throw new Error(error.code + ": " + error.message);
+                            }
+                            else {
+                                var content = message.status.deviceFile.content;
+                                if (content) {
+                                    var contentDecoded = new string_decoder_1.StringDecoder('utf-8').write(new Buffer(content));
+                                    console.log(contentDecoded);
+                                    process.exit(0);
+                                }
+                            }
+                        }
+                        throw new Error("There was an error getting device file \"" + name + "\".");
+                    });
+                    getDeviceFile = { deviceAddress: deviceAddress, name: name };
+                    motionMasterClient.sendRequest({ getDeviceFile: getDeviceFile }, messageId);
                     return [2 /*return*/];
             }
         });

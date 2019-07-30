@@ -5,6 +5,7 @@ import { motionmaster } from 'motion-master-proto';
 import path from 'path';
 import * as rxjs from 'rxjs';
 import { first, map, timeout } from 'rxjs/operators';
+import { StringDecoder } from 'string_decoder';
 import util from 'util';
 import { v4 } from 'uuid';
 import YAML from 'yaml';
@@ -87,6 +88,10 @@ program
 program
   .command('download [paramValues...]')
   .action(downloadAction);
+
+program
+  .command('getDeviceFileContent <filename>')
+  .action(getDeviceFileContentAction);
 
 program
   .command('startCoggingTorqueRecording')
@@ -426,6 +431,36 @@ async function downloadAction(paramValues: string[], cmd: Command) {
   motionMasterClient.sendRequest({ setDeviceParameterValues }, messageId);
 }
 
+async function getDeviceFileContentAction(name: string, cmd: Command) {
+  connectToMotionMaster(cmd.parent);
+  const deviceAddress = await getCommandDeviceAddressAsync(cmd.parent);
+
+  const messageId = v4();
+
+  motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(
+    first(),
+  ).subscribe((message) => {
+    if (message && message.status && message.status.deviceFile) {
+      const error = message.status.deviceFile.error;
+      if (error) {
+        throw new Error(`${error.code}: ${error.message}`);
+      } else {
+        const content = message.status.deviceFile.content;
+        if (content) {
+          const contentDecoded = new StringDecoder('utf-8').write(new Buffer(content));
+          console.log(contentDecoded);
+          process.exit(0);
+        }
+      }
+    }
+    throw new Error(`There was an error getting device file "${name}".`);
+  });
+
+  const getDeviceFile: motionmaster.MotionMasterMessage.Request.IGetDeviceFile = { deviceAddress, name };
+
+  motionMasterClient.sendRequest({ getDeviceFile }, messageId);
+}
+
 async function startOffsetDetectionAction(cmd: Command) {
   connectToMotionMaster(cmd.parent);
 
@@ -699,7 +734,7 @@ function printOnMessageReceived(messageId: string, outputFormat: OutputFormat = 
         console.log(JSON.stringify(outputObj));
         break;
       case 'yaml':
-        console.log(YAML.stringify(outputObj))
+        console.log(YAML.stringify(outputObj));
         break;
       default:
         console.log(
