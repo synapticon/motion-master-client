@@ -145,7 +145,7 @@ commander_1.default.parse(process.argv);
 //
 function requestAction(type, args, cmd) {
     return __awaiter(this, void 0, void 0, function () {
-        var deviceAddress, messageId, _a, pingSystem, getSystemVersion, getDeviceInfo, getDeviceParameterInfo, parameters, getDeviceParameterValues, deviceParameterInfo_1, parameterValues, setDeviceParameterValues, getDeviceFileList, name_1, getDeviceFile, filepath, content, name_2, overwrite, setDeviceFile, name_3, deleteDeviceFile, resetDeviceFault, stopDevice, filepath, firmwarePackageContent, startDeviceFirmwareInstallation, getDeviceLog, skipAutoTuning, startCoggingTorqueRecording, getCoggingTorqueData, startOffsetDetection, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, startPlantIdentification, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, enableMotionController, disableMotionController, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId, stopMonitoringDeviceParameterValues;
+        var deviceAddress, messageId, _a, pingSystem, getSystemVersion, getDeviceInfo, getDeviceParameterInfo, parameters, getDeviceParameterValues, deviceParameterInfo_1, parameterValues, setDeviceParameterValues, getDeviceFileList, name_1, getDeviceFile, filepath, content, name_2, overwrite, setDeviceFile, name_3, deleteDeviceFile, resetDeviceFault, stopDevice, filepath, firmwarePackageContent, startDeviceFirmwareInstallation, getDeviceLog, skipAutoTuning, startCoggingTorqueRecording, getCoggingTorqueData, startOffsetDetection, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, startPlantIdentification, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, enableMotionController, disableMotionController, startSignalGenerator, stopSignalGenerator, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId, stopMonitoringDeviceParameterValues;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -450,12 +450,18 @@ function requestAction(type, args, cmd) {
                     _b.label = 28;
                 case 28:
                     {
-                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                        exitOnMessageReceived(messageId, 2147483647, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.SignalGenerator.Success.Code.DONE);
+                        startSignalGenerator = { deviceAddress: deviceAddress };
+                        motionMasterClient.sendRequest({ startSignalGenerator: startSignalGenerator }, messageId);
+                        return [3 /*break*/, 33];
                     }
                     _b.label = 29;
                 case 29:
                     {
-                        throw new Error("Request \"" + type + "\" is not yet implemented");
+                        stopSignalGenerator = { deviceAddress: deviceAddress };
+                        motionMasterClient.sendRequest({ stopSignalGenerator: stopSignalGenerator }, messageId);
+                        process.exit(0);
+                        return [3 /*break*/, 33];
                     }
                     _b.label = 30;
                 case 30:

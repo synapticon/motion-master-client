@@ -391,10 +391,19 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       throw new Error(`Request "${type}" is not yet implemented`);
     }
     case 'startSignalGenerator': {
-      throw new Error(`Request "${type}" is not yet implemented`);
+      exitOnMessageReceived(messageId, 2147483647, motionmaster.MotionMasterMessage.Status.SignalGenerator.Success.Code.DONE);
+
+      const startSignalGenerator: motionmaster.MotionMasterMessage.Request.IStartSignalGenerator = { deviceAddress };
+
+      motionMasterClient.sendRequest({ startSignalGenerator }, messageId);
+      break;
     }
     case 'stopSignalGenerator': {
-      throw new Error(`Request "${type}" is not yet implemented`);
+      const stopSignalGenerator: motionmaster.MotionMasterMessage.Request.IStopSignalGenerator = { deviceAddress };
+
+      motionMasterClient.sendRequest({ stopSignalGenerator }, messageId);
+      process.exit(0);
+      break;
     }
     case 'startMonitoringDeviceParameterValues': {
       const parameters = args.slice(1).map(paramToIndexSubindex);
