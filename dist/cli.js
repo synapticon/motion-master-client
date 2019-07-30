@@ -116,8 +116,11 @@ commander_1.default
     .command('download [paramValues...]')
     .action(downloadAction);
 commander_1.default
-    .command('getDeviceFileContent <filename>', 'decodes and outputs the content of a file')
+    .command('getDeviceFileContent <filename>')
     .action(getDeviceFileContentAction);
+commander_1.default
+    .command('getDeviceLogContent')
+    .action(getDeviceLogContentAction);
 commander_1.default
     .command('startCoggingTorqueRecording')
     .option('-s, --skip-auto-tuning')
@@ -398,7 +401,7 @@ function requestAction(type, args, cmd) {
                             motionMasterClient.sendRequest({ computeAutoTuningGains: computeAutoTuningGains }, messageId);
                         }
                         else {
-                            throw new Error("Unknown compute auto-tuning gains \"" + args[0] + "\" type.");
+                            throw new Error("Unknown compute auto-tuning gains \"" + args[0] + "\" type");
                         }
                         return [3 /*break*/, 33];
                     }
@@ -543,12 +546,57 @@ function getDeviceFileContentAction(name, cmd) {
                                     console.log(contentDecoded);
                                     process.exit(0);
                                 }
+                                else {
+                                    throw new Error('Device file content is empty');
+                                }
                             }
                         }
-                        throw new Error("There was an error getting device file \"" + name + "\".");
+                        else {
+                            throw new Error('The received message is not "deviceFile"');
+                        }
                     });
                     getDeviceFile = { deviceAddress: deviceAddress, name: name };
                     motionMasterClient.sendRequest({ getDeviceFile: getDeviceFile }, messageId);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function getDeviceLogContentAction(cmd) {
+    return __awaiter(this, void 0, void 0, function () {
+        var deviceAddress, messageId, getDeviceLog;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    connectToMotionMaster(cmd.parent);
+                    return [4 /*yield*/, getCommandDeviceAddressAsync(cmd.parent)];
+                case 1:
+                    deviceAddress = _a.sent();
+                    messageId = uuid_1.v4();
+                    motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(operators_1.first()).subscribe(function (message) {
+                        if (message && message.status && message.status.deviceLog) {
+                            var error = message.status.deviceLog.error;
+                            if (error) {
+                                throw new Error(error.code + ": " + error.message);
+                            }
+                            else {
+                                var content = message.status.deviceLog.content;
+                                if (content) {
+                                    var contentDecoded = new string_decoder_1.StringDecoder('utf-8').write(new Buffer(content));
+                                    console.log(contentDecoded);
+                                    process.exit(0);
+                                }
+                                else {
+                                    throw new Error('Device log content is empty');
+                                }
+                            }
+                        }
+                        else {
+                            throw new Error('The received message is not "deviceLog"');
+                        }
+                    });
+                    getDeviceLog = { deviceAddress: deviceAddress };
+                    motionMasterClient.sendRequest({ getDeviceLog: getDeviceLog }, messageId);
                     return [2 /*return*/];
             }
         });

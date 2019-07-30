@@ -90,8 +90,12 @@ program
   .action(downloadAction);
 
 program
-  .command('getDeviceFileContent <filename>', 'decodes and outputs the content of a file')
+  .command('getDeviceFileContent <filename>')
   .action(getDeviceFileContentAction);
+
+program
+  .command('getDeviceLogContent')
+  .action(getDeviceLogContentAction);
 
 program
   .command('startCoggingTorqueRecording')
@@ -341,7 +345,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
 
         motionMasterClient.sendRequest({ computeAutoTuningGains }, messageId);
       } else {
-        throw new Error(`Unknown compute auto-tuning gains "${args[0]}" type.`);
+        throw new Error(`Unknown compute auto-tuning gains "${args[0]}" type`);
       }
       break;
     }
@@ -450,15 +454,51 @@ async function getDeviceFileContentAction(name: string, cmd: Command) {
           const contentDecoded = new StringDecoder('utf-8').write(new Buffer(content));
           console.log(contentDecoded);
           process.exit(0);
+        } else {
+          throw new Error('Device file content is empty');
         }
       }
+    } else {
+      throw new Error('The received message is not "deviceFile"');
     }
-    throw new Error(`There was an error getting device file "${name}".`);
   });
 
   const getDeviceFile: motionmaster.MotionMasterMessage.Request.IGetDeviceFile = { deviceAddress, name };
 
   motionMasterClient.sendRequest({ getDeviceFile }, messageId);
+}
+
+async function getDeviceLogContentAction(cmd: Command) {
+  connectToMotionMaster(cmd.parent);
+  const deviceAddress = await getCommandDeviceAddressAsync(cmd.parent);
+
+  const messageId = v4();
+
+  motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(
+    first(),
+  ).subscribe((message) => {
+    if (message && message.status && message.status.deviceLog) {
+      const error = message.status.deviceLog.error;
+      if (error) {
+        throw new Error(`${error.code}: ${error.message}`);
+      } else {
+        const content = message.status.deviceLog.content;
+        if (content) {
+          const contentDecoded = new StringDecoder('utf-8').write(new Buffer(content));
+          console.log(contentDecoded);
+          process.exit(0);
+        } else {
+          throw new Error('Device log content is empty');
+        }
+      }
+    } else {
+      throw new Error('The received message is not "deviceLog"');
+    }
+  });
+
+  const getDeviceLog: motionmaster.MotionMasterMessage.Request.IGetDeviceLog = { deviceAddress };
+
+  motionMasterClient.sendRequest({ getDeviceLog }, messageId);
 }
 
 async function startOffsetDetectionAction(cmd: Command) {
