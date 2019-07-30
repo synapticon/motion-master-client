@@ -98,6 +98,10 @@ program
   .action(getDeviceLogContentAction);
 
 program
+  .command('getCoggingTorqueDataContent')
+  .action(getCoggingTorqueDataContent);
+
+program
   .command('startCoggingTorqueRecording')
   .option('-s, --skip-auto-tuning')
   .action(startCoggingTorqueRecordingAction);
@@ -499,6 +503,38 @@ async function getDeviceLogContentAction(cmd: Command) {
   const getDeviceLog: motionmaster.MotionMasterMessage.Request.IGetDeviceLog = { deviceAddress };
 
   motionMasterClient.sendRequest({ getDeviceLog }, messageId);
+}
+
+async function getCoggingTorqueDataContent(cmd: Command) {
+  connectToMotionMaster(cmd.parent);
+  const deviceAddress = await getCommandDeviceAddressAsync(cmd.parent);
+
+  const messageId = v4();
+
+  motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(
+    first(),
+  ).subscribe((message) => {
+    if (message && message.status && message.status.coggingTorqueData) {
+      const error = message.status.coggingTorqueData.error;
+      if (error) {
+        throw new Error(`${error.code}: ${error.message}`);
+      } else {
+        const table = message.status.coggingTorqueData.table;
+        if (table && table.data) {
+          console.log(table.data.join(', '));
+          process.exit(0);
+        } else {
+          throw new Error('Cogging torque table content data is empty');
+        }
+      }
+    } else {
+      throw new Error('The received message is not "coggingTorqueData"');
+    }
+  });
+
+  const getCoggingTorqueData: motionmaster.MotionMasterMessage.Request.IGetCoggingTorqueData = { deviceAddress };
+
+  motionMasterClient.sendRequest({ getCoggingTorqueData }, messageId);
 }
 
 async function startOffsetDetectionAction(cmd: Command) {

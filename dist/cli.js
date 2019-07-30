@@ -122,6 +122,9 @@ commander_1.default
     .command('getDeviceLogContent')
     .action(getDeviceLogContentAction);
 commander_1.default
+    .command('getCoggingTorqueDataContent')
+    .action(getCoggingTorqueDataContent);
+commander_1.default
     .command('startCoggingTorqueRecording')
     .option('-s, --skip-auto-tuning')
     .action(startCoggingTorqueRecordingAction);
@@ -597,6 +600,45 @@ function getDeviceLogContentAction(cmd) {
                     });
                     getDeviceLog = { deviceAddress: deviceAddress };
                     motionMasterClient.sendRequest({ getDeviceLog: getDeviceLog }, messageId);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function getCoggingTorqueDataContent(cmd) {
+    return __awaiter(this, void 0, void 0, function () {
+        var deviceAddress, messageId, getCoggingTorqueData;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    connectToMotionMaster(cmd.parent);
+                    return [4 /*yield*/, getCommandDeviceAddressAsync(cmd.parent)];
+                case 1:
+                    deviceAddress = _a.sent();
+                    messageId = uuid_1.v4();
+                    motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(operators_1.first()).subscribe(function (message) {
+                        if (message && message.status && message.status.coggingTorqueData) {
+                            var error = message.status.coggingTorqueData.error;
+                            if (error) {
+                                throw new Error(error.code + ": " + error.message);
+                            }
+                            else {
+                                var table = message.status.coggingTorqueData.table;
+                                if (table && table.data) {
+                                    console.log(table.data.join(', '));
+                                    process.exit(0);
+                                }
+                                else {
+                                    throw new Error('Cogging torque table content data is empty');
+                                }
+                            }
+                        }
+                        else {
+                            throw new Error('The received message is not "coggingTorqueData"');
+                        }
+                    });
+                    getCoggingTorqueData = { deviceAddress: deviceAddress };
+                    motionMasterClient.sendRequest({ getCoggingTorqueData: getCoggingTorqueData }, messageId);
                     return [2 /*return*/];
             }
         });
