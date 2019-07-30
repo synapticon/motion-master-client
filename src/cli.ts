@@ -36,6 +36,7 @@ const inspectOptions: util.InspectOptions = {
   depth: null,
   colors: true,
   maxArrayLength: null,
+  compact: false,
 };
 
 // map to cache device parameter info per device
@@ -67,6 +68,12 @@ program
 program
   .command('request <type> [args...]')
   .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
+  .on('--help', () => {
+    const types = Object.keys(motionmaster.MotionMasterMessage.Request).slice(8).map((type) => type.charAt(0).toLowerCase() + type.slice(1));
+    console.log('');
+    console.log('Request <type>s:');
+    console.log('  ' + types.join('\n  '));
+  })
   .action(requestAction);
 
 program
@@ -681,8 +688,9 @@ function printOnMessageReceived(messageId: string) {
   motionMasterClient.filterMotionMasterMessageById$(messageId).subscribe((msg) => {
     const timestamp = Date.now();
     const message = msg.toJSON();
+    const outputObj = { timestamp, message };
     console.log(
-      util.inspect({ timestamp, message }, inspectOptions),
+      util.inspect(outputObj, inspectOptions),
     );
   });
 }

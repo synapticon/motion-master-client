@@ -73,6 +73,7 @@ var inspectOptions = {
     depth: null,
     colors: true,
     maxArrayLength: null,
+    compact: false,
 };
 // map to cache device parameter info per device
 var deviceParameterInfoMap = new Map();
@@ -98,6 +99,12 @@ commander_1.default
 commander_1.default
     .command('request <type> [args...]')
     .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
+    .on('--help', function () {
+    var types = Object.keys(motion_master_proto_1.motionmaster.MotionMasterMessage.Request).slice(8).map(function (type) { return type.charAt(0).toLowerCase() + type.slice(1); });
+    console.log('');
+    console.log('Request <type>s:');
+    console.log('  ' + types.join('\n  '));
+})
     .action(requestAction);
 commander_1.default
     .command('upload [params...]')
@@ -779,7 +786,8 @@ function printOnMessageReceived(messageId) {
     motionMasterClient.filterMotionMasterMessageById$(messageId).subscribe(function (msg) {
         var timestamp = Date.now();
         var message = msg.toJSON();
-        console.log(util_1.default.inspect({ timestamp: timestamp, message: message }, inspectOptions));
+        var outputObj = { timestamp: timestamp, message: message };
+        console.log(util_1.default.inspect(outputObj, inspectOptions));
     });
 }
 function parseOptionValueAsInt(value) {
