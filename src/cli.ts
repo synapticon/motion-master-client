@@ -9,7 +9,12 @@ import util from 'util';
 import { v4 } from 'uuid';
 import zmq from 'zeromq';
 
-import { decodeMotionMasterMessage, MotionMasterClient } from './motion-master-client';
+import {
+  decodeMotionMasterMessage,
+  MotionMasterClient,
+  RequestType,
+  StatusType,
+} from './motion-master-client';
 
 // tslint:disable: no-var-requires
 const debug = require('debug')('motion-master-client');
@@ -18,12 +23,12 @@ const version = require('../package.json')['version'];
 
 process.on('uncaughtException', (err) => {
   console.error('Caught exception: ' + err);
-  process.exit();
+  process.exit(-2);
 });
 
 process.on('unhandledRejection', (reason) => {
   console.error('Unhandled rejection reason: ', reason);
-  process.exit();
+  process.exit(-3);
 });
 
 const inspectOptions: util.InspectOptions = {
@@ -32,9 +37,6 @@ const inspectOptions: util.InspectOptions = {
   colors: true,
   maxArrayLength: null,
 };
-
-type RequestKey = keyof motionmaster.MotionMasterMessage.IRequest;
-type StatusKey = keyof motionmaster.MotionMasterMessage.IStatus;
 
 // map to cache device parameter info per device
 const deviceParameterInfoMap: Map<number, motionmaster.MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined> = new Map();
@@ -100,7 +102,7 @@ program.parse(process.argv);
 // command action functions
 //
 
-async function requestAction(type: RequestKey, args: string[], cmd: Command) {
+async function requestAction(type: RequestType, args: string[], cmd: Command) {
   connectToMotionMaster(cmd.parent);
   const deviceAddress = await getCommandDeviceAddressAsync(cmd.parent);
 
@@ -653,7 +655,7 @@ function exitOnMessageReceived(messageId: string, due = 10000, exitOnSuccessCode
         return true;
       } else {
         if (message && message.status) {
-          const key = Object.keys(message.status)[0] as StatusKey;
+          const key = Object.keys(message.status)[0] as StatusType;
           const status = message.status[key] as { success: any, error: any };
           if (status && (status.success.code === exitOnSuccessCode || status.error)) {
             return true;

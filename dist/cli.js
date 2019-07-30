@@ -62,11 +62,11 @@ var version = require('../package.json')['version'];
 // tslint:enable-next-line: no-var-requires
 process.on('uncaughtException', function (err) {
     console.error('Caught exception: ' + err);
-    process.exit();
+    process.exit(-2);
 });
 process.on('unhandledRejection', function (reason) {
     console.error('Unhandled rejection reason: ', reason);
-    process.exit();
+    process.exit(-3);
 });
 var inspectOptions = {
     showHidden: false,

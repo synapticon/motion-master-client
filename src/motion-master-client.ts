@@ -20,7 +20,8 @@ export interface INotification {
   message: motionmaster.IMotionMasterMessage;
 }
 
-export type StatusType = ('systemPong' | 'systemVersion' | 'systemEvent' | 'deviceInfo' | 'deviceParameterInfo' | 'deviceParameterValues' | 'multiDeviceParameterValues' | 'deviceFileList' | 'deviceFile' | 'deviceEvent' | 'deviceFirmwareInstallation' | 'deviceLog' | 'deviceFaultReset' | 'coggingTorqueRecording' | 'coggingTorqueData' | 'offsetDetection' | 'plantIdentification' | 'autoTuning' | 'motionController' | 'signalGenerator' | 'monitoringParameterValues');
+export type RequestType = keyof motionmaster.MotionMasterMessage.IRequest;
+export type StatusType = keyof motionmaster.MotionMasterMessage.IStatus;
 
 export class MotionMasterClient {
 
