@@ -8,6 +8,8 @@ Library and CLI tool for interacting with [Motion Master](https://github.com/syn
 
 ## Command line usage
 
+See the examples in [test.sh](test.sh).
+
     Usage: cli [options] [command]
 
     Options:
