@@ -1145,7 +1145,7 @@ function exitOnMessageReceived(messageId, due, exitOnSuccessCode) {
             if (message && message.status) {
                 var key = Object.keys(message.status)[0];
                 var status_1 = message.status[key];
-                if (status_1 && (status_1.success.code === exitOnSuccessCode || status_1.error)) {
+                if (status_1 && ((status_1.success && status_1.success.code === exitOnSuccessCode) || status_1.error)) {
                     return true;
                 }
             }

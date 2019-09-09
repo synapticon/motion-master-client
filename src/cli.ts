@@ -1058,7 +1058,7 @@ function exitOnMessageReceived(messageId: string, due = 10000, exitOnSuccessCode
         if (message && message.status) {
           const key = Object.keys(message.status)[0] as StatusType;
           const status = message.status[key] as { success: any, error: any };
-          if (status && (status.success.code === exitOnSuccessCode || status.error)) {
+          if (status && ((status.success && status.success.code === exitOnSuccessCode) || status.error)) {
             return true;
           }
         }
