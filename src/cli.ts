@@ -14,6 +14,7 @@ import zmq from 'zeromq';
 import {
   ComputeAutoTuningGainsType,
   decodeMotionMasterMessage,
+  DeviceAddressType,
   MotionMasterClient,
   RequestType,
   SignalGeneratorType,
@@ -137,43 +138,38 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
 
   switch (type) {
     case 'pingSystem': {
-      const pingSystem: motionmaster.MotionMasterMessage.Request.IPingSystem = {};
+      motionMasterClient.requestPingSystem(messageId);
 
-      motionMasterClient.sendRequest({ pingSystem }, messageId);
       process.exit(0);
       break;
     }
     case 'getSystemVersion': {
       exitOnMessageReceived(messageId);
 
-      const getSystemVersion: motionmaster.MotionMasterMessage.Request.IGetSystemVersion = {};
+      motionMasterClient.requestGetSystemVersion(messageId);
 
-      motionMasterClient.sendRequest({ getSystemVersion }, messageId);
       break;
     }
     case 'getDeviceInfo': {
       exitOnMessageReceived(messageId);
 
-      const getDeviceInfo: motionmaster.MotionMasterMessage.Request.IGetDeviceInfo = {};
+      motionMasterClient.requestGetDeviceInfo(messageId);
 
-      motionMasterClient.sendRequest({ getDeviceInfo }, messageId);
       break;
     }
     case 'getDeviceParameterInfo': {
       exitOnMessageReceived(messageId);
 
-      const getDeviceParameterInfo: motionmaster.MotionMasterMessage.Request.IGetDeviceParameterInfo = { deviceAddress };
+      motionMasterClient.requestGetDeviceParameterInfo(deviceAddress, messageId);
 
-      motionMasterClient.sendRequest({ getDeviceParameterInfo }, messageId);
       break;
     }
     case 'getDeviceParameterValues': {
       exitOnMessageReceived(messageId);
 
       const parameters: motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] = args.map(paramToIndexSubindex);
-      const getDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IGetDeviceParameterValues = { deviceAddress, parameters };
+      motionMasterClient.requestGetDeviceParameterValues(deviceAddress, parameters, messageId);
 
-      motionMasterClient.sendRequest({ getDeviceParameterValues }, messageId);
       break;
     }
     case 'getMultiDeviceParameterValues': {
@@ -184,9 +180,8 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
 
       const deviceParameterInfo = await getDeviceParameterInfoAsync(deviceAddress);
       const parameterValues = args.map((paramValue) => paramToIndexSubIndexValue(paramValue, deviceParameterInfo));
-      const setDeviceParameterValues: motionmaster.MotionMasterMessage.Request.ISetDeviceParameterValues = { deviceAddress, parameterValues };
+      motionMasterClient.requestSetDeviceParameterValues(deviceAddress, parameterValues, messageId);
 
-      motionMasterClient.sendRequest({ setDeviceParameterValues }, messageId);
       break;
     }
     case 'setMultiDeviceParameterValues': {
@@ -195,53 +190,47 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
     case 'getDeviceFileList': {
       exitOnMessageReceived(messageId);
 
-      const getDeviceFileList: motionmaster.MotionMasterMessage.Request.IGetDeviceFileList = { deviceAddress };
+      motionMasterClient.requestGetDeviceFileList(deviceAddress, messageId);
 
-      motionMasterClient.sendRequest({ getDeviceFileList }, messageId);
       break;
     }
     case 'getDeviceFile': {
       exitOnMessageReceived(messageId);
 
       const name = args[0];
-      const getDeviceFile: motionmaster.MotionMasterMessage.Request.IGetDeviceFile = { deviceAddress, name };
+      motionMasterClient.requestGetDeviceFile(deviceAddress, name, messageId);
 
-      motionMasterClient.sendRequest({ getDeviceFile }, messageId);
       break;
     }
     case 'setDeviceFile': {
       exitOnMessageReceived(messageId);
 
       const filepath = args[0];
-      const content = fs.readFileSync(filepath);
       const name = path.basename(filepath);
+      const content = fs.readFileSync(filepath);
       const overwrite = true;
-      const setDeviceFile: motionmaster.MotionMasterMessage.Request.ISetDeviceFile = { deviceAddress, name, content, overwrite };
+      motionMasterClient.requestSetDeviceFile(deviceAddress, name, content, overwrite, messageId);
 
-      motionMasterClient.sendRequest({ setDeviceFile }, messageId);
       break;
     }
     case 'deleteDeviceFile': {
       exitOnMessageReceived(messageId);
 
       const name = args[0];
-      const deleteDeviceFile: motionmaster.MotionMasterMessage.Request.IDeleteDeviceFile = { deviceAddress, name };
+      motionMasterClient.requestDeleteDeviceFile(deviceAddress, name, messageId);
 
-      motionMasterClient.sendRequest({ deleteDeviceFile }, messageId);
       break;
     }
     case 'resetDeviceFault': {
       exitOnMessageReceived(messageId);
 
-      const resetDeviceFault: motionmaster.MotionMasterMessage.Request.IResetDeviceFault = { deviceAddress };
+      motionMasterClient.requestResetDeviceFault(deviceAddress, messageId);
 
-      motionMasterClient.sendRequest({ resetDeviceFault }, messageId);
       break;
     }
     case 'stopDevice': {
-      const stopDevice: motionmaster.MotionMasterMessage.Request.IStopDevice = { deviceAddress };
+      motionMasterClient.requestStopDevice(deviceAddress, messageId);
 
-      motionMasterClient.sendRequest({ stopDevice }, messageId);
       process.exit(0);
       break;
     }
@@ -250,9 +239,9 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
 
       const filepath = args[0];
       const firmwarePackageContent = fs.readFileSync(filepath);
-      const startDeviceFirmwareInstallation: motionmaster.MotionMasterMessage.Request.IStartDeviceFirmwareInstallation = { deviceAddress, firmwarePackageContent };
 
-      motionMasterClient.sendRequest({ startDeviceFirmwareInstallation }, messageId);
+      motionMasterClient.requestStartDeviceFirmwareInstallation(deviceAddress, firmwarePackageContent, messageId);
+
       break;
     }
     case 'getDeviceLog': {
@@ -267,25 +256,23 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       exitOnMessageReceived(messageId, 300000, motionmaster.MotionMasterMessage.Status.CoggingTorqueRecording.Success.Code.DONE);
 
       const skipAutoTuning = parseInt(args[0], 10) !== 0;
-      const startCoggingTorqueRecording: motionmaster.MotionMasterMessage.Request.IStartCoggingTorqueRecording = { deviceAddress, skipAutoTuning };
 
-      motionMasterClient.sendRequest({ startCoggingTorqueRecording }, messageId);
+      motionMasterClient.requestStartCoggingTorqueRecording(deviceAddress, skipAutoTuning, messageId);
+
       break;
     }
     case 'getCoggingTorqueData': {
       exitOnMessageReceived(messageId);
 
-      const getCoggingTorqueData: motionmaster.MotionMasterMessage.Request.IGetCoggingTorqueData = { deviceAddress };
+      motionMasterClient.requestGetCoggingTorqueData(deviceAddress, messageId);
 
-      motionMasterClient.sendRequest({ getCoggingTorqueData }, messageId);
       break;
     }
     case 'startOffsetDetection': {
       exitOnMessageReceived(messageId, 180000, motionmaster.MotionMasterMessage.Status.OffsetDetection.Success.Code.DONE);
 
-      const startOffsetDetection: motionmaster.MotionMasterMessage.Request.IStartOffsetDetection = { deviceAddress };
+      motionMasterClient.requestStartOffsetDetection(deviceAddress, messageId);
 
-      motionMasterClient.sendRequest({ startOffsetDetection }, messageId);
       break;
     }
     case 'startPlantIdentification': {
@@ -296,7 +283,6 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       const startFrequency = parseInt(args[2], 10);
       const endFrequency = parseInt(args[3], 10);
       const cutoffFrequency = parseInt(args[4], 10);
-
       const startPlantIdentification: motionmaster.MotionMasterMessage.Request.IStartPlantIdentification = {
         deviceAddress,
         durationSeconds,
@@ -307,6 +293,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       };
 
       motionMasterClient.sendRequest({ startPlantIdentification }, messageId);
+
       break;
     }
     case 'computeAutoTuningGains': {
@@ -380,19 +367,12 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       const controllerType = parseInt(args[0], 10);
       const filter = parseInt(args[1], 10) !== 0;
 
-      const enableMotionController: motionmaster.MotionMasterMessage.Request.IEnableMotionController = {
-        deviceAddress,
-        controllerType,
-        filter,
-      };
+      motionMasterClient.requestEnableMotionController(deviceAddress, controllerType, filter, messageId);
 
-      motionMasterClient.sendRequest({ enableMotionController }, messageId);
       break;
     }
     case 'disableMotionController': {
-      const disableMotionController: motionmaster.MotionMasterMessage.Request.IDisableMotionController = { deviceAddress };
-
-      motionMasterClient.sendRequest({ disableMotionController }, messageId);
+      motionMasterClient.requestDisableMotionController(deviceAddress, messageId);
       process.exit(0);
       break;
     }
@@ -654,20 +634,17 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
     case 'startSignalGenerator': {
       exitOnMessageReceived(messageId, 2147483647, motionmaster.MotionMasterMessage.Status.SignalGenerator.Success.Code.DONE);
 
-      const startSignalGenerator: motionmaster.MotionMasterMessage.Request.IStartSignalGenerator = { deviceAddress };
+      motionMasterClient.requestStartSignalGenerator(deviceAddress, messageId);
 
-      motionMasterClient.sendRequest({ startSignalGenerator }, messageId);
       break;
     }
     case 'stopSignalGenerator': {
-      const stopSignalGenerator: motionmaster.MotionMasterMessage.Request.IStopSignalGenerator = { deviceAddress };
-
-      motionMasterClient.sendRequest({ stopSignalGenerator }, messageId);
+      motionMasterClient.requestStopSignalGenerator(deviceAddress, messageId);
       process.exit(0);
       break;
     }
     case 'startMonitoringDeviceParameterValues': {
-      const parameters = args.slice(1).map(paramToIndexSubindex);
+      const parameters = args.slice(1).map(paramToIndexSubindex) as motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[];
       const getDeviceParameterValues = { deviceAddress, parameters };
       const interval = cmd.interval;
       const topic = args[0];
@@ -677,9 +654,9 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
     }
     case 'stopMonitoringDeviceParameterValues': {
       const startMonitoringRequestId = args[0];
-      const stopMonitoringDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IStopMonitoringDeviceParameterValues = { startMonitoringRequestId };
 
-      motionMasterClient.sendRequest({ stopMonitoringDeviceParameterValues }, messageId);
+      motionMasterClient.requestStopMonitoringDeviceParameterValues(startMonitoringRequestId, messageId);
+
       process.exit(0);
       break;
     }
@@ -959,7 +936,7 @@ function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParame
   motionMasterClient.sendRequest({ startMonitoringDeviceParameterValues }, messageId);
 }
 
-async function getDeviceParameterInfoAsync(deviceAddress: number | null | undefined) {
+async function getDeviceParameterInfoAsync(deviceAddress: DeviceAddressType) {
   if (!deviceAddress) {
     return null;
   }
@@ -1034,7 +1011,7 @@ function paramToIndexSubIndexValue(paramValue: string, deviceParameterInfo: moti
   return parameterValue;
 }
 
-async function getCommandDeviceAddressAsync(cmd: Command): Promise<number | null | undefined> {
+async function getCommandDeviceAddressAsync(cmd: Command): Promise<DeviceAddressType> {
   if (cmd.deviceAddress) {
     return cmd.deviceAddress;
   } else if (Number.isInteger(cmd.devicePosition)) {
@@ -1049,7 +1026,7 @@ async function getCommandDeviceAddressAsync(cmd: Command): Promise<number | null
   }
 }
 
-function exitOnMessageReceived(messageId: string, due = 10000, exitOnSuccessCode?: number): void {
+function exitOnMessageReceived(messageId: string, due = 10000, exitOnSuccessCode?: number) {
   motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(
     first((message) => {
       if (exitOnSuccessCode === undefined) {
@@ -1099,6 +1076,6 @@ function printOnMessageReceived(messageId: string, outputFormat: OutputFormat = 
   });
 }
 
-function parseOptionValueAsInt(value: string): number {
+function parseOptionValueAsInt(value: string) {
   return parseInt(value, 10);
 }

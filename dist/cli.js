@@ -145,7 +145,7 @@ commander_1.default.parse(process.argv);
 //
 function requestAction(type, args, cmd) {
     return __awaiter(this, void 0, void 0, function () {
-        var deviceAddress, messageId, _a, pingSystem, getSystemVersion, getDeviceInfo, getDeviceParameterInfo, parameters, getDeviceParameterValues, deviceParameterInfo_1, parameterValues, setDeviceParameterValues, getDeviceFileList, name_1, getDeviceFile, filepath, content, name_2, overwrite, setDeviceFile, name_3, deleteDeviceFile, resetDeviceFault, stopDevice, filepath, firmwarePackageContent, startDeviceFirmwareInstallation, getDeviceLog, skipAutoTuning, startCoggingTorqueRecording, getCoggingTorqueData, startOffsetDetection, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, startPlantIdentification, computeAutoTuningGainsType, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, enableMotionController, disableMotionController, signalGeneratorType, setSignalGeneratorParameters, target, sustainTime, target, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, target, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, torqueSlope, sustainTime, target, torqueSlope, sustainTime, repeat, target, torqueSlope, sustainTime, repeat, amplitude, frequency, repeat, startSignalGenerator, stopSignalGenerator, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId, stopMonitoringDeviceParameterValues;
+        var deviceAddress, messageId, _a, parameters, deviceParameterInfo_1, parameterValues, name_1, filepath, name_2, content, overwrite, name_3, filepath, firmwarePackageContent, getDeviceLog, skipAutoTuning, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, startPlantIdentification, computeAutoTuningGainsType, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, signalGeneratorType, setSignalGeneratorParameters, target, sustainTime, target, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, target, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, torqueSlope, sustainTime, target, torqueSlope, sustainTime, repeat, target, torqueSlope, sustainTime, repeat, amplitude, frequency, repeat, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -190,8 +190,7 @@ function requestAction(type, args, cmd) {
                     return [3 /*break*/, 32];
                 case 2:
                     {
-                        pingSystem = {};
-                        motionMasterClient.sendRequest({ pingSystem: pingSystem }, messageId);
+                        motionMasterClient.requestPingSystem(messageId);
                         process.exit(0);
                         return [3 /*break*/, 33];
                     }
@@ -199,24 +198,21 @@ function requestAction(type, args, cmd) {
                 case 3:
                     {
                         exitOnMessageReceived(messageId);
-                        getSystemVersion = {};
-                        motionMasterClient.sendRequest({ getSystemVersion: getSystemVersion }, messageId);
+                        motionMasterClient.requestGetSystemVersion(messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 4;
                 case 4:
                     {
                         exitOnMessageReceived(messageId);
-                        getDeviceInfo = {};
-                        motionMasterClient.sendRequest({ getDeviceInfo: getDeviceInfo }, messageId);
+                        motionMasterClient.requestGetDeviceInfo(messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 5;
                 case 5:
                     {
                         exitOnMessageReceived(messageId);
-                        getDeviceParameterInfo = { deviceAddress: deviceAddress };
-                        motionMasterClient.sendRequest({ getDeviceParameterInfo: getDeviceParameterInfo }, messageId);
+                        motionMasterClient.requestGetDeviceParameterInfo(deviceAddress, messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 6;
@@ -224,8 +220,7 @@ function requestAction(type, args, cmd) {
                     {
                         exitOnMessageReceived(messageId);
                         parameters = args.map(paramToIndexSubindex);
-                        getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
-                        motionMasterClient.sendRequest({ getDeviceParameterValues: getDeviceParameterValues }, messageId);
+                        motionMasterClient.requestGetDeviceParameterValues(deviceAddress, parameters, messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 7;
@@ -240,8 +235,7 @@ function requestAction(type, args, cmd) {
                 case 9:
                     deviceParameterInfo_1 = _b.sent();
                     parameterValues = args.map(function (paramValue) { return paramToIndexSubIndexValue(paramValue, deviceParameterInfo_1); });
-                    setDeviceParameterValues = { deviceAddress: deviceAddress, parameterValues: parameterValues };
-                    motionMasterClient.sendRequest({ setDeviceParameterValues: setDeviceParameterValues }, messageId);
+                    motionMasterClient.requestSetDeviceParameterValues(deviceAddress, parameterValues, messageId);
                     return [3 /*break*/, 33];
                 case 10:
                     {
@@ -251,8 +245,7 @@ function requestAction(type, args, cmd) {
                 case 11:
                     {
                         exitOnMessageReceived(messageId);
-                        getDeviceFileList = { deviceAddress: deviceAddress };
-                        motionMasterClient.sendRequest({ getDeviceFileList: getDeviceFileList }, messageId);
+                        motionMasterClient.requestGetDeviceFileList(deviceAddress, messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 12;
@@ -260,8 +253,7 @@ function requestAction(type, args, cmd) {
                     {
                         exitOnMessageReceived(messageId);
                         name_1 = args[0];
-                        getDeviceFile = { deviceAddress: deviceAddress, name: name_1 };
-                        motionMasterClient.sendRequest({ getDeviceFile: getDeviceFile }, messageId);
+                        motionMasterClient.requestGetDeviceFile(deviceAddress, name_1, messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 13;
@@ -269,11 +261,10 @@ function requestAction(type, args, cmd) {
                     {
                         exitOnMessageReceived(messageId);
                         filepath = args[0];
-                        content = fs_1.default.readFileSync(filepath);
                         name_2 = path_1.default.basename(filepath);
+                        content = fs_1.default.readFileSync(filepath);
                         overwrite = true;
-                        setDeviceFile = { deviceAddress: deviceAddress, name: name_2, content: content, overwrite: overwrite };
-                        motionMasterClient.sendRequest({ setDeviceFile: setDeviceFile }, messageId);
+                        motionMasterClient.requestSetDeviceFile(deviceAddress, name_2, content, overwrite, messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 14;
@@ -281,23 +272,20 @@ function requestAction(type, args, cmd) {
                     {
                         exitOnMessageReceived(messageId);
                         name_3 = args[0];
-                        deleteDeviceFile = { deviceAddress: deviceAddress, name: name_3 };
-                        motionMasterClient.sendRequest({ deleteDeviceFile: deleteDeviceFile }, messageId);
+                        motionMasterClient.requestDeleteDeviceFile(deviceAddress, name_3, messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 15;
                 case 15:
                     {
                         exitOnMessageReceived(messageId);
-                        resetDeviceFault = { deviceAddress: deviceAddress };
-                        motionMasterClient.sendRequest({ resetDeviceFault: resetDeviceFault }, messageId);
+                        motionMasterClient.requestResetDeviceFault(deviceAddress, messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 16;
                 case 16:
                     {
-                        stopDevice = { deviceAddress: deviceAddress };
-                        motionMasterClient.sendRequest({ stopDevice: stopDevice }, messageId);
+                        motionMasterClient.requestStopDevice(deviceAddress, messageId);
                         process.exit(0);
                         return [3 /*break*/, 33];
                     }
@@ -307,8 +295,7 @@ function requestAction(type, args, cmd) {
                         exitOnMessageReceived(messageId, 120000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.DeviceFirmwareInstallation.Success.Code.DONE);
                         filepath = args[0];
                         firmwarePackageContent = fs_1.default.readFileSync(filepath);
-                        startDeviceFirmwareInstallation = { deviceAddress: deviceAddress, firmwarePackageContent: firmwarePackageContent };
-                        motionMasterClient.sendRequest({ startDeviceFirmwareInstallation: startDeviceFirmwareInstallation }, messageId);
+                        motionMasterClient.requestStartDeviceFirmwareInstallation(deviceAddress, firmwarePackageContent, messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 18;
@@ -324,24 +311,21 @@ function requestAction(type, args, cmd) {
                     {
                         exitOnMessageReceived(messageId, 300000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.CoggingTorqueRecording.Success.Code.DONE);
                         skipAutoTuning = parseInt(args[0], 10) !== 0;
-                        startCoggingTorqueRecording = { deviceAddress: deviceAddress, skipAutoTuning: skipAutoTuning };
-                        motionMasterClient.sendRequest({ startCoggingTorqueRecording: startCoggingTorqueRecording }, messageId);
+                        motionMasterClient.requestStartCoggingTorqueRecording(deviceAddress, skipAutoTuning, messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 20;
                 case 20:
                     {
                         exitOnMessageReceived(messageId);
-                        getCoggingTorqueData = { deviceAddress: deviceAddress };
-                        motionMasterClient.sendRequest({ getCoggingTorqueData: getCoggingTorqueData }, messageId);
+                        motionMasterClient.requestGetCoggingTorqueData(deviceAddress, messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 21;
                 case 21:
                     {
                         exitOnMessageReceived(messageId, 180000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.OffsetDetection.Success.Code.DONE);
-                        startOffsetDetection = { deviceAddress: deviceAddress };
-                        motionMasterClient.sendRequest({ startOffsetDetection: startOffsetDetection }, messageId);
+                        motionMasterClient.requestStartOffsetDetection(deviceAddress, messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 22;
@@ -431,19 +415,13 @@ function requestAction(type, args, cmd) {
                         exitOnMessageReceived(messageId);
                         controllerType = parseInt(args[0], 10);
                         filter = parseInt(args[1], 10) !== 0;
-                        enableMotionController = {
-                            deviceAddress: deviceAddress,
-                            controllerType: controllerType,
-                            filter: filter,
-                        };
-                        motionMasterClient.sendRequest({ enableMotionController: enableMotionController }, messageId);
+                        motionMasterClient.requestEnableMotionController(deviceAddress, controllerType, filter, messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 26;
                 case 26:
                     {
-                        disableMotionController = { deviceAddress: deviceAddress };
-                        motionMasterClient.sendRequest({ disableMotionController: disableMotionController }, messageId);
+                        motionMasterClient.requestDisableMotionController(deviceAddress, messageId);
                         process.exit(0);
                         return [3 /*break*/, 33];
                     }
@@ -687,15 +665,13 @@ function requestAction(type, args, cmd) {
                 case 28:
                     {
                         exitOnMessageReceived(messageId, 2147483647, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.SignalGenerator.Success.Code.DONE);
-                        startSignalGenerator = { deviceAddress: deviceAddress };
-                        motionMasterClient.sendRequest({ startSignalGenerator: startSignalGenerator }, messageId);
+                        motionMasterClient.requestStartSignalGenerator(deviceAddress, messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 29;
                 case 29:
                     {
-                        stopSignalGenerator = { deviceAddress: deviceAddress };
-                        motionMasterClient.sendRequest({ stopSignalGenerator: stopSignalGenerator }, messageId);
+                        motionMasterClient.requestStopSignalGenerator(deviceAddress, messageId);
                         process.exit(0);
                         return [3 /*break*/, 33];
                     }
@@ -713,8 +689,7 @@ function requestAction(type, args, cmd) {
                 case 31:
                     {
                         startMonitoringRequestId = args[0];
-                        stopMonitoringDeviceParameterValues = { startMonitoringRequestId: startMonitoringRequestId };
-                        motionMasterClient.sendRequest({ stopMonitoringDeviceParameterValues: stopMonitoringDeviceParameterValues }, messageId);
+                        motionMasterClient.requestStopMonitoringDeviceParameterValues(startMonitoringRequestId, messageId);
                         process.exit(0);
                         return [3 /*break*/, 33];
                     }
