@@ -701,7 +701,7 @@ async function getDeviceFileContentAction(name: string, cmd: Command) {
 
   const messageId = v4();
 
-  motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(
+  motionMasterClient.selectMessage(messageId).pipe(
     first(),
   ).subscribe((message) => {
     if (message && message.status && message.status.deviceFile) {
@@ -734,7 +734,7 @@ async function getDeviceLogContentAction(cmd: Command) {
 
   const messageId = v4();
 
-  motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(
+  motionMasterClient.selectMessage(messageId).pipe(
     first(),
   ).subscribe((message) => {
     if (message && message.status && message.status.deviceLog) {
@@ -767,7 +767,7 @@ async function getCoggingTorqueDataContent(cmd: Command) {
 
   const messageId = v4();
 
-  motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(
+  motionMasterClient.selectMessage(messageId).pipe(
     first(),
   ).subscribe((message) => {
     if (message && message.status && message.status.coggingTorqueData) {
@@ -906,7 +906,7 @@ function connectToMotionMaster(cmd: Command) {
   notificationSocket.subscribe('');
 
   // exit process when a heartbeat message is not received for more than the time specified
-  motionMasterClient.filterNotificationByTopic$('heartbeat').pipe(
+  motionMasterClient.selectNotification('heartbeat', false).pipe(
     timeout(config.motionMasterHeartbeatTimeoutDue),
   ).subscribe({
     error: (err) => {
@@ -924,7 +924,7 @@ function connectToMotionMaster(cmd: Command) {
 function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IStartMonitoringDeviceParameterValues) {
   const messageId = v4();
 
-  motionMasterClient.filterNotificationByTopic$(startMonitoringDeviceParameterValues.topic as string).subscribe((notif) => {
+  motionMasterClient.selectNotification(startMonitoringDeviceParameterValues.topic, true).subscribe((notif) => {
     const timestamp = Date.now();
     const topic = startMonitoringDeviceParameterValues.topic;
     const message = notif.message;
@@ -949,7 +949,7 @@ async function getDeviceParameterInfoAsync(deviceAddress: DeviceAddressType) {
   const messageId = v4();
   motionMasterClient.sendRequest({ getDeviceParameterInfo }, messageId);
 
-  const deviceParameterInfo = await motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(
+  const deviceParameterInfo = await motionMasterClient.selectMessage(messageId).pipe(
     first(),
     map((message) => message && message.status ? message.status.deviceParameterInfo : null),
   ).toPromise();
@@ -1015,7 +1015,7 @@ async function getCommandDeviceAddressAsync(cmd: Command): Promise<DeviceAddress
   if (cmd.deviceAddress) {
     return cmd.deviceAddress;
   } else if (Number.isInteger(cmd.devicePosition)) {
-    const device = await motionMasterClient.getDeviceAtPosition$(cmd.devicePosition).toPromise();
+    const device = await motionMasterClient.selectDeviceAtPosition(cmd.devicePosition).toPromise();
     if (device) {
       return device.deviceAddress;
     } else {
@@ -1027,7 +1027,7 @@ async function getCommandDeviceAddressAsync(cmd: Command): Promise<DeviceAddress
 }
 
 function exitOnMessageReceived(messageId: string, due = 10000, exitOnSuccessCode?: number) {
-  motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(
+  motionMasterClient.selectMessage(messageId).pipe(
     first((message) => {
       if (exitOnSuccessCode === undefined) {
         return true;
@@ -1056,7 +1056,7 @@ function exitOnMessageReceived(messageId: string, due = 10000, exitOnSuccessCode
 }
 
 function printOnMessageReceived(messageId: string, outputFormat: OutputFormat = 'inspect') {
-  motionMasterClient.filterMotionMasterMessageById$(messageId).subscribe((msg) => {
+  motionMasterClient.selectMessage(messageId).subscribe((msg) => {
     const timestamp = Date.now();
     const message = msg.toJSON();
     const outputObj = { timestamp, message };

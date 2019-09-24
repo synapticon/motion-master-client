@@ -760,7 +760,7 @@ function getDeviceFileContentAction(name, cmd) {
                 case 1:
                     deviceAddress = _a.sent();
                     messageId = uuid_1.v4();
-                    motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(operators_1.first()).subscribe(function (message) {
+                    motionMasterClient.selectMessage(messageId).pipe(operators_1.first()).subscribe(function (message) {
                         if (message && message.status && message.status.deviceFile) {
                             var error = message.status.deviceFile.error;
                             if (error) {
@@ -800,7 +800,7 @@ function getDeviceLogContentAction(cmd) {
                 case 1:
                     deviceAddress = _a.sent();
                     messageId = uuid_1.v4();
-                    motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(operators_1.first()).subscribe(function (message) {
+                    motionMasterClient.selectMessage(messageId).pipe(operators_1.first()).subscribe(function (message) {
                         if (message && message.status && message.status.deviceLog) {
                             var error = message.status.deviceLog.error;
                             if (error) {
@@ -840,7 +840,7 @@ function getCoggingTorqueDataContent(cmd) {
                 case 1:
                     deviceAddress = _a.sent();
                     messageId = uuid_1.v4();
-                    motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(operators_1.first()).subscribe(function (message) {
+                    motionMasterClient.selectMessage(messageId).pipe(operators_1.first()).subscribe(function (message) {
                         if (message && message.status && message.status.coggingTorqueData) {
                             var error = message.status.coggingTorqueData.error;
                             if (error) {
@@ -992,7 +992,7 @@ function connectToMotionMaster(cmd) {
     // subscribe to all topics
     notificationSocket.subscribe('');
     // exit process when a heartbeat message is not received for more than the time specified
-    motionMasterClient.filterNotificationByTopic$('heartbeat').pipe(operators_1.timeout(config.motionMasterHeartbeatTimeoutDue)).subscribe({
+    motionMasterClient.selectNotification('heartbeat', false).pipe(operators_1.timeout(config.motionMasterHeartbeatTimeoutDue)).subscribe({
         error: function (err) {
             console.error(err.name + ": Heartbeat message not received for more than " + config.motionMasterHeartbeatTimeoutDue + " ms. Check if Motion Master process is running.");
             process.exit(-1);
@@ -1005,7 +1005,7 @@ function connectToMotionMaster(cmd) {
 }
 function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParameterValues) {
     var messageId = uuid_1.v4();
-    motionMasterClient.filterNotificationByTopic$(startMonitoringDeviceParameterValues.topic).subscribe(function (notif) {
+    motionMasterClient.selectNotification(startMonitoringDeviceParameterValues.topic, true).subscribe(function (notif) {
         var timestamp = Date.now();
         var topic = startMonitoringDeviceParameterValues.topic;
         var message = notif.message;
@@ -1028,7 +1028,7 @@ function getDeviceParameterInfoAsync(deviceAddress) {
                     getDeviceParameterInfo = { deviceAddress: deviceAddress };
                     messageId = uuid_1.v4();
                     motionMasterClient.sendRequest({ getDeviceParameterInfo: getDeviceParameterInfo }, messageId);
-                    return [4 /*yield*/, motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(operators_1.first(), operators_1.map(function (message) { return message && message.status ? message.status.deviceParameterInfo : null; })).toPromise()];
+                    return [4 /*yield*/, motionMasterClient.selectMessage(messageId).pipe(operators_1.first(), operators_1.map(function (message) { return message && message.status ? message.status.deviceParameterInfo : null; })).toPromise()];
                 case 1:
                     deviceParameterInfo = _a.sent();
                     deviceParameterInfoMap.set(deviceAddress, deviceParameterInfo); // cache
@@ -1094,7 +1094,7 @@ function getCommandDeviceAddressAsync(cmd) {
                     return [2 /*return*/, cmd.deviceAddress];
                 case 1:
                     if (!Number.isInteger(cmd.devicePosition)) return [3 /*break*/, 3];
-                    return [4 /*yield*/, motionMasterClient.getDeviceAtPosition$(cmd.devicePosition).toPromise()];
+                    return [4 /*yield*/, motionMasterClient.selectDeviceAtPosition(cmd.devicePosition).toPromise()];
                 case 2:
                     device = _a.sent();
                     if (device) {
@@ -1112,7 +1112,7 @@ function getCommandDeviceAddressAsync(cmd) {
 }
 function exitOnMessageReceived(messageId, due, exitOnSuccessCode) {
     if (due === void 0) { due = 10000; }
-    motionMasterClient.filterMotionMasterMessageById$(messageId).pipe(operators_1.first(function (message) {
+    motionMasterClient.selectMessage(messageId).pipe(operators_1.first(function (message) {
         if (exitOnSuccessCode === undefined) {
             return true;
         }
@@ -1139,7 +1139,7 @@ function exitOnMessageReceived(messageId, due, exitOnSuccessCode) {
 }
 function printOnMessageReceived(messageId, outputFormat) {
     if (outputFormat === void 0) { outputFormat = 'inspect'; }
-    motionMasterClient.filterMotionMasterMessageById$(messageId).subscribe(function (msg) {
+    motionMasterClient.selectMessage(messageId).subscribe(function (msg) {
         var timestamp = Date.now();
         var message = msg.toJSON();
         var outputObj = { timestamp: timestamp, message: message };
