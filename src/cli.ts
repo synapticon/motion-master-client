@@ -283,16 +283,8 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       const startFrequency = parseInt(args[2], 10);
       const endFrequency = parseInt(args[3], 10);
       const cutoffFrequency = parseInt(args[4], 10);
-      const startPlantIdentification: motionmaster.MotionMasterMessage.Request.IStartPlantIdentification = {
-        deviceAddress,
-        durationSeconds,
-        torqueAmplitude,
-        startFrequency,
-        endFrequency,
-        cutoffFrequency,
-      };
 
-      motionMasterClient.sendRequest({ startPlantIdentification }, messageId);
+      motionMasterClient.requestStartPlantIdentification(deviceAddress, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, messageId);
 
       break;
     }

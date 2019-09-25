@@ -145,7 +145,7 @@ commander_1.default.parse(process.argv);
 //
 function requestAction(type, args, cmd) {
     return __awaiter(this, void 0, void 0, function () {
-        var deviceAddress, messageId, _a, parameters, deviceParameterInfo_1, parameterValues, name_1, filepath, name_2, content, overwrite, name_3, filepath, firmwarePackageContent, getDeviceLog, skipAutoTuning, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, startPlantIdentification, computeAutoTuningGainsType, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, signalGeneratorType, setSignalGeneratorParameters, target, sustainTime, target, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, target, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, torqueSlope, sustainTime, target, torqueSlope, sustainTime, repeat, target, torqueSlope, sustainTime, repeat, amplitude, frequency, repeat, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId;
+        var deviceAddress, messageId, _a, parameters, deviceParameterInfo_1, parameterValues, name_1, filepath, name_2, content, overwrite, name_3, filepath, firmwarePackageContent, getDeviceLog, skipAutoTuning, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, computeAutoTuningGainsType, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, signalGeneratorType, setSignalGeneratorParameters, target, sustainTime, target, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, target, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, torqueSlope, sustainTime, target, torqueSlope, sustainTime, repeat, target, torqueSlope, sustainTime, repeat, amplitude, frequency, repeat, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -337,15 +337,7 @@ function requestAction(type, args, cmd) {
                         startFrequency = parseInt(args[2], 10);
                         endFrequency = parseInt(args[3], 10);
                         cutoffFrequency = parseInt(args[4], 10);
-                        startPlantIdentification = {
-                            deviceAddress: deviceAddress,
-                            durationSeconds: durationSeconds,
-                            torqueAmplitude: torqueAmplitude,
-                            startFrequency: startFrequency,
-                            endFrequency: endFrequency,
-                            cutoffFrequency: cutoffFrequency,
-                        };
-                        motionMasterClient.sendRequest({ startPlantIdentification: startPlantIdentification }, messageId);
+                        motionMasterClient.requestStartPlantIdentification(deviceAddress, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 23;
