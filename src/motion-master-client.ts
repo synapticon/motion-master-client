@@ -280,7 +280,7 @@ export class MotionMasterClient {
         if (status) {
           const deviceInfo = status.deviceInfo;
           if (deviceInfo && deviceInfo.devices) {
-            return deviceInfo.devices[position];
+            return deviceInfo.devices.find((device) => device.position === position);
           }
         }
         return null;

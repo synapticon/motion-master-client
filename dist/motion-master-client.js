@@ -195,7 +195,7 @@ var MotionMasterClient = /** @class */ (function () {
             if (status) {
                 var deviceInfo = status.deviceInfo;
                 if (deviceInfo && deviceInfo.devices) {
-                    return deviceInfo.devices[position];
+                    return deviceInfo.devices.find(function (device) { return device.position === position; });
                 }
             }
             return null;
