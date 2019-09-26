@@ -168,6 +168,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       exitOnMessageReceived(messageId);
 
       const parameters: motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] = args.map(paramToIndexSubindex);
+      validateParameters(parameters);
       motionMasterClient.requestGetDeviceParameterValues(deviceAddress, parameters, messageId);
 
       break;
@@ -637,6 +638,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
     }
     case 'startMonitoringDeviceParameterValues': {
       const parameters = args.slice(1).map(paramToIndexSubindex) as motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[];
+      validateParameters(parameters);
       const getDeviceParameterValues = { deviceAddress, parameters };
       const interval = cmd.interval;
       const topic = args[0];
@@ -667,6 +669,7 @@ async function uploadAction(params: string[], cmd: Command) {
   exitOnMessageReceived(messageId);
 
   const parameters: motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] = params.map(paramToIndexSubindex);
+  validateParameters(parameters);
   const getDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IGetDeviceParameterValues = { deviceAddress, parameters };
 
   motionMasterClient.sendRequest({ getDeviceParameterValues }, messageId);
@@ -1003,6 +1006,25 @@ function paramToIndexSubIndexValue(paramValue: string, deviceParameterInfo: moti
   return parameterValue;
 }
 
+function validateParameters(parameters: motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[]) {
+  let error = null;
+
+  if (parameters.some((p) => p.index === 0)) {
+    error = new Error('Parameter with index 0 is requested.');
+  }
+
+  if (parameters.some((p) => isNaN(p.index as number) || isNaN(p.subindex as number))) {
+    error = new Error('Parameter with unparsable index or subindex is requested.');
+  }
+
+  if (error) {
+    error.message += '\nExample of correct syntax: "0x2002 0x100A:0 0x2003:4".';
+    console.error(`${error.name}: ${error.message}`);
+    console.error(util.inspect(parameters, inspectOptions));
+    process.exit(-4);
+  }
+}
+
 async function getCommandDeviceAddressAsync(cmd: Command): Promise<DeviceAddressType> {
   if (cmd.deviceAddress) {
     return cmd.deviceAddress;
@@ -1054,16 +1076,19 @@ function printOnMessageReceived(messageId: string, outputFormat: OutputFormat = 
     const outputObj = { timestamp, message };
 
     switch (outputFormat) {
-      case 'json':
+      case 'json': {
         console.log(JSON.stringify(outputObj));
         break;
-      case 'yaml':
+      }
+      case 'yaml': {
         console.log(YAML.stringify(outputObj));
         break;
-      default:
+      }
+      default: {
         console.log(
           util.inspect(outputObj, inspectOptions),
         );
+      }
     }
   });
 }

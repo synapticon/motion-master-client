@@ -220,6 +220,7 @@ function requestAction(type, args, cmd) {
                     {
                         exitOnMessageReceived(messageId);
                         parameters = args.map(paramToIndexSubindex);
+                        validateParameters(parameters);
                         motionMasterClient.requestGetDeviceParameterValues(deviceAddress, parameters, messageId);
                         return [3 /*break*/, 33];
                     }
@@ -671,6 +672,7 @@ function requestAction(type, args, cmd) {
                 case 30:
                     {
                         parameters = args.slice(1).map(paramToIndexSubindex);
+                        validateParameters(parameters);
                         getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
                         interval = cmd.interval;
                         topic = args[0];
@@ -710,6 +712,7 @@ function uploadAction(params, cmd) {
                     printOnMessageReceived(messageId, cmd.parent.outputFormat);
                     exitOnMessageReceived(messageId);
                     parameters = params.map(paramToIndexSubindex);
+                    validateParameters(parameters);
                     getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
                     motionMasterClient.sendRequest({ getDeviceParameterValues: getDeviceParameterValues }, messageId);
                     return [2 /*return*/];
@@ -1076,6 +1079,21 @@ function paramToIndexSubIndexValue(paramValue, deviceParameterInfo) {
     }
     return parameterValue;
 }
+function validateParameters(parameters) {
+    var error = null;
+    if (parameters.some(function (p) { return p.index === 0; })) {
+        error = new Error('Parameter with index 0 is requested.');
+    }
+    if (parameters.some(function (p) { return isNaN(p.index) || isNaN(p.subindex); })) {
+        error = new Error('Parameter with unparsable index or subindex is requested.');
+    }
+    if (error) {
+        error.message += '\nExample of correct syntax: "0x2002 0x100A:0 0x2003:4".';
+        console.error(error.name + ": " + error.message);
+        console.error(util_1.default.inspect(parameters, inspectOptions));
+        process.exit(-4);
+    }
+}
 function getCommandDeviceAddressAsync(cmd) {
     return __awaiter(this, void 0, void 0, function () {
         var device;
@@ -1136,14 +1154,17 @@ function printOnMessageReceived(messageId, outputFormat) {
         var message = msg.toJSON();
         var outputObj = { timestamp: timestamp, message: message };
         switch (outputFormat) {
-            case 'json':
+            case 'json': {
                 console.log(JSON.stringify(outputObj));
                 break;
-            case 'yaml':
+            }
+            case 'yaml': {
                 console.log(yaml_1.default.stringify(outputObj));
                 break;
-            default:
+            }
+            default: {
                 console.log(util_1.default.inspect(outputObj, inspectOptions));
+            }
         }
     });
 }
