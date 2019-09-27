@@ -901,7 +901,7 @@ function connectToMotionMaster(cmd: Command) {
   notificationSocket.subscribe('');
 
   // exit process when a heartbeat message is not received for more than the time specified
-  motionMasterClient.selectNotification('heartbeat', false).pipe(
+  motionMasterClient.selectStatus('systemPong').pipe(
     timeout(config.motionMasterHeartbeatTimeoutDue),
   ).subscribe({
     error: (err) => {
