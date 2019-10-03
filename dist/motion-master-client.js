@@ -14,11 +14,11 @@ function encodeRequest(id, request) {
 }
 exports.encodeRequest = encodeRequest;
 /**
- * Decode MotionMasterMessage from buffer.
- * @param buffer
+ * Decode MotionMasterMessage from typed array.
+ * @param data
  */
-function decodeMotionMasterMessage(buffer) {
-    return motion_master_proto_1.motionmaster.MotionMasterMessage.decode(new Uint8Array(buffer));
+function decodeMotionMasterMessage(data) {
+    return motion_master_proto_1.motionmaster.MotionMasterMessage.decode(data);
 }
 exports.decodeMotionMasterMessage = decodeMotionMasterMessage;
 /**
@@ -233,11 +233,11 @@ var MotionMasterClient = /** @class */ (function () {
     /**
      * Select notifications by topic and optionally decode the content.
      * @param topic to filter incoming notifications by
-     * @param decode to MotionMasterMessage or leave the content as Buffer
-     * @returns an observable of topic and depending on the value of decode argument: MotionMasterMessage when true, Buffer otherwise
+     * @param decode to MotionMasterMessage or leave the content as Uint8Array
+     * @returns an observable of topic and depending on the value of decode argument: MotionMasterMessage when true, Uint8Array otherwise
      */
     MotionMasterClient.prototype.selectNotification = function (topic, decode) {
-        return this.notification.pipe(operators_1.filter(function (notif) { return notif[0].toString('utf8') === topic; }), operators_1.map(function (notif) { return ({ topic: topic, message: decode ? decodeMotionMasterMessage(notif[1]) : notif[1] }); }));
+        return this.notification.pipe(operators_1.filter(function (notif) { return notif[0].toString() === topic; }), operators_1.map(function (notif) { return ({ topic: topic, message: decode ? decodeMotionMasterMessage(notif[1]) : notif[1] }); }));
     };
     /**
      * Select status messages by type.

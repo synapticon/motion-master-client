@@ -764,7 +764,7 @@ function getDeviceFileContentAction(name, cmd) {
                             else {
                                 var content = message.status.deviceFile.content;
                                 if (content) {
-                                    var contentDecoded = new string_decoder_1.StringDecoder('utf-8').write(new Buffer(content));
+                                    var contentDecoded = new string_decoder_1.StringDecoder('utf-8').write(Buffer.from(content));
                                     console.log(contentDecoded);
                                     process.exit(0);
                                 }
@@ -804,7 +804,7 @@ function getDeviceLogContentAction(cmd) {
                             else {
                                 var content = message.status.deviceLog.content;
                                 if (content) {
-                                    var contentDecoded = new string_decoder_1.StringDecoder('utf-8').write(new Buffer(content));
+                                    var contentDecoded = new string_decoder_1.StringDecoder('utf-8').write(Buffer.from(content));
                                     console.log(contentDecoded);
                                     process.exit(0);
                                 }
@@ -968,18 +968,18 @@ function connectToMotionMaster(cmd) {
     serverSocket.identity = config.identity;
     serverSocket.connect(config.serverEndpoint);
     debug("ZeroMQ DEALER socket is connected to server endpoint: " + config.serverEndpoint);
-    // feed buffer data coming from Motion Master to MotionMasterClient
+    // feed data coming from Motion Master to MotionMasterClient
     serverSocket.on('message', function (data) {
         input.next(data);
     });
-    // send buffer data fed from MotionMasterClient to Motion Master
-    output.subscribe(function (buffer) {
-        var message = motion_master_client_1.decodeMotionMasterMessage(buffer);
+    // send data fed from MotionMasterClient to Motion Master
+    output.subscribe(function (data) {
+        var message = motion_master_client_1.decodeMotionMasterMessage(data);
         // log outgoing messages and skip ping messages
         if (!(message && message.request && message.request.pingSystem)) {
-            debug(util_1.default.inspect(motion_master_client_1.decodeMotionMasterMessage(buffer).toJSON(), inspectOptions));
+            debug(util_1.default.inspect(motion_master_client_1.decodeMotionMasterMessage(data).toJSON(), inspectOptions));
         }
-        serverSocket.send(buffer);
+        serverSocket.send(Buffer.from(data));
     });
     // connnect to notification endpoint
     var notificationSocket = zeromq_1.default.socket('sub').connect(config.notificationEndpoint);
@@ -993,7 +993,7 @@ function connectToMotionMaster(cmd) {
             process.exit(-1);
         },
     });
-    // feed notification buffer data coming from Motion Master to MotionMasterClient
+    // feed notification data coming from Motion Master to MotionMasterClient
     notificationSocket.on('message', function (topic, message) {
         notification.next([topic, message]);
     });

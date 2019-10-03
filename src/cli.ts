@@ -49,9 +49,9 @@ const inspectOptions: util.InspectOptions = {
 // map to cache device parameter info per device
 const deviceParameterInfoMap: Map<number, motionmaster.MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined> = new Map();
 
-const input = new rxjs.Subject<Buffer>();
-const output = new rxjs.Subject<Buffer>();
-const notification = new rxjs.Subject<[Buffer, Buffer]>();
+const input = new rxjs.Subject<Uint8Array>();
+const output = new rxjs.Subject<Uint8Array>();
+const notification = new rxjs.Subject<[Uint8Array, Uint8Array]>();
 const motionMasterClient = new MotionMasterClient(input, output, notification);
 
 const config = {
@@ -706,7 +706,7 @@ async function getDeviceFileContentAction(name: string, cmd: Command) {
       } else {
         const content = message.status.deviceFile.content;
         if (content) {
-          const contentDecoded = new StringDecoder('utf-8').write(new Buffer(content));
+          const contentDecoded = new StringDecoder('utf-8').write(Buffer.from(content));
           console.log(contentDecoded);
           process.exit(0);
         } else {
@@ -739,7 +739,7 @@ async function getDeviceLogContentAction(cmd: Command) {
       } else {
         const content = message.status.deviceLog.content;
         if (content) {
-          const contentDecoded = new StringDecoder('utf-8').write(new Buffer(content));
+          const contentDecoded = new StringDecoder('utf-8').write(Buffer.from(content));
           console.log(contentDecoded);
           process.exit(0);
         } else {
@@ -876,21 +876,21 @@ function connectToMotionMaster(cmd: Command) {
   serverSocket.connect(config.serverEndpoint);
   debug(`ZeroMQ DEALER socket is connected to server endpoint: ${config.serverEndpoint}`);
 
-  // feed buffer data coming from Motion Master to MotionMasterClient
+  // feed data coming from Motion Master to MotionMasterClient
   serverSocket.on('message', (data) => {
     input.next(data);
   });
 
-  // send buffer data fed from MotionMasterClient to Motion Master
-  output.subscribe((buffer) => {
-    const message = decodeMotionMasterMessage(buffer);
+  // send data fed from MotionMasterClient to Motion Master
+  output.subscribe((data) => {
+    const message = decodeMotionMasterMessage(data);
     // log outgoing messages and skip ping messages
     if (!(message && message.request && message.request.pingSystem)) {
       debug(
-        util.inspect(decodeMotionMasterMessage(buffer).toJSON(), inspectOptions),
+        util.inspect(decodeMotionMasterMessage(data).toJSON(), inspectOptions),
       );
     }
-    serverSocket.send(buffer);
+    serverSocket.send(Buffer.from(data));
   });
 
   // connnect to notification endpoint
@@ -910,8 +910,8 @@ function connectToMotionMaster(cmd: Command) {
     },
   });
 
-  // feed notification buffer data coming from Motion Master to MotionMasterClient
-  notificationSocket.on('message', (topic: Buffer, message: Buffer) => {
+  // feed notification data coming from Motion Master to MotionMasterClient
+  notificationSocket.on('message', (topic: Uint8Array, message: Uint8Array) => {
     notification.next([topic, message]);
   });
 }

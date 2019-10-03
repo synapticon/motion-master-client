@@ -10,15 +10,15 @@ import { v4 } from 'uuid';
  */
 export function encodeRequest(id: string, request: motionmaster.MotionMasterMessage.IRequest) {
   const message = motionmaster.MotionMasterMessage.create({ id, request });
-  return motionmaster.MotionMasterMessage.encode(message).finish() as Buffer;
+  return motionmaster.MotionMasterMessage.encode(message).finish();
 }
 
 /**
- * Decode MotionMasterMessage from buffer.
- * @param buffer
+ * Decode MotionMasterMessage from typed array.
+ * @param data
  */
-export function decodeMotionMasterMessage(buffer: Buffer) {
-  return motionmaster.MotionMasterMessage.decode(new Uint8Array(buffer));
+export function decodeMotionMasterMessage(data: Uint8Array) {
+  return motionmaster.MotionMasterMessage.decode(data);
 }
 
 export type RequestType = keyof motionmaster.MotionMasterMessage.IRequest;
@@ -80,9 +80,9 @@ export class MotionMasterClient {
   deviceEvent$: Observable<motionmaster.MotionMasterMessage.Status.DeviceEvent>;
 
   constructor(
-    public readonly input: Subject<Buffer>,
-    public readonly output: Subject<Buffer>,
-    public readonly notification: Subject<[Buffer, Buffer]>,
+    public readonly input: Subject<Uint8Array>,
+    public readonly output: Subject<Uint8Array>,
+    public readonly notification: Subject<[Uint8Array, Uint8Array]>,
   ) {
     this.motionMasterMessage$ = this.input.pipe(
       map(decodeMotionMasterMessage),
@@ -172,7 +172,7 @@ export class MotionMasterClient {
     this.sendRequest({ stopDevice }, messageId);
   }
 
-  requestStartDeviceFirmwareInstallation(deviceAddress: DeviceAddressType, firmwarePackageContent: Buffer, messageId?: string) {
+  requestStartDeviceFirmwareInstallation(deviceAddress: DeviceAddressType, firmwarePackageContent: Uint8Array, messageId?: string) {
     const startDeviceFirmwareInstallation: motionmaster.MotionMasterMessage.Request.IStartDeviceFirmwareInstallation = { deviceAddress, firmwarePackageContent };
     const id = this.sendRequest({ startDeviceFirmwareInstallation }, messageId);
     return this.selectMessageStatus(id, 'deviceFirmwareInstallation');
@@ -332,13 +332,13 @@ export class MotionMasterClient {
   /**
    * Select notifications by topic and optionally decode the content.
    * @param topic to filter incoming notifications by
-   * @param decode to MotionMasterMessage or leave the content as Buffer
-   * @returns an observable of topic and depending on the value of decode argument: MotionMasterMessage when true, Buffer otherwise
+   * @param decode to MotionMasterMessage or leave the content as Uint8Array
+   * @returns an observable of topic and depending on the value of decode argument: MotionMasterMessage when true, Uint8Array otherwise
    */
   selectNotification<T extends boolean>(topic: string | null | undefined, decode: T):
-    T extends true ? Observable<{ topic: string, message: motionmaster.MotionMasterMessage }> : Observable<{ topic: string, message: Buffer }> {
+    T extends true ? Observable<{ topic: string, message: motionmaster.MotionMasterMessage }> : Observable<{ topic: string, message: Uint8Array }> {
     return this.notification.pipe(
-      filter((notif) => notif[0].toString('utf8') === topic),
+      filter((notif) => notif[0].toString() === topic),
       map((notif) => ({ topic, message: decode ? decodeMotionMasterMessage(notif[1]) : notif[1] })),
     ) as any;
   }
