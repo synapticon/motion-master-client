@@ -38,18 +38,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var commander_1 = __importDefault(require("commander"));
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
-var rxjs = __importStar(require("rxjs"));
+var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
 var string_decoder_1 = require("string_decoder");
 var util_1 = __importDefault(require("util"));
@@ -78,9 +71,9 @@ var inspectOptions = {
 };
 // map to cache device parameter info per device
 var deviceParameterInfoMap = new Map();
-var input = new rxjs.Subject();
-var output = new rxjs.Subject();
-var notification = new rxjs.Subject();
+var input = new rxjs_1.Subject();
+var output = new rxjs_1.Subject();
+var notification = new rxjs_1.Subject();
 var motionMasterClient = new motion_master_client_1.MotionMasterClient(input, output, notification);
 var config = {
     pingSystemInterval: 200,
@@ -144,7 +137,7 @@ commander_1.default.parse(process.argv);
 //
 function requestAction(type, args, cmd) {
     return __awaiter(this, void 0, void 0, function () {
-        var deviceAddress, messageId, _a, parameters, deviceParameterInfo_1, parameterValues, name_1, filepath, name_2, content, overwrite, name_3, filepath, firmwarePackageContent, getDeviceLog, skipAutoTuning, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, computeAutoTuningGainsType, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, signalGeneratorType, setSignalGeneratorParameters, target, sustainTime, target, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, target, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, torqueSlope, sustainTime, target, torqueSlope, sustainTime, repeat, target, torqueSlope, sustainTime, repeat, amplitude, frequency, repeat, parameters, getDeviceParameterValues, interval, topic, startMonitoringRequestId;
+        var deviceAddress, messageId, _a, parameters, deviceParameterInfo_1, parameterValues, name_1, filepath, name_2, content, overwrite, name_3, filepath, firmwarePackageContent, getDeviceLog, skipAutoTuning, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, computeAutoTuningGainsType, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, signalGeneratorType, setSignalGeneratorParameters, target, sustainTime, target, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, target, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, torqueSlope, sustainTime, target, torqueSlope, sustainTime, repeat, target, torqueSlope, sustainTime, repeat, amplitude, frequency, repeat, parameters, getDeviceParameterValues, topic, startMonitoringRequestId;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -673,9 +666,8 @@ function requestAction(type, args, cmd) {
                         parameters = args.slice(1).map(paramToIndexSubindex);
                         validateParameters(parameters);
                         getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
-                        interval = cmd.interval;
                         topic = args[0];
-                        requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues: getDeviceParameterValues, interval: interval, topic: topic });
+                        requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues: getDeviceParameterValues, interval: cmd.interval, topic: topic });
                         return [3 /*break*/, 33];
                     }
                     _b.label = 31;
@@ -932,7 +924,7 @@ function startPlantIdentificationAction(durationSeconds, torqueAmplitude, startF
 }
 function monitorAction(topic, params, cmd) {
     return __awaiter(this, void 0, void 0, function () {
-        var deviceAddress, parameters, getDeviceParameterValues, interval;
+        var deviceAddress, parameters, getDeviceParameterValues;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -942,8 +934,7 @@ function monitorAction(topic, params, cmd) {
                     deviceAddress = _a.sent();
                     parameters = params.map(paramToIndexSubindex);
                     getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
-                    interval = cmd.interval;
-                    requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues: getDeviceParameterValues, interval: interval, topic: topic });
+                    requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues: getDeviceParameterValues, interval: cmd.interval, topic: topic });
                     return [2 /*return*/];
             }
         });
@@ -959,7 +950,7 @@ function connectToMotionMaster(cmd) {
         Object.assign(config, json);
     }
     // ping Motion Master in regular intervals
-    var pingSystemInterval = rxjs.interval(config.pingSystemInterval);
+    var pingSystemInterval = rxjs_1.interval(config.pingSystemInterval);
     pingSystemInterval.subscribe(function () { return motionMasterClient.sendRequest({ pingSystem: {} }); });
     // connect to server endpoint
     var serverSocket = zeromq_1.default.socket('dealer');
