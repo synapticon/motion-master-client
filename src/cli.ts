@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { motionmaster } from '@synapticon/motion-master-proto';
 import program, { Command } from 'commander';
 import fs from 'fs';
 import path from 'path';
@@ -16,6 +15,7 @@ import {
   decodeMotionMasterMessage,
   DeviceAddressType,
   MotionMasterClient,
+  MotionMasterMessage,
   RequestType,
   SignalGeneratorType,
   StatusType,
@@ -47,7 +47,7 @@ const inspectOptions: util.InspectOptions = {
 };
 
 // map to cache device parameter info per device
-const deviceParameterInfoMap: Map<number, motionmaster.MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined> = new Map();
+const deviceParameterInfoMap: Map<number, MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined> = new Map();
 
 const input = new rxjs.Subject<Uint8Array>();
 const output = new rxjs.Subject<Uint8Array>();
@@ -77,7 +77,7 @@ program
   .command('request <type> [args...]')
   .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
   .on('--help', () => {
-    const types = Object.keys(motionmaster.MotionMasterMessage.Request).slice(8).map((type) => type.charAt(0).toLowerCase() + type.slice(1));
+    const types = Object.keys(MotionMasterMessage.Request).slice(8).map((type) => type.charAt(0).toLowerCase() + type.slice(1));
     console.log('');
     console.log('Request <type>s:');
     console.log('  ' + types.join('\n  '));
@@ -167,7 +167,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
     case 'getDeviceParameterValues': {
       exitOnMessageReceived(messageId);
 
-      const parameters: motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] = args.map(paramToIndexSubindex);
+      const parameters: MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] = args.map(paramToIndexSubindex);
       validateParameters(parameters);
       motionMasterClient.requestGetDeviceParameterValues(deviceAddress, parameters, messageId);
 
@@ -236,7 +236,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       break;
     }
     case 'startDeviceFirmwareInstallation': {
-      exitOnMessageReceived(messageId, 120000, motionmaster.MotionMasterMessage.Status.DeviceFirmwareInstallation.Success.Code.DONE);
+      exitOnMessageReceived(messageId, 120000, MotionMasterMessage.Status.DeviceFirmwareInstallation.Success.Code.DONE);
 
       const filepath = args[0];
       const firmwarePackageContent = fs.readFileSync(filepath);
@@ -248,13 +248,13 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
     case 'getDeviceLog': {
       exitOnMessageReceived(messageId);
 
-      const getDeviceLog: motionmaster.MotionMasterMessage.Request.IGetDeviceLog = { deviceAddress };
+      const getDeviceLog: MotionMasterMessage.Request.IGetDeviceLog = { deviceAddress };
 
       motionMasterClient.sendRequest({ getDeviceLog }, messageId);
       break;
     }
     case 'startCoggingTorqueRecording': {
-      exitOnMessageReceived(messageId, 300000, motionmaster.MotionMasterMessage.Status.CoggingTorqueRecording.Success.Code.DONE);
+      exitOnMessageReceived(messageId, 300000, MotionMasterMessage.Status.CoggingTorqueRecording.Success.Code.DONE);
 
       const skipAutoTuning = parseInt(args[0], 10) !== 0;
 
@@ -270,14 +270,14 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       break;
     }
     case 'startOffsetDetection': {
-      exitOnMessageReceived(messageId, 180000, motionmaster.MotionMasterMessage.Status.OffsetDetection.Success.Code.DONE);
+      exitOnMessageReceived(messageId, 180000, MotionMasterMessage.Status.OffsetDetection.Success.Code.DONE);
 
       motionMasterClient.requestStartOffsetDetection(deviceAddress, messageId);
 
       break;
     }
     case 'startPlantIdentification': {
-      exitOnMessageReceived(messageId, 60000, motionmaster.MotionMasterMessage.Status.PlantIdentification.Success.Code.DONE);
+      exitOnMessageReceived(messageId, 60000, MotionMasterMessage.Status.PlantIdentification.Success.Code.DONE);
 
       const durationSeconds = parseFloat(args[0]);
       const torqueAmplitude = parseInt(args[1], 10);
@@ -293,7 +293,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       const computeAutoTuningGainsType = args[0] as ComputeAutoTuningGainsType;
       switch (computeAutoTuningGainsType) {
         case 'positionParameters': {
-          exitOnMessageReceived(messageId, 10000, motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.POSITION_DONE);
+          exitOnMessageReceived(messageId, 10000, MotionMasterMessage.Status.AutoTuning.Success.Code.POSITION_DONE);
 
           const controllerType = parseInt(args[1], 10);
           const settlingTime = parseFloat(args[2]);
@@ -303,7 +303,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
           const lb = parseFloat(args[6]);
           const ub = parseFloat(args[7]);
 
-          const computeAutoTuningGains: motionmaster.MotionMasterMessage.Request.IComputeAutoTuningGains = {
+          const computeAutoTuningGains: MotionMasterMessage.Request.IComputeAutoTuningGains = {
             deviceAddress,
             positionParameters: {
               controllerType,
@@ -320,12 +320,12 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
           break;
         }
         case 'velocityParameters': {
-          exitOnMessageReceived(messageId, 10000, motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.VELOCITY_DONE);
+          exitOnMessageReceived(messageId, 10000, MotionMasterMessage.Status.AutoTuning.Success.Code.VELOCITY_DONE);
 
           const velocityLoopBandwidth = parseFloat(args[1]);
           const velocityDamping = parseFloat(args[2]);
 
-          const computeAutoTuningGains: motionmaster.MotionMasterMessage.Request.IComputeAutoTuningGains = {
+          const computeAutoTuningGains: MotionMasterMessage.Request.IComputeAutoTuningGains = {
             deviceAddress,
             velocityParameters: {
               velocityLoopBandwidth,
@@ -345,7 +345,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
     case 'setMotionControllerParameters': {
       const target = parseInt(args[0], 10);
 
-      const setMotionControllerParameters: motionmaster.MotionMasterMessage.Request.ISetMotionControllerParameters = {
+      const setMotionControllerParameters: MotionMasterMessage.Request.ISetMotionControllerParameters = {
         deviceAddress,
         target,
       };
@@ -372,7 +372,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
     case 'setSignalGeneratorParameters': {
       const signalGeneratorType = args[0] as SignalGeneratorType;
 
-      const setSignalGeneratorParameters: motionmaster.MotionMasterMessage.Request.ISetSignalGeneratorParameters = { deviceAddress };
+      const setSignalGeneratorParameters: MotionMasterMessage.Request.ISetSignalGeneratorParameters = { deviceAddress };
 
       switch (signalGeneratorType) {
         case 'positionStepResponse': {
@@ -625,7 +625,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       break;
     }
     case 'startSignalGenerator': {
-      exitOnMessageReceived(messageId, 2147483647, motionmaster.MotionMasterMessage.Status.SignalGenerator.Success.Code.DONE);
+      exitOnMessageReceived(messageId, 2147483647, MotionMasterMessage.Status.SignalGenerator.Success.Code.DONE);
 
       motionMasterClient.requestStartSignalGenerator(deviceAddress, messageId);
 
@@ -637,7 +637,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       break;
     }
     case 'startMonitoringDeviceParameterValues': {
-      const parameters = args.slice(1).map(paramToIndexSubindex) as motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[];
+      const parameters = args.slice(1).map(paramToIndexSubindex) as MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[];
       validateParameters(parameters);
       const getDeviceParameterValues = { deviceAddress, parameters };
       const interval = cmd.interval;
@@ -668,9 +668,9 @@ async function uploadAction(params: string[], cmd: Command) {
   printOnMessageReceived(messageId, cmd.parent.outputFormat as OutputFormat);
   exitOnMessageReceived(messageId);
 
-  const parameters: motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] = params.map(paramToIndexSubindex);
+  const parameters: MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] = params.map(paramToIndexSubindex);
   validateParameters(parameters);
-  const getDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IGetDeviceParameterValues = { deviceAddress, parameters };
+  const getDeviceParameterValues: MotionMasterMessage.Request.IGetDeviceParameterValues = { deviceAddress, parameters };
 
   motionMasterClient.sendRequest({ getDeviceParameterValues }, messageId);
 }
@@ -685,7 +685,7 @@ async function downloadAction(paramValues: string[], cmd: Command) {
 
   const deviceParameterInfo = await getDeviceParameterInfoAsync(deviceAddress);
   const parameterValues = paramValues.map((paramValue) => paramToIndexSubIndexValue(paramValue, deviceParameterInfo));
-  const setDeviceParameterValues: motionmaster.MotionMasterMessage.Request.ISetDeviceParameterValues = { deviceAddress, parameterValues };
+  const setDeviceParameterValues: MotionMasterMessage.Request.ISetDeviceParameterValues = { deviceAddress, parameterValues };
 
   motionMasterClient.sendRequest({ setDeviceParameterValues }, messageId);
 }
@@ -718,7 +718,7 @@ async function getDeviceFileContentAction(name: string, cmd: Command) {
     }
   });
 
-  const getDeviceFile: motionmaster.MotionMasterMessage.Request.IGetDeviceFile = { deviceAddress, name };
+  const getDeviceFile: MotionMasterMessage.Request.IGetDeviceFile = { deviceAddress, name };
 
   motionMasterClient.sendRequest({ getDeviceFile }, messageId);
 }
@@ -751,7 +751,7 @@ async function getDeviceLogContentAction(cmd: Command) {
     }
   });
 
-  const getDeviceLog: motionmaster.MotionMasterMessage.Request.IGetDeviceLog = { deviceAddress };
+  const getDeviceLog: MotionMasterMessage.Request.IGetDeviceLog = { deviceAddress };
 
   motionMasterClient.sendRequest({ getDeviceLog }, messageId);
 }
@@ -783,7 +783,7 @@ async function getCoggingTorqueDataContent(cmd: Command) {
     }
   });
 
-  const getCoggingTorqueData: motionmaster.MotionMasterMessage.Request.IGetCoggingTorqueData = { deviceAddress };
+  const getCoggingTorqueData: MotionMasterMessage.Request.IGetCoggingTorqueData = { deviceAddress };
 
   motionMasterClient.sendRequest({ getCoggingTorqueData }, messageId);
 }
@@ -793,10 +793,10 @@ async function startOffsetDetectionAction(cmd: Command) {
 
   const messageId = v4();
   printOnMessageReceived(messageId, cmd.parent.outputFormat as OutputFormat);
-  exitOnMessageReceived(messageId, 180000, motionmaster.MotionMasterMessage.Status.OffsetDetection.Success.Code.DONE);
+  exitOnMessageReceived(messageId, 180000, MotionMasterMessage.Status.OffsetDetection.Success.Code.DONE);
 
   const deviceAddress = await getCommandDeviceAddressAsync(cmd.parent);
-  const startOffsetDetection: motionmaster.MotionMasterMessage.Request.IStartOffsetDetection = { deviceAddress };
+  const startOffsetDetection: MotionMasterMessage.Request.IStartOffsetDetection = { deviceAddress };
 
   motionMasterClient.sendRequest({ startOffsetDetection }, messageId);
 }
@@ -806,11 +806,11 @@ async function startCoggingTorqueRecordingAction(cmd: Command) {
 
   const messageId = v4();
   printOnMessageReceived(messageId, cmd.parent.outputFormat as OutputFormat);
-  exitOnMessageReceived(messageId, 300000, motionmaster.MotionMasterMessage.Status.CoggingTorqueRecording.Success.Code.DONE);
+  exitOnMessageReceived(messageId, 300000, MotionMasterMessage.Status.CoggingTorqueRecording.Success.Code.DONE);
 
   const deviceAddress = await getCommandDeviceAddressAsync(cmd.parent);
   const skipAutoTuning = cmd.skipAutoTuning;
-  const startCoggingTorqueRecording: motionmaster.MotionMasterMessage.Request.IStartCoggingTorqueRecording = { deviceAddress, skipAutoTuning };
+  const startCoggingTorqueRecording: MotionMasterMessage.Request.IStartCoggingTorqueRecording = { deviceAddress, skipAutoTuning };
 
   motionMasterClient.sendRequest({ startCoggingTorqueRecording }, messageId);
 }
@@ -828,9 +828,9 @@ async function startPlantIdentificationAction(
 
   const messageId = v4();
   printOnMessageReceived(messageId, cmd.parent.outputFormat as OutputFormat);
-  exitOnMessageReceived(messageId, 60000, motionmaster.MotionMasterMessage.Status.PlantIdentification.Success.Code.DONE);
+  exitOnMessageReceived(messageId, 60000, MotionMasterMessage.Status.PlantIdentification.Success.Code.DONE);
 
-  const startPlantIdentification: motionmaster.MotionMasterMessage.Request.IStartPlantIdentification = {
+  const startPlantIdentification: MotionMasterMessage.Request.IStartPlantIdentification = {
     deviceAddress,
     durationSeconds,
     torqueAmplitude,
@@ -916,7 +916,7 @@ function connectToMotionMaster(cmd: Command) {
   });
 }
 
-function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParameterValues: motionmaster.MotionMasterMessage.Request.IStartMonitoringDeviceParameterValues) {
+function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParameterValues: MotionMasterMessage.Request.IStartMonitoringDeviceParameterValues) {
   const messageId = v4();
 
   motionMasterClient.selectNotification(startMonitoringDeviceParameterValues.topic, true).subscribe((notif) => {
@@ -961,17 +961,17 @@ function paramToIndexSubindex(paramValue: string) {
   return { index, subindex };
 }
 
-function paramToIndexSubIndexValue(paramValue: string, deviceParameterInfo: motionmaster.MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined) {
+function paramToIndexSubIndexValue(paramValue: string, deviceParameterInfo: MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined) {
   const [param, value] = paramValue.split('=');
   const { index, subindex } = paramToIndexSubindex(param);
 
-  const parameterValue: motionmaster.MotionMasterMessage.Status.DeviceParameterValues.IParameterValue = { index, subindex };
+  const parameterValue: MotionMasterMessage.Status.DeviceParameterValues.IParameterValue = { index, subindex };
 
   if (deviceParameterInfo) {
     if (deviceParameterInfo.parameters) {
       const parameter = deviceParameterInfo.parameters.find((p) => p.index === index && p.subindex === subindex);
       if (parameter) {
-        const VT = motionmaster.MotionMasterMessage.Status.DeviceParameterInfo.Parameter.ValueType;
+        const VT = MotionMasterMessage.Status.DeviceParameterInfo.Parameter.ValueType;
         switch (parameter.valueType) {
           case VT.UNSPECIFIED:
           case VT.INTEGER8:
@@ -1006,7 +1006,7 @@ function paramToIndexSubIndexValue(paramValue: string, deviceParameterInfo: moti
   return parameterValue;
 }
 
-function validateParameters(parameters: motionmaster.MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[]) {
+function validateParameters(parameters: MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[]) {
   let error = null;
 
   if (parameters.some((p) => p.index === 0)) {

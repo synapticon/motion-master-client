@@ -9,8 +9,8 @@ exports.MotionMasterMessage = motion_master_proto_1.motionmaster.MotionMasterMes
  * @param id message id
  * @param request oneof request objects
  */
-function encodeRequest(id, request) {
-    var message = exports.MotionMasterMessage.create({ id: id, request: request });
+function encodeRequest(request, id) {
+    var message = exports.MotionMasterMessage.create({ request: request, id: id });
     return exports.MotionMasterMessage.encode(message).finish();
 }
 exports.encodeRequest = encodeRequest;
@@ -47,141 +47,156 @@ var MotionMasterClient = /** @class */ (function () {
         this.deviceEvent$ = this.status$.pipe(operators_1.map(function (status) { return status['deviceEvent']; }));
     }
     MotionMasterClient.prototype.requestPingSystem = function (messageId) {
-        var pingSystem = {};
+        var pingSystem = exports.MotionMasterMessage.Request.PingSystem.create();
         var id = this.sendRequest({ pingSystem: pingSystem }, messageId);
         return this.selectMessageStatus(id, 'systemPong');
     };
     MotionMasterClient.prototype.requestGetSystemVersion = function (messageId) {
-        var getSystemVersion = {};
+        var getSystemVersion = exports.MotionMasterMessage.Request.GetSystemVersion.create();
         var id = this.sendRequest({ getSystemVersion: getSystemVersion }, messageId);
         return this.selectMessageStatus(id, 'systemVersion');
     };
     MotionMasterClient.prototype.requestGetDeviceInfo = function (messageId) {
-        var getDeviceInfo = {};
+        var getDeviceInfo = exports.MotionMasterMessage.Request.GetDeviceInfo.create();
         var id = this.sendRequest({ getDeviceInfo: getDeviceInfo }, messageId);
         return this.selectMessageStatus(id, 'deviceInfo');
     };
     MotionMasterClient.prototype.requestGetDeviceParameterInfo = function (deviceAddress, messageId) {
-        var getDeviceParameterInfo = { deviceAddress: deviceAddress };
+        var getDeviceParameterInfo = exports.MotionMasterMessage.Request.GetDeviceParameterInfo.create({ deviceAddress: deviceAddress });
         var id = this.sendRequest({ getDeviceParameterInfo: getDeviceParameterInfo }, messageId);
         return this.selectMessageStatus(id, 'deviceParameterInfo');
     };
     MotionMasterClient.prototype.requestGetDeviceParameterValues = function (deviceAddress, parameters, messageId) {
-        var getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
+        var getDeviceParameterValues = exports.MotionMasterMessage.Request.GetDeviceParameterValues.create({ deviceAddress: deviceAddress, parameters: parameters });
         var id = this.sendRequest({ getDeviceParameterValues: getDeviceParameterValues }, messageId);
         return this.selectMessageStatus(id, 'deviceParameterValues');
     };
     MotionMasterClient.prototype.requestSetDeviceParameterValues = function (deviceAddress, parameterValues, messageId) {
-        var setDeviceParameterValues = { deviceAddress: deviceAddress, parameterValues: parameterValues };
+        var setDeviceParameterValues = exports.MotionMasterMessage.Request.SetDeviceParameterValues.create({ deviceAddress: deviceAddress, parameterValues: parameterValues });
         var id = this.sendRequest({ setDeviceParameterValues: setDeviceParameterValues }, messageId);
         return this.selectMessageStatus(id, 'deviceParameterValues');
     };
     MotionMasterClient.prototype.requestGetDeviceFileList = function (deviceAddress, messageId) {
-        var getDeviceFileList = { deviceAddress: deviceAddress };
+        var getDeviceFileList = exports.MotionMasterMessage.Request.GetDeviceFileList.create({ deviceAddress: deviceAddress });
         var id = this.sendRequest({ getDeviceFileList: getDeviceFileList }, messageId);
         return this.selectMessageStatus(id, 'deviceFileList');
     };
     MotionMasterClient.prototype.requestGetDeviceFile = function (deviceAddress, name, messageId) {
-        var getDeviceFile = { deviceAddress: deviceAddress, name: name };
+        var getDeviceFile = exports.MotionMasterMessage.Request.GetDeviceFile.create({ deviceAddress: deviceAddress, name: name });
         var id = this.sendRequest({ getDeviceFile: getDeviceFile }, messageId);
         return this.selectMessageStatus(id, 'deviceFile');
     };
     MotionMasterClient.prototype.requestSetDeviceFile = function (deviceAddress, name, content, overwrite, messageId) {
-        var setDeviceFile = { deviceAddress: deviceAddress, name: name, content: content, overwrite: overwrite };
+        var setDeviceFile = exports.MotionMasterMessage.Request.SetDeviceFile.create({ deviceAddress: deviceAddress, name: name, content: content, overwrite: overwrite });
         var id = this.sendRequest({ setDeviceFile: setDeviceFile }, messageId);
         return this.selectMessageStatus(id, 'deviceFile');
     };
     MotionMasterClient.prototype.requestDeleteDeviceFile = function (deviceAddress, name, messageId) {
-        var deleteDeviceFile = { deviceAddress: deviceAddress, name: name };
+        var deleteDeviceFile = exports.MotionMasterMessage.Request.DeleteDeviceFile.create({ deviceAddress: deviceAddress, name: name });
         var id = this.sendRequest({ deleteDeviceFile: deleteDeviceFile }, messageId);
         return this.selectMessageStatus(id, 'deviceFile');
     };
     MotionMasterClient.prototype.requestResetDeviceFault = function (deviceAddress, messageId) {
-        var resetDeviceFault = { deviceAddress: deviceAddress };
+        var resetDeviceFault = exports.MotionMasterMessage.Request.ResetDeviceFault.create({ deviceAddress: deviceAddress });
         var id = this.sendRequest({ resetDeviceFault: resetDeviceFault }, messageId);
         return this.selectMessageStatus(id, 'deviceFaultReset');
     };
     MotionMasterClient.prototype.requestStopDevice = function (deviceAddress, messageId) {
-        var stopDevice = { deviceAddress: deviceAddress };
-        this.sendRequest({ stopDevice: stopDevice }, messageId);
+        var stopDevice = exports.MotionMasterMessage.Request.StopDevice.create({ deviceAddress: deviceAddress });
+        var id = this.sendRequest({ stopDevice: stopDevice }, messageId);
+        return id;
     };
     MotionMasterClient.prototype.requestStartDeviceFirmwareInstallation = function (deviceAddress, firmwarePackageContent, messageId) {
-        var startDeviceFirmwareInstallation = { deviceAddress: deviceAddress, firmwarePackageContent: firmwarePackageContent };
+        var startDeviceFirmwareInstallation = exports.MotionMasterMessage.Request.StartDeviceFirmwareInstallation.create({ deviceAddress: deviceAddress, firmwarePackageContent: firmwarePackageContent });
         var id = this.sendRequest({ startDeviceFirmwareInstallation: startDeviceFirmwareInstallation }, messageId);
         return this.selectMessageStatus(id, 'deviceFirmwareInstallation');
     };
     MotionMasterClient.prototype.requestGetDeviceLog = function (deviceAddress, messageId) {
-        var getDeviceLog = { deviceAddress: deviceAddress };
+        var getDeviceLog = exports.MotionMasterMessage.Request.GetDeviceLog.create({ deviceAddress: deviceAddress });
         var id = this.sendRequest({ getDeviceLog: getDeviceLog }, messageId);
         return this.selectMessageStatus(id, 'deviceLog');
     };
     MotionMasterClient.prototype.requestStartCoggingTorqueRecording = function (deviceAddress, skipAutoTuning, messageId) {
-        var startCoggingTorqueRecording = { deviceAddress: deviceAddress, skipAutoTuning: skipAutoTuning };
+        var startCoggingTorqueRecording = exports.MotionMasterMessage.Request.StartCoggingTorqueRecording.create({ deviceAddress: deviceAddress, skipAutoTuning: skipAutoTuning });
         var id = this.sendRequest({ startCoggingTorqueRecording: startCoggingTorqueRecording }, messageId);
         return this.selectMessageStatus(id, 'coggingTorqueRecording');
     };
     MotionMasterClient.prototype.requestGetCoggingTorqueData = function (deviceAddress, messageId) {
-        var getCoggingTorqueData = { deviceAddress: deviceAddress };
+        var getCoggingTorqueData = exports.MotionMasterMessage.Request.GetCoggingTorqueData.create({ deviceAddress: deviceAddress });
         var id = this.sendRequest({ getCoggingTorqueData: getCoggingTorqueData }, messageId);
         return this.selectMessageStatus(id, 'coggingTorqueData');
     };
     MotionMasterClient.prototype.requestStartOffsetDetection = function (deviceAddress, messageId) {
-        var startOffsetDetection = { deviceAddress: deviceAddress };
+        var startOffsetDetection = exports.MotionMasterMessage.Request.StartOffsetDetection.create({ deviceAddress: deviceAddress });
         var id = this.sendRequest({ startOffsetDetection: startOffsetDetection }, messageId);
         return this.selectMessageStatus(id, 'offsetDetection');
     };
     MotionMasterClient.prototype.requestStartPlantIdentification = function (deviceAddress, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, messageId) {
-        var startPlantIdentification = {
+        var startPlantIdentification = exports.MotionMasterMessage.Request.StartPlantIdentification.create({
             deviceAddress: deviceAddress,
             durationSeconds: durationSeconds,
             torqueAmplitude: torqueAmplitude,
             startFrequency: startFrequency,
             endFrequency: endFrequency,
             cutoffFrequency: cutoffFrequency,
-        };
+        });
         var id = this.sendRequest({ startPlantIdentification: startPlantIdentification }, messageId);
         return this.selectMessageStatus(id, 'plantIdentification');
     };
+    MotionMasterClient.prototype.requestComputePositionAutoTuningGains = function (deviceAddress, positionParameters, messageId) {
+        var computeAutoTuningGains = exports.MotionMasterMessage.Request.ComputeAutoTuningGains.create({ deviceAddress: deviceAddress, positionParameters: positionParameters });
+        var id = this.sendRequest({ computeAutoTuningGains: computeAutoTuningGains }, messageId);
+        return this.selectMessageStatus(id, 'autoTuning');
+    };
+    MotionMasterClient.prototype.requestComputeVelocityAutoTuningGains = function (deviceAddress, velocityParameters, messageId) {
+        var computeAutoTuningGains = exports.MotionMasterMessage.Request.ComputeAutoTuningGains.create({ deviceAddress: deviceAddress, velocityParameters: velocityParameters });
+        var id = this.sendRequest({ computeAutoTuningGains: computeAutoTuningGains }, messageId);
+        return this.selectMessageStatus(id, 'autoTuning');
+    };
     MotionMasterClient.prototype.requestSetMotionControllerParameters = function (deviceAddress, target, messageId) {
-        var setMotionControllerParameters = {
+        var setMotionControllerParameters = exports.MotionMasterMessage.Request.SetMotionControllerParameters.create({
             deviceAddress: deviceAddress,
             target: target,
-        };
+        });
         var id = this.sendRequest({ setMotionControllerParameters: setMotionControllerParameters }, messageId);
-        return this.selectMessageStatus(id, 'motionController');
+        return id;
     };
     MotionMasterClient.prototype.requestEnableMotionController = function (deviceAddress, controllerType, filterValue, messageId) {
-        var enableMotionController = {
+        var enableMotionController = exports.MotionMasterMessage.Request.EnableMotionController.create({
             deviceAddress: deviceAddress,
             controllerType: controllerType,
             filter: filterValue,
-        };
+        });
         var id = this.sendRequest({ enableMotionController: enableMotionController }, messageId);
         return this.selectMessageStatus(id, 'motionController');
     };
     MotionMasterClient.prototype.requestDisableMotionController = function (deviceAddress, messageId) {
-        var disableMotionController = { deviceAddress: deviceAddress };
+        var disableMotionController = exports.MotionMasterMessage.Request.DisableMotionController.create({ deviceAddress: deviceAddress });
         var id = this.sendRequest({ disableMotionController: disableMotionController }, messageId);
         return this.selectMessageStatus(id, 'motionController');
     };
+    MotionMasterClient.prototype.requestSetSignalGeneratorParameters = function (setSignalGeneratorParameters, messageId) {
+        var id = this.sendRequest({ setSignalGeneratorParameters: setSignalGeneratorParameters }, messageId);
+        return id;
+    };
     MotionMasterClient.prototype.requestStartSignalGenerator = function (deviceAddress, messageId) {
-        var startSignalGenerator = { deviceAddress: deviceAddress };
+        var startSignalGenerator = exports.MotionMasterMessage.Request.StartSignalGenerator.create({ deviceAddress: deviceAddress });
         var id = this.sendRequest({ startSignalGenerator: startSignalGenerator }, messageId);
         return this.selectMessageStatus(id, 'signalGenerator');
     };
     MotionMasterClient.prototype.requestStopSignalGenerator = function (deviceAddress, messageId) {
-        var stopSignalGenerator = { deviceAddress: deviceAddress };
+        var stopSignalGenerator = exports.MotionMasterMessage.Request.StopSignalGenerator.create({ deviceAddress: deviceAddress });
         var id = this.sendRequest({ stopSignalGenerator: stopSignalGenerator }, messageId);
         return this.selectMessageStatus(id, 'signalGenerator');
     };
     MotionMasterClient.prototype.requestStartMonitoringDeviceParameterValues = function (deviceAddress, parameters, interval, topic, messageId) {
         var getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
-        var startMonitoringDeviceParameterValues = { getDeviceParameterValues: getDeviceParameterValues, interval: interval, topic: topic };
+        var startMonitoringDeviceParameterValues = exports.MotionMasterMessage.Request.StartMonitoringDeviceParameterValues.create({ getDeviceParameterValues: getDeviceParameterValues, interval: interval, topic: topic });
         var id = this.sendRequest({ startMonitoringDeviceParameterValues: startMonitoringDeviceParameterValues }, messageId);
         return this.selectMessageStatus(id, 'monitoringParameterValues');
     };
     MotionMasterClient.prototype.requestStopMonitoringDeviceParameterValues = function (startMonitoringRequestId, messageId) {
-        var stopMonitoringDeviceParameterValues = { startMonitoringRequestId: startMonitoringRequestId };
+        var stopMonitoringDeviceParameterValues = exports.MotionMasterMessage.Request.StopMonitoringDeviceParameterValues.create({ startMonitoringRequestId: startMonitoringRequestId });
         var id = this.sendRequest({ stopMonitoringDeviceParameterValues: stopMonitoringDeviceParameterValues }, messageId);
         return this.selectMessageStatus(id, 'monitoringParameterValues');
     };
@@ -201,7 +216,7 @@ var MotionMasterClient = /** @class */ (function () {
             }
             return null;
         }));
-        var getDeviceInfo = {};
+        var getDeviceInfo = exports.MotionMasterMessage.Request.GetDeviceInfo.create();
         this.sendRequest({ getDeviceInfo: getDeviceInfo }, messageId);
         return observable;
     };
@@ -255,12 +270,10 @@ var MotionMasterClient = /** @class */ (function () {
      * @returns passed or generated messageId
      */
     MotionMasterClient.prototype.sendRequest = function (request, messageId) {
-        if (!messageId) {
-            messageId = uuid_1.v4();
-        }
-        var encodedMessage = encodeRequest(messageId, request);
+        var id = messageId || uuid_1.v4();
+        var encodedMessage = encodeRequest(request, id);
         this.output.next(encodedMessage);
-        return messageId;
+        return id;
     };
     MotionMasterClient.prototype.sendMessage = function (message) {
         var encodedMessage = exports.MotionMasterMessage.encode(message).finish();

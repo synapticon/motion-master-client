@@ -11,8 +11,8 @@ export import IMotionMasterMessage = motionmaster.IMotionMasterMessage;
  * @param id message id
  * @param request oneof request objects
  */
-export function encodeRequest(id: string, request: MotionMasterMessage.IRequest) {
-  const message = MotionMasterMessage.create({ id, request });
+export function encodeRequest(request: MotionMasterMessage.IRequest, id: string) {
+  const message = MotionMasterMessage.create({ request, id });
   return MotionMasterMessage.encode(message).finish();
 }
 
@@ -106,165 +106,194 @@ export class MotionMasterClient {
   }
 
   requestPingSystem(messageId?: string) {
-    const pingSystem: MotionMasterMessage.Request.IPingSystem = {};
+    const pingSystem = MotionMasterMessage.Request.PingSystem.create();
     const id = this.sendRequest({ pingSystem }, messageId);
     return this.selectMessageStatus(id, 'systemPong');
   }
 
   requestGetSystemVersion(messageId?: string) {
-    const getSystemVersion: MotionMasterMessage.Request.IGetSystemVersion = {};
+    const getSystemVersion = MotionMasterMessage.Request.GetSystemVersion.create();
     const id = this.sendRequest({ getSystemVersion }, messageId);
     return this.selectMessageStatus(id, 'systemVersion');
   }
 
   requestGetDeviceInfo(messageId?: string) {
-    const getDeviceInfo: MotionMasterMessage.Request.IGetDeviceInfo = {};
+    const getDeviceInfo = MotionMasterMessage.Request.GetDeviceInfo.create();
     const id = this.sendRequest({ getDeviceInfo }, messageId);
     return this.selectMessageStatus(id, 'deviceInfo');
   }
 
   requestGetDeviceParameterInfo(deviceAddress: DeviceAddressType, messageId?: string) {
-    const getDeviceParameterInfo: MotionMasterMessage.Request.IGetDeviceParameterInfo = { deviceAddress };
+    const getDeviceParameterInfo = MotionMasterMessage.Request.GetDeviceParameterInfo.create({ deviceAddress });
     const id = this.sendRequest({ getDeviceParameterInfo }, messageId);
     return this.selectMessageStatus(id, 'deviceParameterInfo');
   }
 
   requestGetDeviceParameterValues(deviceAddress: DeviceAddressType, parameters: MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[], messageId?: string) {
-    const getDeviceParameterValues: MotionMasterMessage.Request.IGetDeviceParameterValues = { deviceAddress, parameters };
+    const getDeviceParameterValues = MotionMasterMessage.Request.GetDeviceParameterValues.create({ deviceAddress, parameters });
     const id = this.sendRequest({ getDeviceParameterValues }, messageId);
     return this.selectMessageStatus(id, 'deviceParameterValues');
   }
 
   requestSetDeviceParameterValues(deviceAddress: DeviceAddressType, parameterValues: MotionMasterMessage.Request.SetDeviceParameterValues.IParameterValue[], messageId?: string) {
-    const setDeviceParameterValues: MotionMasterMessage.Request.ISetDeviceParameterValues = { deviceAddress, parameterValues };
+    const setDeviceParameterValues = MotionMasterMessage.Request.SetDeviceParameterValues.create({ deviceAddress, parameterValues });
     const id = this.sendRequest({ setDeviceParameterValues }, messageId);
     return this.selectMessageStatus(id, 'deviceParameterValues');
   }
 
   requestGetDeviceFileList(deviceAddress: DeviceAddressType, messageId?: string) {
-    const getDeviceFileList: MotionMasterMessage.Request.IGetDeviceFileList = { deviceAddress };
+    const getDeviceFileList = MotionMasterMessage.Request.GetDeviceFileList.create({ deviceAddress });
     const id = this.sendRequest({ getDeviceFileList }, messageId);
     return this.selectMessageStatus(id, 'deviceFileList');
   }
 
   requestGetDeviceFile(deviceAddress: DeviceAddressType, name: string, messageId?: string) {
-    const getDeviceFile: MotionMasterMessage.Request.IGetDeviceFile = { deviceAddress, name };
+    const getDeviceFile = MotionMasterMessage.Request.GetDeviceFile.create({ deviceAddress, name });
     const id = this.sendRequest({ getDeviceFile }, messageId);
     return this.selectMessageStatus(id, 'deviceFile');
   }
 
   requestSetDeviceFile(deviceAddress: DeviceAddressType, name: string, content: Uint8Array, overwrite: boolean, messageId?: string) {
-    const setDeviceFile: MotionMasterMessage.Request.ISetDeviceFile = { deviceAddress, name, content, overwrite };
+    const setDeviceFile = MotionMasterMessage.Request.SetDeviceFile.create({ deviceAddress, name, content, overwrite });
     const id = this.sendRequest({ setDeviceFile }, messageId);
     return this.selectMessageStatus(id, 'deviceFile');
   }
 
   requestDeleteDeviceFile(deviceAddress: DeviceAddressType, name: string, messageId?: string) {
-    const deleteDeviceFile: MotionMasterMessage.Request.IDeleteDeviceFile = { deviceAddress, name };
+    const deleteDeviceFile = MotionMasterMessage.Request.DeleteDeviceFile.create({ deviceAddress, name });
     const id = this.sendRequest({ deleteDeviceFile }, messageId);
     return this.selectMessageStatus(id, 'deviceFile');
   }
 
   requestResetDeviceFault(deviceAddress: DeviceAddressType, messageId?: string) {
-    const resetDeviceFault: MotionMasterMessage.Request.IResetDeviceFault = { deviceAddress };
+    const resetDeviceFault = MotionMasterMessage.Request.ResetDeviceFault.create({ deviceAddress });
     const id = this.sendRequest({ resetDeviceFault }, messageId);
     return this.selectMessageStatus(id, 'deviceFaultReset');
   }
 
   requestStopDevice(deviceAddress: DeviceAddressType, messageId?: string) {
-    const stopDevice: MotionMasterMessage.Request.IStopDevice = { deviceAddress };
-    this.sendRequest({ stopDevice }, messageId);
+    const stopDevice = MotionMasterMessage.Request.StopDevice.create({ deviceAddress });
+    const id = this.sendRequest({ stopDevice }, messageId);
+    return id;
   }
 
   requestStartDeviceFirmwareInstallation(deviceAddress: DeviceAddressType, firmwarePackageContent: Uint8Array, messageId?: string) {
-    const startDeviceFirmwareInstallation: MotionMasterMessage.Request.IStartDeviceFirmwareInstallation = { deviceAddress, firmwarePackageContent };
+    const startDeviceFirmwareInstallation = MotionMasterMessage.Request.StartDeviceFirmwareInstallation.create({ deviceAddress, firmwarePackageContent });
     const id = this.sendRequest({ startDeviceFirmwareInstallation }, messageId);
     return this.selectMessageStatus(id, 'deviceFirmwareInstallation');
   }
 
   requestGetDeviceLog(deviceAddress: DeviceAddressType, messageId?: string) {
-    const getDeviceLog: MotionMasterMessage.Request.IGetDeviceLog = { deviceAddress };
+    const getDeviceLog = MotionMasterMessage.Request.GetDeviceLog.create({ deviceAddress });
     const id = this.sendRequest({ getDeviceLog }, messageId);
     return this.selectMessageStatus(id, 'deviceLog');
   }
 
   requestStartCoggingTorqueRecording(deviceAddress: DeviceAddressType, skipAutoTuning: boolean, messageId?: string) {
-    const startCoggingTorqueRecording: MotionMasterMessage.Request.IStartCoggingTorqueRecording = { deviceAddress, skipAutoTuning };
+    const startCoggingTorqueRecording = MotionMasterMessage.Request.StartCoggingTorqueRecording.create({ deviceAddress, skipAutoTuning });
     const id = this.sendRequest({ startCoggingTorqueRecording }, messageId);
     return this.selectMessageStatus(id, 'coggingTorqueRecording');
   }
 
   requestGetCoggingTorqueData(deviceAddress: DeviceAddressType, messageId?: string) {
-    const getCoggingTorqueData: MotionMasterMessage.Request.IGetCoggingTorqueData = { deviceAddress };
+    const getCoggingTorqueData = MotionMasterMessage.Request.GetCoggingTorqueData.create({ deviceAddress });
     const id = this.sendRequest({ getCoggingTorqueData }, messageId);
     return this.selectMessageStatus(id, 'coggingTorqueData');
   }
 
   requestStartOffsetDetection(deviceAddress: DeviceAddressType, messageId?: string) {
-    const startOffsetDetection: MotionMasterMessage.Request.IStartOffsetDetection = { deviceAddress };
+    const startOffsetDetection = MotionMasterMessage.Request.StartOffsetDetection.create({ deviceAddress });
     const id = this.sendRequest({ startOffsetDetection }, messageId);
     return this.selectMessageStatus(id, 'offsetDetection');
   }
 
   requestStartPlantIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, cutoffFrequency: number, messageId: string) {
-    const startPlantIdentification: MotionMasterMessage.Request.IStartPlantIdentification = {
+    const startPlantIdentification = MotionMasterMessage.Request.StartPlantIdentification.create({
       deviceAddress,
       durationSeconds,
       torqueAmplitude,
       startFrequency,
       endFrequency,
       cutoffFrequency,
-    };
+    });
     const id = this.sendRequest({ startPlantIdentification }, messageId);
     return this.selectMessageStatus(id, 'plantIdentification');
   }
 
+  requestComputePositionAutoTuningGains(
+    deviceAddress: number,
+    positionParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IPositionParameters,
+    messageId?: string,
+  ) {
+    const computeAutoTuningGains = MotionMasterMessage.Request.ComputeAutoTuningGains.create({ deviceAddress, positionParameters });
+    const id = this.sendRequest({ computeAutoTuningGains }, messageId);
+    return this.selectMessageStatus(id, 'autoTuning');
+  }
+
+  requestComputeVelocityAutoTuningGains(
+    deviceAddress: number,
+    velocityParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IVelocityParameters,
+    messageId?: string,
+  ) {
+    const computeAutoTuningGains = MotionMasterMessage.Request.ComputeAutoTuningGains.create({ deviceAddress, velocityParameters });
+    const id = this.sendRequest({ computeAutoTuningGains }, messageId);
+    return this.selectMessageStatus(id, 'autoTuning');
+  }
+
   requestSetMotionControllerParameters(deviceAddress: DeviceAddressType, target: number, messageId?: string) {
-    const setMotionControllerParameters: MotionMasterMessage.Request.ISetMotionControllerParameters = {
+    const setMotionControllerParameters = MotionMasterMessage.Request.SetMotionControllerParameters.create({
       deviceAddress,
       target,
-    };
+    });
     const id = this.sendRequest({ setMotionControllerParameters }, messageId);
-    return this.selectMessageStatus(id, 'motionController');
+    return id;
   }
 
   requestEnableMotionController(deviceAddress: DeviceAddressType, controllerType: MotionMasterMessage.Request.EnableMotionController.ControllerType, filterValue: boolean, messageId?: string) {
-    const enableMotionController: MotionMasterMessage.Request.IEnableMotionController = {
+    const enableMotionController = MotionMasterMessage.Request.EnableMotionController.create({
       deviceAddress,
       controllerType,
       filter: filterValue,
-    };
+    });
     const id = this.sendRequest({ enableMotionController }, messageId);
     return this.selectMessageStatus(id, 'motionController');
   }
 
   requestDisableMotionController(deviceAddress: DeviceAddressType, messageId?: string) {
-    const disableMotionController: MotionMasterMessage.Request.IDisableMotionController = { deviceAddress };
+    const disableMotionController = MotionMasterMessage.Request.DisableMotionController.create({ deviceAddress });
     const id = this.sendRequest({ disableMotionController }, messageId);
     return this.selectMessageStatus(id, 'motionController');
   }
 
+  requestSetSignalGeneratorParameters(
+    setSignalGeneratorParameters: MotionMasterMessage.Request.ISetSignalGeneratorParameters,
+    messageId?: string,
+  ) {
+    const id = this.sendRequest({ setSignalGeneratorParameters }, messageId);
+    return id;
+  }
+
   requestStartSignalGenerator(deviceAddress: DeviceAddressType, messageId?: string) {
-    const startSignalGenerator: MotionMasterMessage.Request.IStartSignalGenerator = { deviceAddress };
+    const startSignalGenerator = MotionMasterMessage.Request.StartSignalGenerator.create({ deviceAddress });
     const id = this.sendRequest({ startSignalGenerator }, messageId);
     return this.selectMessageStatus(id, 'signalGenerator');
   }
 
   requestStopSignalGenerator(deviceAddress: DeviceAddressType, messageId?: string) {
-    const stopSignalGenerator: MotionMasterMessage.Request.IStopSignalGenerator = { deviceAddress };
+    const stopSignalGenerator = MotionMasterMessage.Request.StopSignalGenerator.create({ deviceAddress });
     const id = this.sendRequest({ stopSignalGenerator }, messageId);
     return this.selectMessageStatus(id, 'signalGenerator');
   }
 
   requestStartMonitoringDeviceParameterValues(deviceAddress: DeviceAddressType, parameters: MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[], interval: number, topic: string, messageId?: string) {
     const getDeviceParameterValues = { deviceAddress, parameters };
-    const startMonitoringDeviceParameterValues = { getDeviceParameterValues, interval, topic };
+    const startMonitoringDeviceParameterValues = MotionMasterMessage.Request.StartMonitoringDeviceParameterValues.create({ getDeviceParameterValues, interval, topic });
     const id = this.sendRequest({ startMonitoringDeviceParameterValues }, messageId);
     return this.selectMessageStatus(id, 'monitoringParameterValues');
   }
 
   requestStopMonitoringDeviceParameterValues(startMonitoringRequestId: string, messageId?: string) {
-    const stopMonitoringDeviceParameterValues: MotionMasterMessage.Request.IStopMonitoringDeviceParameterValues = { startMonitoringRequestId };
+    const stopMonitoringDeviceParameterValues = MotionMasterMessage.Request.StopMonitoringDeviceParameterValues.create({ startMonitoringRequestId });
     const id = this.sendRequest({ stopMonitoringDeviceParameterValues }, messageId);
     return this.selectMessageStatus(id, 'monitoringParameterValues');
   }
@@ -290,7 +319,7 @@ export class MotionMasterClient {
         return null;
       }),
     );
-    const getDeviceInfo = {};
+    const getDeviceInfo = MotionMasterMessage.Request.GetDeviceInfo.create();
     this.sendRequest({ getDeviceInfo }, messageId);
     return observable;
   }
@@ -366,12 +395,10 @@ export class MotionMasterClient {
    * @returns passed or generated messageId
    */
   sendRequest(request: MotionMasterMessage.IRequest, messageId?: string) {
-    if (!messageId) {
-      messageId = v4();
-    }
-    const encodedMessage = encodeRequest(messageId, request);
+    const id = messageId || v4();
+    const encodedMessage = encodeRequest(request, id);
     this.output.next(encodedMessage);
-    return messageId;
+    return id;
   }
 
   sendMessage(message: IMotionMasterMessage) {

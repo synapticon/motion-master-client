@@ -46,7 +46,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var motion_master_proto_1 = require("@synapticon/motion-master-proto");
 var commander_1 = __importDefault(require("commander"));
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
@@ -103,7 +102,7 @@ commander_1.default
     .command('request <type> [args...]')
     .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
     .on('--help', function () {
-    var types = Object.keys(motion_master_proto_1.motionmaster.MotionMasterMessage.Request).slice(8).map(function (type) { return type.charAt(0).toLowerCase() + type.slice(1); });
+    var types = Object.keys(motion_master_client_1.MotionMasterMessage.Request).slice(8).map(function (type) { return type.charAt(0).toLowerCase() + type.slice(1); });
     console.log('');
     console.log('Request <type>s:');
     console.log('  ' + types.join('\n  '));
@@ -293,7 +292,7 @@ function requestAction(type, args, cmd) {
                     _b.label = 17;
                 case 17:
                     {
-                        exitOnMessageReceived(messageId, 120000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.DeviceFirmwareInstallation.Success.Code.DONE);
+                        exitOnMessageReceived(messageId, 120000, motion_master_client_1.MotionMasterMessage.Status.DeviceFirmwareInstallation.Success.Code.DONE);
                         filepath = args[0];
                         firmwarePackageContent = fs_1.default.readFileSync(filepath);
                         motionMasterClient.requestStartDeviceFirmwareInstallation(deviceAddress, firmwarePackageContent, messageId);
@@ -310,7 +309,7 @@ function requestAction(type, args, cmd) {
                     _b.label = 19;
                 case 19:
                     {
-                        exitOnMessageReceived(messageId, 300000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.CoggingTorqueRecording.Success.Code.DONE);
+                        exitOnMessageReceived(messageId, 300000, motion_master_client_1.MotionMasterMessage.Status.CoggingTorqueRecording.Success.Code.DONE);
                         skipAutoTuning = parseInt(args[0], 10) !== 0;
                         motionMasterClient.requestStartCoggingTorqueRecording(deviceAddress, skipAutoTuning, messageId);
                         return [3 /*break*/, 33];
@@ -325,14 +324,14 @@ function requestAction(type, args, cmd) {
                     _b.label = 21;
                 case 21:
                     {
-                        exitOnMessageReceived(messageId, 180000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.OffsetDetection.Success.Code.DONE);
+                        exitOnMessageReceived(messageId, 180000, motion_master_client_1.MotionMasterMessage.Status.OffsetDetection.Success.Code.DONE);
                         motionMasterClient.requestStartOffsetDetection(deviceAddress, messageId);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 22;
                 case 22:
                     {
-                        exitOnMessageReceived(messageId, 60000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.PlantIdentification.Success.Code.DONE);
+                        exitOnMessageReceived(messageId, 60000, motion_master_client_1.MotionMasterMessage.Status.PlantIdentification.Success.Code.DONE);
                         durationSeconds = parseFloat(args[0]);
                         torqueAmplitude = parseInt(args[1], 10);
                         startFrequency = parseInt(args[2], 10);
@@ -347,7 +346,7 @@ function requestAction(type, args, cmd) {
                         computeAutoTuningGainsType = args[0];
                         switch (computeAutoTuningGainsType) {
                             case 'positionParameters': {
-                                exitOnMessageReceived(messageId, 10000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.POSITION_DONE);
+                                exitOnMessageReceived(messageId, 10000, motion_master_client_1.MotionMasterMessage.Status.AutoTuning.Success.Code.POSITION_DONE);
                                 controllerType = parseInt(args[1], 10);
                                 settlingTime = parseFloat(args[2]);
                                 positionDamping = parseFloat(args[3]);
@@ -371,7 +370,7 @@ function requestAction(type, args, cmd) {
                                 break;
                             }
                             case 'velocityParameters': {
-                                exitOnMessageReceived(messageId, 10000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.AutoTuning.Success.Code.VELOCITY_DONE);
+                                exitOnMessageReceived(messageId, 10000, motion_master_client_1.MotionMasterMessage.Status.AutoTuning.Success.Code.VELOCITY_DONE);
                                 velocityLoopBandwidth = parseFloat(args[1]);
                                 velocityDamping = parseFloat(args[2]);
                                 computeAutoTuningGains = {
@@ -657,7 +656,7 @@ function requestAction(type, args, cmd) {
                     _b.label = 28;
                 case 28:
                     {
-                        exitOnMessageReceived(messageId, 2147483647, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.SignalGenerator.Success.Code.DONE);
+                        exitOnMessageReceived(messageId, 2147483647, motion_master_client_1.MotionMasterMessage.Status.SignalGenerator.Success.Code.DONE);
                         motionMasterClient.requestStartSignalGenerator(deviceAddress, messageId);
                         return [3 /*break*/, 33];
                     }
@@ -872,7 +871,7 @@ function startOffsetDetectionAction(cmd) {
                     connectToMotionMaster(cmd.parent);
                     messageId = uuid_1.v4();
                     printOnMessageReceived(messageId, cmd.parent.outputFormat);
-                    exitOnMessageReceived(messageId, 180000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.OffsetDetection.Success.Code.DONE);
+                    exitOnMessageReceived(messageId, 180000, motion_master_client_1.MotionMasterMessage.Status.OffsetDetection.Success.Code.DONE);
                     return [4 /*yield*/, getCommandDeviceAddressAsync(cmd.parent)];
                 case 1:
                     deviceAddress = _a.sent();
@@ -892,7 +891,7 @@ function startCoggingTorqueRecordingAction(cmd) {
                     connectToMotionMaster(cmd.parent);
                     messageId = uuid_1.v4();
                     printOnMessageReceived(messageId, cmd.parent.outputFormat);
-                    exitOnMessageReceived(messageId, 300000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.CoggingTorqueRecording.Success.Code.DONE);
+                    exitOnMessageReceived(messageId, 300000, motion_master_client_1.MotionMasterMessage.Status.CoggingTorqueRecording.Success.Code.DONE);
                     return [4 /*yield*/, getCommandDeviceAddressAsync(cmd.parent)];
                 case 1:
                     deviceAddress = _a.sent();
@@ -916,7 +915,7 @@ function startPlantIdentificationAction(durationSeconds, torqueAmplitude, startF
                     deviceAddress = _a.sent();
                     messageId = uuid_1.v4();
                     printOnMessageReceived(messageId, cmd.parent.outputFormat);
-                    exitOnMessageReceived(messageId, 60000, motion_master_proto_1.motionmaster.MotionMasterMessage.Status.PlantIdentification.Success.Code.DONE);
+                    exitOnMessageReceived(messageId, 60000, motion_master_client_1.MotionMasterMessage.Status.PlantIdentification.Success.Code.DONE);
                     startPlantIdentification = {
                         deviceAddress: deviceAddress,
                         durationSeconds: durationSeconds,
@@ -1046,7 +1045,7 @@ function paramToIndexSubIndexValue(paramValue, deviceParameterInfo) {
         if (deviceParameterInfo.parameters) {
             var parameter = deviceParameterInfo.parameters.find(function (p) { return p.index === index && p.subindex === subindex; });
             if (parameter) {
-                var VT = motion_master_proto_1.motionmaster.MotionMasterMessage.Status.DeviceParameterInfo.Parameter.ValueType;
+                var VT = motion_master_client_1.MotionMasterMessage.Status.DeviceParameterInfo.Parameter.ValueType;
                 switch (parameter.valueType) {
                     case VT.UNSPECIFIED:
                     case VT.INTEGER8:
