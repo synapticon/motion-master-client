@@ -46,9 +46,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var motion_master_proto_1 = require("@synapticon/motion-master-proto");
 var commander_1 = __importDefault(require("commander"));
 var fs_1 = __importDefault(require("fs"));
-var motion_master_proto_1 = require("motion-master-proto");
 var path_1 = __importDefault(require("path"));
 var rxjs = __importStar(require("rxjs"));
 var operators_1 = require("rxjs/operators");

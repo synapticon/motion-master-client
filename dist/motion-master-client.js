@@ -1,16 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var motion_master_proto_1 = require("motion-master-proto");
+var motion_master_proto_1 = require("@synapticon/motion-master-proto");
 var operators_1 = require("rxjs/operators");
 var uuid_1 = require("uuid");
+exports.MotionMasterMessage = motion_master_proto_1.motionmaster.MotionMasterMessage;
 /**
  * Encode Request in MotionMasterMessage with the provided id.
  * @param id message id
  * @param request oneof request objects
  */
 function encodeRequest(id, request) {
-    var message = motion_master_proto_1.motionmaster.MotionMasterMessage.create({ id: id, request: request });
-    return motion_master_proto_1.motionmaster.MotionMasterMessage.encode(message).finish();
+    var message = exports.MotionMasterMessage.create({ id: id, request: request });
+    return exports.MotionMasterMessage.encode(message).finish();
 }
 exports.encodeRequest = encodeRequest;
 /**
@@ -18,7 +19,7 @@ exports.encodeRequest = encodeRequest;
  * @param data
  */
 function decodeMotionMasterMessage(data) {
-    return motion_master_proto_1.motionmaster.MotionMasterMessage.decode(data);
+    return exports.MotionMasterMessage.decode(data);
 }
 exports.decodeMotionMasterMessage = decodeMotionMasterMessage;
 /**
@@ -257,9 +258,14 @@ var MotionMasterClient = /** @class */ (function () {
         if (!messageId) {
             messageId = uuid_1.v4();
         }
-        var message = encodeRequest(messageId, request);
-        this.output.next(message);
+        var encodedMessage = encodeRequest(messageId, request);
+        this.output.next(encodedMessage);
         return messageId;
+    };
+    MotionMasterClient.prototype.sendMessage = function (message) {
+        var encodedMessage = exports.MotionMasterMessage.encode(message).finish();
+        this.output.next(encodedMessage);
+        return message.id;
     };
     return MotionMasterClient;
 }());

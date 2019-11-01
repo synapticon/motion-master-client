@@ -1,7 +1,7 @@
 #!/usr/bin/env node
+import { motionmaster } from '@synapticon/motion-master-proto';
 import program, { Command } from 'commander';
 import fs from 'fs';
-import { motionmaster } from 'motion-master-proto';
 import path from 'path';
 import * as rxjs from 'rxjs';
 import { first, map, timeout } from 'rxjs/operators';
