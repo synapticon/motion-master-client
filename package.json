@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "private": false,
   "description": "",
-  "main": "dist/cli.js",
+  "main": "dist/motion-master-client.js",
   "scripts": {
     "build": "npx tsc --build tsconfig.json",
     "watch": "npx tsc --watch",
@@ -22,7 +22,7 @@
     "rxjs": "^6.5.2",
     "uuid": "^3.3.2",
     "yaml": "^1.6.0",
-    "zeromq": "^5.1.0"
+    "zeromq": "^5.1.1"
   },
   "devDependencies": {
     "@types/commander": "^2.12.2",

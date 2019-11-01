@@ -2,7 +2,7 @@
 import program, { Command } from 'commander';
 import fs from 'fs';
 import path from 'path';
-import * as rxjs from 'rxjs';
+import { interval, Subject } from 'rxjs';
 import { first, map, timeout } from 'rxjs/operators';
 import { StringDecoder } from 'string_decoder';
 import util from 'util';
@@ -49,9 +49,9 @@ const inspectOptions: util.InspectOptions = {
 // map to cache device parameter info per device
 const deviceParameterInfoMap: Map<number, MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined> = new Map();
 
-const input = new rxjs.Subject<Uint8Array>();
-const output = new rxjs.Subject<Uint8Array>();
-const notification = new rxjs.Subject<[Uint8Array, Uint8Array]>();
+const input = new Subject<Uint8Array>();
+const output = new Subject<Uint8Array>();
+const notification = new Subject<[Uint8Array, Uint8Array]>();
 const motionMasterClient = new MotionMasterClient(input, output, notification);
 
 const config = {
@@ -640,10 +640,9 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       const parameters = args.slice(1).map(paramToIndexSubindex) as MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[];
       validateParameters(parameters);
       const getDeviceParameterValues = { deviceAddress, parameters };
-      const interval = cmd.interval;
       const topic = args[0];
 
-      requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues, interval, topic });
+      requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues, interval: cmd.interval, topic });
       break;
     }
     case 'stopMonitoringDeviceParameterValues': {
@@ -848,9 +847,8 @@ async function monitorAction(topic: string, params: string[], cmd: Command) {
 
   const parameters = params.map(paramToIndexSubindex);
   const getDeviceParameterValues = { deviceAddress, parameters };
-  const interval = cmd.interval;
 
-  requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues, interval, topic });
+  requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues, interval: cmd.interval, topic });
 }
 
 //
@@ -866,7 +864,7 @@ function connectToMotionMaster(cmd: Command) {
   }
 
   // ping Motion Master in regular intervals
-  const pingSystemInterval = rxjs.interval(config.pingSystemInterval);
+  const pingSystemInterval = interval(config.pingSystemInterval);
   pingSystemInterval.subscribe(() => motionMasterClient.sendRequest({ pingSystem: {} }));
 
   // connect to server endpoint
