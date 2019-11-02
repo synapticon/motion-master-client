@@ -76,7 +76,7 @@ export type StatusTypeObservable<T extends StatusType> =
  */
 export class MotionMasterClient {
 
-  motionMasterMessage$: Observable<MotionMasterMessage>;
+  motionMasterMessage$: Observable<IMotionMasterMessage>;
 
   status$: Observable<MotionMasterMessage.IStatus | null | undefined>;
 
@@ -84,9 +84,9 @@ export class MotionMasterClient {
   deviceEvent$: Observable<MotionMasterMessage.Status.IDeviceEvent | null | undefined>;
 
   constructor(
-    public readonly input: Subject<MotionMasterMessage>,
-    public readonly output: Subject<MotionMasterMessage>,
-    public readonly notification: Subject<[string, MotionMasterMessage]>,
+    public readonly input: Subject<IMotionMasterMessage>,
+    public readonly output: Subject<IMotionMasterMessage>,
+    public readonly notification: Subject<[string, IMotionMasterMessage]>,
   ) {
     this.motionMasterMessage$ = this.input;
     this.status$ = this.motionMasterMessage$.pipe(map((message) => message.status));
@@ -367,7 +367,7 @@ export class MotionMasterClient {
     return id;
   }
 
-  sendMessage(message: MotionMasterMessage) {
+  sendMessage(message: IMotionMasterMessage) {
     this.output.next(message);
     return message.id;
   }

@@ -966,7 +966,7 @@ function connectToMotionMaster(cmd) {
     output.subscribe(function (message) {
         // log outgoing messages and skip ping messages
         if (!(message && message.request && message.request.pingSystem)) {
-            debug(util_1.default.inspect(message.toJSON(), inspectOptions));
+            debug(util_1.default.inspect(message, inspectOptions));
         }
         serverSocket.send(Buffer.from(motion_master_client_1.encodeMotionMasterMessage(message)));
     });
@@ -1138,9 +1138,8 @@ function exitOnMessageReceived(messageId, due, exitOnSuccessCode) {
 }
 function printOnMessageReceived(messageId, outputFormat) {
     if (outputFormat === void 0) { outputFormat = 'inspect'; }
-    motionMasterClient.selectMessage(messageId).subscribe(function (msg) {
+    motionMasterClient.selectMessage(messageId).subscribe(function (message) {
         var timestamp = Date.now();
-        var message = msg.toJSON();
         var outputObj = { timestamp: timestamp, message: message };
         switch (outputFormat) {
             case 'json': {

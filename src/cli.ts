@@ -15,6 +15,7 @@ import {
   decodeMotionMasterMessage,
   DeviceAddressType,
   encodeMotionMasterMessage,
+  IMotionMasterMessage,
   MotionMasterClient,
   MotionMasterMessage,
   RequestType,
@@ -50,9 +51,9 @@ const inspectOptions: util.InspectOptions = {
 // map to cache device parameter info per device
 const deviceParameterInfoMap: Map<number, MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined> = new Map();
 
-const input = new Subject<MotionMasterMessage>();
-const output = new Subject<MotionMasterMessage>();
-const notification = new Subject<[string, MotionMasterMessage]>();
+const input = new Subject<IMotionMasterMessage>();
+const output = new Subject<IMotionMasterMessage>();
+const notification = new Subject<[string, IMotionMasterMessage]>();
 const motionMasterClient = new MotionMasterClient(input, output, notification);
 
 const config = {
@@ -885,7 +886,7 @@ function connectToMotionMaster(cmd: Command) {
     // log outgoing messages and skip ping messages
     if (!(message && message.request && message.request.pingSystem)) {
       debug(
-        util.inspect(message.toJSON(), inspectOptions),
+        util.inspect(message, inspectOptions),
       );
     }
     serverSocket.send(Buffer.from(encodeMotionMasterMessage(message)));
@@ -1068,9 +1069,8 @@ function exitOnMessageReceived(messageId: string, due = 10000, exitOnSuccessCode
 }
 
 function printOnMessageReceived(messageId: string, outputFormat: OutputFormat = 'inspect') {
-  motionMasterClient.selectMessage(messageId).subscribe((msg) => {
+  motionMasterClient.selectMessage(messageId).subscribe((message) => {
     const timestamp = Date.now();
-    const message = msg.toJSON();
     const outputObj = { timestamp, message };
 
     switch (outputFormat) {
