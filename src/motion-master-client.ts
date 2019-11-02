@@ -7,18 +7,18 @@ export import MotionMasterMessage = motionmaster.MotionMasterMessage;
 export import IMotionMasterMessage = motionmaster.IMotionMasterMessage;
 
 /**
- * Encode Request in MotionMasterMessage with the provided id.
- * @param id message id
- * @param request oneof request objects
+ * Encode MotionMasterMessage to typed array.
+ * @param message an instance of MotionMasterMessage.
+ * @returns Uint8Array
  */
-export function encodeRequest(request: MotionMasterMessage.IRequest, id: string) {
-  const message = MotionMasterMessage.create({ request, id });
+export function encodeMotionMasterMessage(message: IMotionMasterMessage) {
   return MotionMasterMessage.encode(message).finish();
 }
 
 /**
  * Decode MotionMasterMessage from typed array.
- * @param data
+ * @param data Uint8Array to decode
+ * @returns MotionMasterMessage
  */
 export function decodeMotionMasterMessage(data: Uint8Array) {
   return MotionMasterMessage.decode(data);
@@ -36,36 +36,36 @@ export type DeviceAddressType = number | null | undefined;
  * @see https://www.typescriptlang.org/docs/handbook/advanced-types.html#conditional-types
  */
 export type StatusTypeObservable<T extends StatusType> =
-  T extends 'systemPong' ? Observable<MotionMasterMessage.Status.SystemPong> :
-  T extends 'systemVersion' ? Observable<MotionMasterMessage.Status.SystemVersion> :
-  T extends 'systemEvent' ? Observable<MotionMasterMessage.Status.SystemEvent> :
-  T extends 'deviceInfo' ? Observable<MotionMasterMessage.Status.DeviceInfo> :
-  T extends 'deviceParameterInfo' ? Observable<MotionMasterMessage.Status.DeviceParameterInfo> :
-  T extends 'deviceParameterValues' ? Observable<MotionMasterMessage.Status.DeviceParameterValues> :
-  T extends 'multiDeviceParameterValues' ? Observable<MotionMasterMessage.Status.MultiDeviceParameterValues> :
-  T extends 'deviceFileList' ? Observable<MotionMasterMessage.Status.DeviceFileList> :
-  T extends 'deviceFile' ? Observable<MotionMasterMessage.Status.DeviceFile> :
-  T extends 'deviceEvent' ? Observable<MotionMasterMessage.Status.DeviceEvent> :
-  T extends 'deviceFirmwareInstallation' ? Observable<MotionMasterMessage.Status.DeviceFirmwareInstallation> :
-  T extends 'deviceLog' ? Observable<MotionMasterMessage.Status.DeviceLog> :
-  T extends 'deviceFaultReset' ? Observable<MotionMasterMessage.Status.DeviceFaultReset> :
-  T extends 'coggingTorqueRecording' ? Observable<MotionMasterMessage.Status.CoggingTorqueRecording> :
-  T extends 'coggingTorqueData' ? Observable<MotionMasterMessage.Status.CoggingTorqueData> :
-  T extends 'offsetDetection' ? Observable<MotionMasterMessage.Status.OffsetDetection> :
-  T extends 'plantIdentification' ? Observable<MotionMasterMessage.Status.PlantIdentification> :
-  T extends 'autoTuning' ? Observable<MotionMasterMessage.Status.AutoTuning> :
-  T extends 'motionController' ? Observable<MotionMasterMessage.Status.MotionController> :
-  T extends 'signalGenerator' ? Observable<MotionMasterMessage.Status.SignalGenerator> :
-  T extends 'monitoringParameterValues' ? Observable<MotionMasterMessage.Status.MonitoringParameterValues> :
-  T extends 'deviceStop' ? Observable<MotionMasterMessage.Status.DeviceStop> :
+  T extends 'systemPong' ? Observable<MotionMasterMessage.Status.ISystemPong> :
+  T extends 'systemVersion' ? Observable<MotionMasterMessage.Status.ISystemVersion> :
+  T extends 'systemEvent' ? Observable<MotionMasterMessage.Status.ISystemEvent> :
+  T extends 'deviceInfo' ? Observable<MotionMasterMessage.Status.IDeviceInfo> :
+  T extends 'deviceParameterInfo' ? Observable<MotionMasterMessage.Status.IDeviceParameterInfo> :
+  T extends 'deviceParameterValues' ? Observable<MotionMasterMessage.Status.IDeviceParameterValues> :
+  T extends 'multiDeviceParameterValues' ? Observable<MotionMasterMessage.Status.IMultiDeviceParameterValues> :
+  T extends 'deviceFileList' ? Observable<MotionMasterMessage.Status.IDeviceFileList> :
+  T extends 'deviceFile' ? Observable<MotionMasterMessage.Status.IDeviceFile> :
+  T extends 'deviceEvent' ? Observable<MotionMasterMessage.Status.IDeviceEvent> :
+  T extends 'deviceFirmwareInstallation' ? Observable<MotionMasterMessage.Status.IDeviceFirmwareInstallation> :
+  T extends 'deviceLog' ? Observable<MotionMasterMessage.Status.IDeviceLog> :
+  T extends 'deviceFaultReset' ? Observable<MotionMasterMessage.Status.IDeviceFaultReset> :
+  T extends 'coggingTorqueRecording' ? Observable<MotionMasterMessage.Status.ICoggingTorqueRecording> :
+  T extends 'coggingTorqueData' ? Observable<MotionMasterMessage.Status.ICoggingTorqueData> :
+  T extends 'offsetDetection' ? Observable<MotionMasterMessage.Status.IOffsetDetection> :
+  T extends 'plantIdentification' ? Observable<MotionMasterMessage.Status.IPlantIdentification> :
+  T extends 'autoTuning' ? Observable<MotionMasterMessage.Status.IAutoTuning> :
+  T extends 'motionController' ? Observable<MotionMasterMessage.Status.IMotionController> :
+  T extends 'signalGenerator' ? Observable<MotionMasterMessage.Status.ISignalGenerator> :
+  T extends 'monitoringParameterValues' ? Observable<MotionMasterMessage.Status.IMonitoringParameterValues> :
+  T extends 'deviceStop' ? Observable<MotionMasterMessage.Status.IDeviceStop> :
   Observable<any>;
 
 /**
  * Class representing a Motion Master client.
  *
  * It's composed out of input, output and notification streams:
- * - Subscribe to input to receive encoded messages from Motion Master DEALER socket.
- * - Send encoded messages to output stream.
+ * - Subscribe to input to receive messages from Motion Master DEALER socket.
+ * - Send messages to output stream.
  * - Subscribe to notification stream to receive messages published on a certain topic on Motion Master SUB socket.
  *
  * This class comes with properties and helper methods for:
@@ -78,31 +78,20 @@ export class MotionMasterClient {
 
   motionMasterMessage$: Observable<MotionMasterMessage>;
 
-  status$: Observable<MotionMasterMessage.Status>;
+  status$: Observable<MotionMasterMessage.IStatus | null | undefined>;
 
-  systemEvent$: Observable<MotionMasterMessage.Status.SystemEvent>;
-  deviceEvent$: Observable<MotionMasterMessage.Status.DeviceEvent>;
+  systemEvent$: Observable<MotionMasterMessage.Status.ISystemEvent | null | undefined>;
+  deviceEvent$: Observable<MotionMasterMessage.Status.IDeviceEvent | null | undefined>;
 
   constructor(
-    public readonly input: Subject<Uint8Array>,
-    public readonly output: Subject<Uint8Array>,
-    public readonly notification: Subject<[Uint8Array, Uint8Array]>,
+    public readonly input: Subject<MotionMasterMessage>,
+    public readonly output: Subject<MotionMasterMessage>,
+    public readonly notification: Subject<[string, MotionMasterMessage]>,
   ) {
-    this.motionMasterMessage$ = this.input.pipe(
-      map(decodeMotionMasterMessage),
-    );
-
-    this.status$ = this.motionMasterMessage$.pipe(
-      map((message) => message.status),
-    ) as Observable<MotionMasterMessage.Status>; // we expect Status to be ALWAYS defined on input message
-
-    this.systemEvent$ = this.status$.pipe(
-      map((status) => status['systemEvent']),
-    ) as Observable<MotionMasterMessage.Status.SystemEvent>;
-
-    this.deviceEvent$ = this.status$.pipe(
-      map((status) => status['deviceEvent']),
-    ) as Observable<MotionMasterMessage.Status.DeviceEvent>;
+    this.motionMasterMessage$ = this.input;
+    this.status$ = this.motionMasterMessage$.pipe(map((message) => message.status));
+    this.systemEvent$ = this.status$.pipe(map((status) => status ? status['systemEvent'] : undefined));
+    this.deviceEvent$ = this.status$.pipe(map((status) => status ? status['deviceEvent'] : undefined));
   }
 
   requestPingSystem(messageId?: string) {
@@ -304,24 +293,16 @@ export class MotionMasterClient {
    * @returns an observable of device messages
    */
   selectDeviceAtPosition(position: number) {
-    const messageId = v4();
-    const observable = this.motionMasterMessage$.pipe(
-      filter((message) => message.id === messageId),
+    return this.requestGetDeviceInfo().pipe(
       first(),
-      map((message) => message.status),
-      map((status) => {
-        if (status) {
-          const deviceInfo = status.deviceInfo;
-          if (deviceInfo && deviceInfo.devices) {
-            return deviceInfo.devices.find((device) => device.position === position);
-          }
+      map((deviceInfo) => {
+        if (deviceInfo.devices) {
+          return deviceInfo.devices.find((device) => device.position === position);
+        } else {
+          return null;
         }
-        return null;
       }),
     );
-    const getDeviceInfo = MotionMasterMessage.Request.GetDeviceInfo.create();
-    this.sendRequest({ getDeviceInfo }, messageId);
-    return observable;
   }
 
   /**
@@ -355,57 +336,39 @@ export class MotionMasterClient {
         filter((message) => message.id === messageId),
       );
 
-    const status$ = message$.pipe(
-      map((message) => message.status),
-    ) as Observable<MotionMasterMessage.Status>; // we expect Status to be ALWAYS defined on input message
-
-    return status$.pipe(
-      map((status) => status[type]),
-    ) as any;
+    // we expect Status to be ALWAYS defined on input message
+    const status$ = message$.pipe(map((message) => message.status)) as Observable<MotionMasterMessage.Status>;
+    return status$.pipe(map((status) => status[type])) as any;
   }
 
   /**
-   * Select notifications by topic and optionally decode the content.
+   * Select notifications by topic.
    * @param topic to filter incoming notifications by
-   * @param decode to MotionMasterMessage or leave the content as Uint8Array
-   * @returns an observable of topic and depending on the value of decode argument: MotionMasterMessage when true, Uint8Array otherwise
+   * @returns an observable of topic and MotionMasterMessage
    */
-  selectNotification<T extends boolean>(topic: string | null | undefined, decode: T):
-    T extends true ? Observable<{ topic: string, message: MotionMasterMessage }> : Observable<{ topic: string, message: Uint8Array }> {
+  selectNotification<T extends boolean>(topic: string | null | undefined):
+    T extends true ? Observable<{ topic: string, message: IMotionMasterMessage }> : Observable<{ topic: string, message: IMotionMasterMessage }> {
     return this.notification.pipe(
       filter((notif) => notif[0].toString() === topic),
-      map((notif) => ({ topic, message: decode ? decodeMotionMasterMessage(notif[1]) : notif[1] })),
+      map((notif) => ({ topic, message: notif[1] })),
     ) as any;
   }
 
   /**
-   * Select status messages by type.
-   * @param type status type, e.g. 'systemVersion', 'offsetDetection'
-   * @returns an observable of status messages depending on the passed type
-   */
-  selectStatus<T extends StatusType>(type: T): StatusTypeObservable<T> {
-    return this.status$.pipe(
-      filter((status) => status.type === type),
-      map((status) => status[type]),
-    ) as any;
-  }
-
-  /**
-   * Send encoded Request message to output.
+   * Send Request message to output.
    * @param request proto message
    * @param [messageId] identifies request, if no messageId is provided one is generated with uuid v4 and returned
    * @returns passed or generated messageId
    */
   sendRequest(request: MotionMasterMessage.IRequest, messageId?: string) {
     const id = messageId || v4();
-    const encodedMessage = encodeRequest(request, id);
-    this.output.next(encodedMessage);
+    const message = MotionMasterMessage.create({ request, id });
+    this.output.next(message);
     return id;
   }
 
-  sendMessage(message: IMotionMasterMessage) {
-    const encodedMessage = MotionMasterMessage.encode(message).finish();
-    this.output.next(encodedMessage);
+  sendMessage(message: MotionMasterMessage) {
+    this.output.next(message);
     return message.id;
   }
 

@@ -14,6 +14,7 @@ import {
   ComputeAutoTuningGainsType,
   decodeMotionMasterMessage,
   DeviceAddressType,
+  encodeMotionMasterMessage,
   MotionMasterClient,
   MotionMasterMessage,
   RequestType,
@@ -49,13 +50,13 @@ const inspectOptions: util.InspectOptions = {
 // map to cache device parameter info per device
 const deviceParameterInfoMap: Map<number, MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined> = new Map();
 
-const input = new Subject<Uint8Array>();
-const output = new Subject<Uint8Array>();
-const notification = new Subject<[Uint8Array, Uint8Array]>();
+const input = new Subject<MotionMasterMessage>();
+const output = new Subject<MotionMasterMessage>();
+const notification = new Subject<[string, MotionMasterMessage]>();
 const motionMasterClient = new MotionMasterClient(input, output, notification);
 
 const config = {
-  pingSystemInterval: 200, // ping Motion Master at regular intervals
+  pingSystemInterval: 150, // ping Motion Master at regular intervals
   motionMasterHeartbeatTimeoutDue: 1000, // exit process when Motion Master doesn't send a heartbeat message in time specified
   serverEndpoint: 'tcp://127.0.0.1:62524', // request and receive status messages (response)
   notificationEndpoint: 'tcp://127.0.0.1:62525', // subscribe to a topic and receive published status messages (heartbeat and monitoring)
@@ -876,19 +877,18 @@ function connectToMotionMaster(cmd: Command) {
 
   // feed data coming from Motion Master to MotionMasterClient
   serverSocket.on('message', (data) => {
-    input.next(data);
+    input.next(decodeMotionMasterMessage(data));
   });
 
   // send data fed from MotionMasterClient to Motion Master
-  output.subscribe((data) => {
-    const message = decodeMotionMasterMessage(data);
+  output.subscribe((message) => {
     // log outgoing messages and skip ping messages
     if (!(message && message.request && message.request.pingSystem)) {
       debug(
-        util.inspect(decodeMotionMasterMessage(data).toJSON(), inspectOptions),
+        util.inspect(message.toJSON(), inspectOptions),
       );
     }
-    serverSocket.send(Buffer.from(data));
+    serverSocket.send(Buffer.from(encodeMotionMasterMessage(message)));
   });
 
   // connnect to notification endpoint
@@ -899,7 +899,7 @@ function connectToMotionMaster(cmd: Command) {
   notificationSocket.subscribe('');
 
   // exit process when a heartbeat message is not received for more than the time specified
-  motionMasterClient.selectStatus('systemPong').pipe(
+  motionMasterClient.selectMessageStatus('systemPong').pipe(
     timeout(config.motionMasterHeartbeatTimeoutDue),
   ).subscribe({
     error: (err) => {
@@ -910,14 +910,14 @@ function connectToMotionMaster(cmd: Command) {
 
   // feed notification data coming from Motion Master to MotionMasterClient
   notificationSocket.on('message', (topic: Uint8Array, message: Uint8Array) => {
-    notification.next([topic, message]);
+    notification.next([topic.toString(), decodeMotionMasterMessage(message)]);
   });
 }
 
 function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParameterValues: MotionMasterMessage.Request.IStartMonitoringDeviceParameterValues) {
   const messageId = v4();
 
-  motionMasterClient.selectNotification(startMonitoringDeviceParameterValues.topic, true).subscribe((notif) => {
+  motionMasterClient.selectNotification(startMonitoringDeviceParameterValues.topic).subscribe((notif) => {
     const timestamp = Date.now();
     const topic = startMonitoringDeviceParameterValues.topic;
     const message = notif.message;

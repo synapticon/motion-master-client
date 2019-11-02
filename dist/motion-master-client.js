@@ -5,18 +5,18 @@ var operators_1 = require("rxjs/operators");
 var uuid_1 = require("uuid");
 exports.MotionMasterMessage = motion_master_proto_1.motionmaster.MotionMasterMessage;
 /**
- * Encode Request in MotionMasterMessage with the provided id.
- * @param id message id
- * @param request oneof request objects
+ * Encode MotionMasterMessage to typed array.
+ * @param message an instance of MotionMasterMessage.
+ * @returns Uint8Array
  */
-function encodeRequest(request, id) {
-    var message = exports.MotionMasterMessage.create({ request: request, id: id });
+function encodeMotionMasterMessage(message) {
     return exports.MotionMasterMessage.encode(message).finish();
 }
-exports.encodeRequest = encodeRequest;
+exports.encodeMotionMasterMessage = encodeMotionMasterMessage;
 /**
  * Decode MotionMasterMessage from typed array.
- * @param data
+ * @param data Uint8Array to decode
+ * @returns MotionMasterMessage
  */
 function decodeMotionMasterMessage(data) {
     return exports.MotionMasterMessage.decode(data);
@@ -26,8 +26,8 @@ exports.decodeMotionMasterMessage = decodeMotionMasterMessage;
  * Class representing a Motion Master client.
  *
  * It's composed out of input, output and notification streams:
- * - Subscribe to input to receive encoded messages from Motion Master DEALER socket.
- * - Send encoded messages to output stream.
+ * - Subscribe to input to receive messages from Motion Master DEALER socket.
+ * - Send messages to output stream.
  * - Subscribe to notification stream to receive messages published on a certain topic on Motion Master SUB socket.
  *
  * This class comes with properties and helper methods for:
@@ -41,10 +41,10 @@ var MotionMasterClient = /** @class */ (function () {
         this.input = input;
         this.output = output;
         this.notification = notification;
-        this.motionMasterMessage$ = this.input.pipe(operators_1.map(decodeMotionMasterMessage));
-        this.status$ = this.motionMasterMessage$.pipe(operators_1.map(function (message) { return message.status; })); // we expect Status to be ALWAYS defined on input message
-        this.systemEvent$ = this.status$.pipe(operators_1.map(function (status) { return status['systemEvent']; }));
-        this.deviceEvent$ = this.status$.pipe(operators_1.map(function (status) { return status['deviceEvent']; }));
+        this.motionMasterMessage$ = this.input;
+        this.status$ = this.motionMasterMessage$.pipe(operators_1.map(function (message) { return message.status; }));
+        this.systemEvent$ = this.status$.pipe(operators_1.map(function (status) { return status ? status['systemEvent'] : undefined; }));
+        this.deviceEvent$ = this.status$.pipe(operators_1.map(function (status) { return status ? status['deviceEvent'] : undefined; }));
     }
     MotionMasterClient.prototype.requestPingSystem = function (messageId) {
         var pingSystem = exports.MotionMasterMessage.Request.PingSystem.create();
@@ -206,19 +206,14 @@ var MotionMasterClient = /** @class */ (function () {
      * @returns an observable of device messages
      */
     MotionMasterClient.prototype.selectDeviceAtPosition = function (position) {
-        var messageId = uuid_1.v4();
-        var observable = this.motionMasterMessage$.pipe(operators_1.filter(function (message) { return message.id === messageId; }), operators_1.first(), operators_1.map(function (message) { return message.status; }), operators_1.map(function (status) {
-            if (status) {
-                var deviceInfo = status.deviceInfo;
-                if (deviceInfo && deviceInfo.devices) {
-                    return deviceInfo.devices.find(function (device) { return device.position === position; });
-                }
+        return this.requestGetDeviceInfo().pipe(operators_1.first(), operators_1.map(function (deviceInfo) {
+            if (deviceInfo.devices) {
+                return deviceInfo.devices.find(function (device) { return device.position === position; });
             }
-            return null;
+            else {
+                return null;
+            }
         }));
-        var getDeviceInfo = exports.MotionMasterMessage.Request.GetDeviceInfo.create();
-        this.sendRequest({ getDeviceInfo: getDeviceInfo }, messageId);
-        return observable;
     };
     /**
      * Select incoming messages by id.
@@ -245,41 +240,32 @@ var MotionMasterClient = /** @class */ (function () {
         var message$ = messageId === undefined
             ? this.motionMasterMessage$
             : this.motionMasterMessage$.pipe(operators_1.filter(function (message) { return message.id === messageId; }));
-        var status$ = message$.pipe(operators_1.map(function (message) { return message.status; })); // we expect Status to be ALWAYS defined on input message
+        // we expect Status to be ALWAYS defined on input message
+        var status$ = message$.pipe(operators_1.map(function (message) { return message.status; }));
         return status$.pipe(operators_1.map(function (status) { return status[type]; }));
     };
     /**
-     * Select notifications by topic and optionally decode the content.
+     * Select notifications by topic.
      * @param topic to filter incoming notifications by
-     * @param decode to MotionMasterMessage or leave the content as Uint8Array
-     * @returns an observable of topic and depending on the value of decode argument: MotionMasterMessage when true, Uint8Array otherwise
+     * @returns an observable of topic and MotionMasterMessage
      */
-    MotionMasterClient.prototype.selectNotification = function (topic, decode) {
-        return this.notification.pipe(operators_1.filter(function (notif) { return notif[0].toString() === topic; }), operators_1.map(function (notif) { return ({ topic: topic, message: decode ? decodeMotionMasterMessage(notif[1]) : notif[1] }); }));
+    MotionMasterClient.prototype.selectNotification = function (topic) {
+        return this.notification.pipe(operators_1.filter(function (notif) { return notif[0].toString() === topic; }), operators_1.map(function (notif) { return ({ topic: topic, message: notif[1] }); }));
     };
     /**
-     * Select status messages by type.
-     * @param type status type, e.g. 'systemVersion', 'offsetDetection'
-     * @returns an observable of status messages depending on the passed type
-     */
-    MotionMasterClient.prototype.selectStatus = function (type) {
-        return this.status$.pipe(operators_1.filter(function (status) { return status.type === type; }), operators_1.map(function (status) { return status[type]; }));
-    };
-    /**
-     * Send encoded Request message to output.
+     * Send Request message to output.
      * @param request proto message
      * @param [messageId] identifies request, if no messageId is provided one is generated with uuid v4 and returned
      * @returns passed or generated messageId
      */
     MotionMasterClient.prototype.sendRequest = function (request, messageId) {
         var id = messageId || uuid_1.v4();
-        var encodedMessage = encodeRequest(request, id);
-        this.output.next(encodedMessage);
+        var message = exports.MotionMasterMessage.create({ request: request, id: id });
+        this.output.next(message);
         return id;
     };
     MotionMasterClient.prototype.sendMessage = function (message) {
-        var encodedMessage = exports.MotionMasterMessage.encode(message).finish();
-        this.output.next(encodedMessage);
+        this.output.next(message);
         return message.id;
     };
     return MotionMasterClient;

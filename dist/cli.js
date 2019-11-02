@@ -76,7 +76,7 @@ var output = new rxjs_1.Subject();
 var notification = new rxjs_1.Subject();
 var motionMasterClient = new motion_master_client_1.MotionMasterClient(input, output, notification);
 var config = {
-    pingSystemInterval: 200,
+    pingSystemInterval: 150,
     motionMasterHeartbeatTimeoutDue: 1000,
     serverEndpoint: 'tcp://127.0.0.1:62524',
     notificationEndpoint: 'tcp://127.0.0.1:62525',
@@ -960,16 +960,15 @@ function connectToMotionMaster(cmd) {
     debug("ZeroMQ DEALER socket is connected to server endpoint: " + config.serverEndpoint);
     // feed data coming from Motion Master to MotionMasterClient
     serverSocket.on('message', function (data) {
-        input.next(data);
+        input.next(motion_master_client_1.decodeMotionMasterMessage(data));
     });
     // send data fed from MotionMasterClient to Motion Master
-    output.subscribe(function (data) {
-        var message = motion_master_client_1.decodeMotionMasterMessage(data);
+    output.subscribe(function (message) {
         // log outgoing messages and skip ping messages
         if (!(message && message.request && message.request.pingSystem)) {
-            debug(util_1.default.inspect(motion_master_client_1.decodeMotionMasterMessage(data).toJSON(), inspectOptions));
+            debug(util_1.default.inspect(message.toJSON(), inspectOptions));
         }
-        serverSocket.send(Buffer.from(data));
+        serverSocket.send(Buffer.from(motion_master_client_1.encodeMotionMasterMessage(message)));
     });
     // connnect to notification endpoint
     var notificationSocket = zeromq_1.default.socket('sub').connect(config.notificationEndpoint);
@@ -977,7 +976,7 @@ function connectToMotionMaster(cmd) {
     // subscribe to all topics
     notificationSocket.subscribe('');
     // exit process when a heartbeat message is not received for more than the time specified
-    motionMasterClient.selectStatus('systemPong').pipe(operators_1.timeout(config.motionMasterHeartbeatTimeoutDue)).subscribe({
+    motionMasterClient.selectMessageStatus('systemPong').pipe(operators_1.timeout(config.motionMasterHeartbeatTimeoutDue)).subscribe({
         error: function (err) {
             console.error(err.name + ": Heartbeat message not received for more than " + config.motionMasterHeartbeatTimeoutDue + " ms. Check if Motion Master process is running.");
             process.exit(-1);
@@ -985,12 +984,12 @@ function connectToMotionMaster(cmd) {
     });
     // feed notification data coming from Motion Master to MotionMasterClient
     notificationSocket.on('message', function (topic, message) {
-        notification.next([topic, message]);
+        notification.next([topic.toString(), motion_master_client_1.decodeMotionMasterMessage(message)]);
     });
 }
 function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParameterValues) {
     var messageId = uuid_1.v4();
-    motionMasterClient.selectNotification(startMonitoringDeviceParameterValues.topic, true).subscribe(function (notif) {
+    motionMasterClient.selectNotification(startMonitoringDeviceParameterValues.topic).subscribe(function (notif) {
         var timestamp = Date.now();
         var topic = startMonitoringDeviceParameterValues.topic;
         var message = notif.message;
