@@ -50,17 +50,25 @@ var uuid_1 = require("uuid");
 var yaml_1 = __importDefault(require("yaml"));
 var zeromq_1 = __importDefault(require("zeromq"));
 var motion_master_client_1 = require("./motion-master-client");
+var ExitStatus;
+(function (ExitStatus) {
+    ExitStatus[ExitStatus["SUCCESS"] = 0] = "SUCCESS";
+    ExitStatus[ExitStatus["UNCAUGHT_EXCEPTION"] = 1] = "UNCAUGHT_EXCEPTION";
+    ExitStatus[ExitStatus["UNHANDLED_REJECTION"] = 2] = "UNHANDLED_REJECTION";
+    ExitStatus[ExitStatus["TIMEOUT"] = 3] = "TIMEOUT";
+    ExitStatus[ExitStatus["INCORRECT_PARAMETER_FORMAT"] = 4] = "INCORRECT_PARAMETER_FORMAT";
+})(ExitStatus || (ExitStatus = {}));
 // tslint:disable: no-var-requires
 var debug = require('debug')('motion-master-client');
 var version = require('../package.json')['version'];
 // tslint:enable-next-line: no-var-requires
 process.on('uncaughtException', function (err) {
     console.error('Caught exception: ' + err);
-    process.exit(-2);
+    process.exit(ExitStatus.UNCAUGHT_EXCEPTION);
 });
 process.on('unhandledRejection', function (reason) {
     console.error('Unhandled rejection reason: ', reason);
-    process.exit(-3);
+    process.exit(ExitStatus.UNHANDLED_REJECTION);
 });
 var inspectOptions = {
     showHidden: false,
@@ -71,10 +79,10 @@ var inspectOptions = {
 };
 // map to cache device parameter info per device
 var deviceParameterInfoMap = new Map();
-var input = new rxjs_1.Subject();
-var output = new rxjs_1.Subject();
-var notification = new rxjs_1.Subject();
-var motionMasterClient = new motion_master_client_1.MotionMasterClient(input, output, notification);
+var input$ = new rxjs_1.Subject();
+var output$ = new rxjs_1.Subject();
+var notification$ = new rxjs_1.Subject();
+var motionMasterClient = new motion_master_client_1.MotionMasterClient(input$, output$, notification$);
 var config = {
     pingSystemInterval: 150,
     motionMasterHeartbeatTimeoutDue: 1000,
@@ -183,7 +191,7 @@ function requestAction(type, args, cmd) {
                 case 2:
                     {
                         motionMasterClient.requestPingSystem(messageId);
-                        process.exit(0);
+                        process.exit(ExitStatus.SUCCESS);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 3;
@@ -279,7 +287,7 @@ function requestAction(type, args, cmd) {
                 case 16:
                     {
                         motionMasterClient.requestStopDevice(deviceAddress, messageId);
-                        process.exit(0);
+                        process.exit(ExitStatus.SUCCESS);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 17;
@@ -391,7 +399,7 @@ function requestAction(type, args, cmd) {
                             target: target,
                         };
                         motionMasterClient.sendRequest({ setMotionControllerParameters: setMotionControllerParameters }, messageId);
-                        process.exit(0);
+                        process.exit(ExitStatus.SUCCESS);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 25;
@@ -407,7 +415,7 @@ function requestAction(type, args, cmd) {
                 case 26:
                     {
                         motionMasterClient.requestDisableMotionController(deviceAddress, messageId);
-                        process.exit(0);
+                        process.exit(ExitStatus.SUCCESS);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 27;
@@ -643,7 +651,7 @@ function requestAction(type, args, cmd) {
                             }
                         }
                         motionMasterClient.sendRequest({ setSignalGeneratorParameters: setSignalGeneratorParameters }, messageId);
-                        process.exit(0);
+                        process.exit(ExitStatus.SUCCESS);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 28;
@@ -657,7 +665,7 @@ function requestAction(type, args, cmd) {
                 case 29:
                     {
                         motionMasterClient.requestStopSignalGenerator(deviceAddress, messageId);
-                        process.exit(0);
+                        process.exit(ExitStatus.SUCCESS);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 30;
@@ -675,7 +683,7 @@ function requestAction(type, args, cmd) {
                     {
                         startMonitoringRequestId = args[0];
                         motionMasterClient.requestStopMonitoringDeviceParameterValues(startMonitoringRequestId, messageId);
-                        process.exit(0);
+                        process.exit(ExitStatus.SUCCESS);
                         return [3 /*break*/, 33];
                     }
                     _b.label = 32;
@@ -757,7 +765,7 @@ function getDeviceFileContentAction(name, cmd) {
                                 if (content) {
                                     var contentDecoded = new string_decoder_1.StringDecoder('utf-8').write(Buffer.from(content));
                                     console.log(contentDecoded);
-                                    process.exit(0);
+                                    process.exit(ExitStatus.SUCCESS);
                                 }
                                 else {
                                     throw new Error('Device file content is empty');
@@ -797,7 +805,7 @@ function getDeviceLogContentAction(cmd) {
                                 if (content) {
                                     var contentDecoded = new string_decoder_1.StringDecoder('utf-8').write(Buffer.from(content));
                                     console.log(contentDecoded);
-                                    process.exit(0);
+                                    process.exit(ExitStatus.SUCCESS);
                                 }
                                 else {
                                     throw new Error('Device log content is empty');
@@ -836,7 +844,7 @@ function getCoggingTorqueDataContent(cmd) {
                                 var table = message.status.coggingTorqueData.table;
                                 if (table && table.data) {
                                     console.log(table.data.join(', '));
-                                    process.exit(0);
+                                    process.exit(ExitStatus.SUCCESS);
                                 }
                                 else {
                                     throw new Error('Cogging torque table content data is empty');
@@ -954,16 +962,16 @@ function connectToMotionMaster(cmd) {
     pingSystemInterval.subscribe(function () { return motionMasterClient.sendRequest({ pingSystem: {} }); });
     // connect to server endpoint
     var serverSocket = zeromq_1.default.socket('dealer');
-    debug("Identity: " + config.identity);
+    debug("Using identity for ZeroMQ DEALER socket: " + config.identity);
     serverSocket.identity = config.identity;
     serverSocket.connect(config.serverEndpoint);
-    debug("ZeroMQ DEALER socket is connected to server endpoint: " + config.serverEndpoint);
+    debug("Connected to ZeroMQ DEALER socket server endpoint: " + config.serverEndpoint);
     // feed data coming from Motion Master to MotionMasterClient
     serverSocket.on('message', function (data) {
-        input.next(motion_master_client_1.decodeMotionMasterMessage(data));
+        input$.next(motion_master_client_1.decodeMotionMasterMessage(data));
     });
     // send data fed from MotionMasterClient to Motion Master
-    output.subscribe(function (message) {
+    output$.subscribe(function (message) {
         // log outgoing messages and skip ping messages
         if (!(message && message.request && message.request.pingSystem)) {
             debug(util_1.default.inspect(message, inspectOptions));
@@ -972,19 +980,19 @@ function connectToMotionMaster(cmd) {
     });
     // connnect to notification endpoint
     var notificationSocket = zeromq_1.default.socket('sub').connect(config.notificationEndpoint);
-    debug("ZeroMQ SUB socket connected to notification endpoint: " + config.notificationEndpoint);
+    debug("Connected to ZeroMQ SUB socket notification endpoint: " + config.notificationEndpoint);
     // subscribe to all topics
     notificationSocket.subscribe('');
     // exit process when a heartbeat message is not received for more than the time specified
     motionMasterClient.selectMessageStatus('systemPong').pipe(operators_1.timeout(config.motionMasterHeartbeatTimeoutDue)).subscribe({
         error: function (err) {
             console.error(err.name + ": Heartbeat message not received for more than " + config.motionMasterHeartbeatTimeoutDue + " ms. Check if Motion Master process is running.");
-            process.exit(-1);
+            process.exit(ExitStatus.TIMEOUT);
         },
     });
     // feed notification data coming from Motion Master to MotionMasterClient
     notificationSocket.on('message', function (topic, message) {
-        notification.next([topic.toString(), motion_master_client_1.decodeMotionMasterMessage(message)]);
+        notification$.next([topic.toString(), motion_master_client_1.decodeMotionMasterMessage(message)]);
     });
 }
 function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParameterValues) {
@@ -1077,10 +1085,10 @@ function validateParameters(parameters) {
         error = new Error('Parameter with unparsable index or subindex is requested.');
     }
     if (error) {
-        error.message += '\nExample of correct syntax: "0x2002 0x100A:0 0x2003:4".';
+        error.message += '\nExample of correct formats: "0x2002 0x100A:0 0x2003:4".';
         console.error(error.name + ": " + error.message);
         console.error(util_1.default.inspect(parameters, inspectOptions));
-        process.exit(-4);
+        process.exit(ExitStatus.INCORRECT_PARAMETER_FORMAT);
     }
 }
 function getCommandDeviceAddressAsync(cmd) {
@@ -1128,11 +1136,11 @@ function exitOnMessageReceived(messageId, due, exitOnSuccessCode) {
     }), operators_1.timeout(due)).subscribe({
         next: function () {
             debug("Exit on message received " + messageId);
-            process.exit(0);
+            process.exit(ExitStatus.SUCCESS);
         },
         error: function (err) {
             console.error(err.name + ": Status message " + messageId + " not received for more than " + due + " ms.");
-            process.exit(-1);
+            process.exit(ExitStatus.TIMEOUT);
         },
     });
 }
