@@ -678,6 +678,13 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
 
       break;
     }
+    case 'startNarrowAngleCalibration': {
+      exitOnMessageReceived(messageId, 30000, MotionMasterMessage.Status.NarrowAngleCalibration.Success.Code.DONE);
+
+      motionMasterClient.requestStartNarrowAngleCalibration(deviceAddress);
+
+      break;
+    }
     default: {
       throw new Error(`Request "${type}" doesn\'t exist`);
     }

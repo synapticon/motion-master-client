@@ -300,6 +300,12 @@ export class MotionMasterClient {
     return this.selectMessageStatus('ethercatNetworkState', id);
   }
 
+  requestStartNarrowAngleCalibration(deviceAddress: DeviceAddressType, messageId?: string) {
+    const startNarrowAngleCalibration = MotionMasterMessage.Request.StartNarrowAngleCalibration.create({ deviceAddress });
+    const id = this.sendRequest({ startNarrowAngleCalibration }, messageId);
+    return this.selectMessageStatus('narrowAngleCalibration', id);
+  }
+
   /**
    * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
    * @param position device position in EtherCAT chain
