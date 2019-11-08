@@ -51,10 +51,10 @@ const inspectOptions: util.InspectOptions = {
 // map to cache device parameter info per device
 const deviceParameterInfoMap: Map<number, MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined> = new Map();
 
-const input = new Subject<IMotionMasterMessage>();
-const output = new Subject<IMotionMasterMessage>();
-const notification = new Subject<[string, IMotionMasterMessage]>();
-const motionMasterClient = new MotionMasterClient(input, output, notification);
+const input$ = new Subject<IMotionMasterMessage>();
+const output$ = new Subject<IMotionMasterMessage>();
+const notification$ = new Subject<[string, IMotionMasterMessage]>();
+const motionMasterClient = new MotionMasterClient(input$, output$, notification$);
 
 const config = {
   pingSystemInterval: 150, // ping Motion Master at regular intervals
@@ -878,11 +878,11 @@ function connectToMotionMaster(cmd: Command) {
 
   // feed data coming from Motion Master to MotionMasterClient
   serverSocket.on('message', (data) => {
-    input.next(decodeMotionMasterMessage(data));
+    input$.next(decodeMotionMasterMessage(data));
   });
 
   // send data fed from MotionMasterClient to Motion Master
-  output.subscribe((message) => {
+  output$.subscribe((message) => {
     // log outgoing messages and skip ping messages
     if (!(message && message.request && message.request.pingSystem)) {
       debug(
@@ -911,7 +911,7 @@ function connectToMotionMaster(cmd: Command) {
 
   // feed notification data coming from Motion Master to MotionMasterClient
   notificationSocket.on('message', (topic: Uint8Array, message: Uint8Array) => {
-    notification.next([topic.toString(), decodeMotionMasterMessage(message)]);
+    notification$.next([topic.toString(), decodeMotionMasterMessage(message)]);
   });
 }
 
