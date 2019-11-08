@@ -58,6 +58,7 @@ export type StatusTypeObservable<T extends StatusType> =
   T extends 'signalGenerator' ? Observable<MotionMasterMessage.Status.ISignalGenerator> :
   T extends 'monitoringParameterValues' ? Observable<MotionMasterMessage.Status.IMonitoringParameterValues> :
   T extends 'deviceStop' ? Observable<MotionMasterMessage.Status.IDeviceStop> :
+  T extends 'ethercatNetworkState' ? Observable<MotionMasterMessage.Status.IEthercatNetworkState> :
   Observable<any>;
 
 /**
@@ -285,6 +286,18 @@ export class MotionMasterClient {
     const stopMonitoringDeviceParameterValues = MotionMasterMessage.Request.StopMonitoringDeviceParameterValues.create({ startMonitoringRequestId });
     const id = this.sendRequest({ stopMonitoringDeviceParameterValues }, messageId);
     return this.selectMessageStatus('monitoringParameterValues', id);
+  }
+
+  requestGetEthercatNetworkState(deviceAddress: DeviceAddressType, messageId?: string) {
+    const getEthercatNetworkState = MotionMasterMessage.Request.GetEthercatNetworkState.create({ deviceAddress });
+    const id = this.sendRequest({ getEthercatNetworkState }, messageId);
+    return this.selectMessageStatus('ethercatNetworkState', id);
+  }
+
+  requestSetEthercatNetworkState(deviceAddress: DeviceAddressType, state: MotionMasterMessage.Request.SetEthercatNetworkState.State, messageId?: string) {
+    const setEthercatNetworkState = MotionMasterMessage.Request.SetEthercatNetworkState.create({ deviceAddress, state });
+    const id = this.sendRequest({ setEthercatNetworkState }, messageId);
+    return this.selectMessageStatus('ethercatNetworkState', id);
   }
 
   /**

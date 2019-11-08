@@ -663,6 +663,21 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       process.exit(ExitStatus.SUCCESS);
       break;
     }
+    case 'getEthercatNetworkState': {
+      exitOnMessageReceived(messageId);
+
+      motionMasterClient.requestGetEthercatNetworkState(deviceAddress, messageId);
+
+      break;
+    }
+    case 'setEthercatNetworkState': {
+      exitOnMessageReceived(messageId);
+
+      const state = parseInt(args[0], 10);
+      motionMasterClient.requestSetEthercatNetworkState(deviceAddress, state, messageId);
+
+      break;
+    }
     default: {
       throw new Error(`Request "${type}" doesn\'t exist`);
     }

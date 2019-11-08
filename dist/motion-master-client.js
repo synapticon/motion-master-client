@@ -200,6 +200,16 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ stopMonitoringDeviceParameterValues: stopMonitoringDeviceParameterValues }, messageId);
         return this.selectMessageStatus('monitoringParameterValues', id);
     };
+    MotionMasterClient.prototype.requestGetEthercatNetworkState = function (deviceAddress, messageId) {
+        var getEthercatNetworkState = exports.MotionMasterMessage.Request.GetEthercatNetworkState.create({ deviceAddress: deviceAddress });
+        var id = this.sendRequest({ getEthercatNetworkState: getEthercatNetworkState }, messageId);
+        return this.selectMessageStatus('ethercatNetworkState', id);
+    };
+    MotionMasterClient.prototype.requestSetEthercatNetworkState = function (deviceAddress, state, messageId) {
+        var setEthercatNetworkState = exports.MotionMasterMessage.Request.SetEthercatNetworkState.create({ deviceAddress: deviceAddress, state: state });
+        var id = this.sendRequest({ setEthercatNetworkState: setEthercatNetworkState }, messageId);
+        return this.selectMessageStatus('ethercatNetworkState', id);
+    };
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain
