@@ -4,6 +4,10 @@
   "private": false,
   "description": "",
   "main": "dist/motion-master-client.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/synapticon/motion-master-client.git"
+  },
   "scripts": {
     "build": "npx tsc --build tsconfig.json",
     "watch": "npx tsc --watch",
@@ -16,7 +20,7 @@
   "author": "Marko Sanković <msankovic@synapticon.com> (https://github.com/markosankovic)",
   "license": "MIT",
   "dependencies": {
-    "@synapticon/motion-master-proto": "^3.0.0-beta.6",
+    "@synapticon/motion-master-proto": "^3.0.0-beta.8",
     "commander": "^2.20.0",
     "debug": "^4.1.1",
     "rxjs": "^6.5.2",
