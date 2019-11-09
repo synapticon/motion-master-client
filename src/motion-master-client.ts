@@ -85,11 +85,11 @@ export class MotionMasterClient {
   deviceEvent$: Observable<MotionMasterMessage.Status.IDeviceEvent | null | undefined>;
 
   constructor(
-    public readonly input: Subject<IMotionMasterMessage>,
-    public readonly output: Subject<IMotionMasterMessage>,
-    public readonly notification: Subject<[string, IMotionMasterMessage]>,
+    public readonly input$: Subject<IMotionMasterMessage>,
+    public readonly output$: Subject<IMotionMasterMessage>,
+    public readonly notification$: Subject<[string, IMotionMasterMessage]>,
   ) {
-    this.motionMasterMessage$ = this.input;
+    this.motionMasterMessage$ = this.input$;
     this.status$ = this.motionMasterMessage$.pipe(map((message) => message.status));
     this.systemEvent$ = this.status$.pipe(map((status) => status ? status['systemEvent'] : undefined));
     this.deviceEvent$ = this.status$.pipe(map((status) => status ? status['deviceEvent'] : undefined));
@@ -367,7 +367,7 @@ export class MotionMasterClient {
    */
   selectNotification<T extends boolean>(topic: string | null | undefined):
     T extends true ? Observable<{ topic: string, message: IMotionMasterMessage }> : Observable<{ topic: string, message: IMotionMasterMessage }> {
-    return this.notification.pipe(
+    return this.notification$.pipe(
       filter((notif) => notif[0].toString() === topic),
       map((notif) => ({ topic, message: notif[1] })),
     ) as any;
@@ -382,12 +382,12 @@ export class MotionMasterClient {
   sendRequest(request: MotionMasterMessage.IRequest, messageId?: string) {
     const id = messageId || v4();
     const message = MotionMasterMessage.create({ request, id });
-    this.output.next(message);
+    this.output$.next(message);
     return id;
   }
 
   sendMessage(message: IMotionMasterMessage) {
-    this.output.next(message);
+    this.output$.next(message);
     return message.id;
   }
 

@@ -37,11 +37,11 @@ exports.decodeMotionMasterMessage = decodeMotionMasterMessage;
  * - Selecting device at position.
  */
 var MotionMasterClient = /** @class */ (function () {
-    function MotionMasterClient(input, output, notification) {
-        this.input = input;
-        this.output = output;
-        this.notification = notification;
-        this.motionMasterMessage$ = this.input;
+    function MotionMasterClient(input$, output$, notification$) {
+        this.input$ = input$;
+        this.output$ = output$;
+        this.notification$ = notification$;
+        this.motionMasterMessage$ = this.input$;
         this.status$ = this.motionMasterMessage$.pipe(operators_1.map(function (message) { return message.status; }));
         this.systemEvent$ = this.status$.pipe(operators_1.map(function (status) { return status ? status['systemEvent'] : undefined; }));
         this.deviceEvent$ = this.status$.pipe(operators_1.map(function (status) { return status ? status['deviceEvent'] : undefined; }));
@@ -265,7 +265,7 @@ var MotionMasterClient = /** @class */ (function () {
      * @returns an observable of topic and MotionMasterMessage
      */
     MotionMasterClient.prototype.selectNotification = function (topic) {
-        return this.notification.pipe(operators_1.filter(function (notif) { return notif[0].toString() === topic; }), operators_1.map(function (notif) { return ({ topic: topic, message: notif[1] }); }));
+        return this.notification$.pipe(operators_1.filter(function (notif) { return notif[0].toString() === topic; }), operators_1.map(function (notif) { return ({ topic: topic, message: notif[1] }); }));
     };
     /**
      * Send Request message to output.
@@ -276,11 +276,11 @@ var MotionMasterClient = /** @class */ (function () {
     MotionMasterClient.prototype.sendRequest = function (request, messageId) {
         var id = messageId || uuid_1.v4();
         var message = exports.MotionMasterMessage.create({ request: request, id: id });
-        this.output.next(message);
+        this.output$.next(message);
         return id;
     };
     MotionMasterClient.prototype.sendMessage = function (message) {
-        this.output.next(message);
+        this.output$.next(message);
         return message.id;
     };
     return MotionMasterClient;
