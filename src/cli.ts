@@ -2,7 +2,7 @@
 import program, { Command } from 'commander';
 import fs from 'fs';
 import path from 'path';
-import { interval, Subject } from 'rxjs';
+import { interval } from 'rxjs';
 import { first, map, timeout } from 'rxjs/operators';
 import { StringDecoder } from 'string_decoder';
 import util from 'util';
@@ -12,16 +12,18 @@ import zmq from 'zeromq';
 
 import {
   ComputeAutoTuningGainsType,
-  decodeMotionMasterMessage,
   DeviceAddressType,
-  encodeMotionMasterMessage,
-  IMotionMasterMessage,
   MotionMasterClient,
-  MotionMasterMessage,
   RequestType,
   SignalGeneratorType,
   StatusType,
 } from './motion-master-client';
+import { MotionMasterNotification } from './motion-master-notification';
+import {
+  decodeMotionMasterMessage,
+  encodeMotionMasterMessage,
+  MotionMasterMessage,
+} from './util';
 
 type OutputFormat = 'inspect' | 'json' | 'yaml';
 
@@ -59,10 +61,8 @@ const inspectOptions: util.InspectOptions = {
 // map to cache device parameter info per device
 const deviceParameterInfoMap: Map<number, MotionMasterMessage.Status.IDeviceParameterInfo | null | undefined> = new Map();
 
-const input$ = new Subject<IMotionMasterMessage>();
-const output$ = new Subject<IMotionMasterMessage>();
-const notification$ = new Subject<[string, IMotionMasterMessage]>();
-const motionMasterClient = new MotionMasterClient(input$, output$, notification$);
+const motionMasterClient = new MotionMasterClient();
+const motionMasterNotification = new MotionMasterNotification();
 
 const config = {
   pingSystemInterval: 150, // ping Motion Master at regular intervals
@@ -908,11 +908,11 @@ function connectToMotionMaster(cmd: Command) {
 
   // feed data coming from Motion Master to MotionMasterClient
   serverSocket.on('message', (data) => {
-    input$.next(decodeMotionMasterMessage(data));
+    motionMasterClient.input$.next(decodeMotionMasterMessage(data));
   });
 
   // send data fed from MotionMasterClient to Motion Master
-  output$.subscribe((message) => {
+  motionMasterClient.output$.subscribe((message) => {
     // log outgoing messages and skip ping messages
     if (!(message && message.request && message.request.pingSystem)) {
       debug(
@@ -941,17 +941,16 @@ function connectToMotionMaster(cmd: Command) {
 
   // feed notification data coming from Motion Master to MotionMasterClient
   notificationSocket.on('message', (topic: Uint8Array, message: Uint8Array) => {
-    notification$.next([topic.toString(), decodeMotionMasterMessage(message)]);
+    motionMasterNotification.input$.next({ topic: topic.toString(), message: decodeMotionMasterMessage(message) });
   });
 }
 
 function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParameterValues: MotionMasterMessage.Request.IStartMonitoringDeviceParameterValues) {
   const messageId = v4();
 
-  motionMasterClient.selectNotification(startMonitoringDeviceParameterValues.topic).subscribe((notif) => {
+  motionMasterNotification.selectByTopic(startMonitoringDeviceParameterValues.topic || '').subscribe((message) => {
     const timestamp = Date.now();
     const topic = startMonitoringDeviceParameterValues.topic;
-    const message = notif.message;
     console.log(
       util.inspect({ timestamp, topic, message }, inspectOptions),
     );

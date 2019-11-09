@@ -1,28 +1,8 @@
-import { motionmaster } from '@synapticon/motion-master-proto';
 import { Observable, Subject } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 import { v4 } from 'uuid';
 
-export import MotionMasterMessage = motionmaster.MotionMasterMessage;
-export import IMotionMasterMessage = motionmaster.IMotionMasterMessage;
-
-/**
- * Encode MotionMasterMessage to typed array.
- * @param message an instance of MotionMasterMessage.
- * @returns Uint8Array
- */
-export function encodeMotionMasterMessage(message: IMotionMasterMessage) {
-  return MotionMasterMessage.encode(message).finish();
-}
-
-/**
- * Decode MotionMasterMessage from typed array.
- * @param data Uint8Array to decode
- * @returns MotionMasterMessage
- */
-export function decodeMotionMasterMessage(data: Uint8Array) {
-  return MotionMasterMessage.decode(data);
-}
+import { IMotionMasterMessage, MotionMasterMessage } from './util';
 
 export type RequestType = keyof MotionMasterMessage.IRequest;
 export type StatusType = keyof MotionMasterMessage.IStatus;
@@ -59,41 +39,15 @@ export type StatusTypeObservable<T extends StatusType> =
   T extends 'monitoringParameterValues' ? Observable<MotionMasterMessage.Status.IMonitoringParameterValues> :
   T extends 'deviceStop' ? Observable<MotionMasterMessage.Status.IDeviceStop> :
   T extends 'ethercatNetworkState' ? Observable<MotionMasterMessage.Status.IEthercatNetworkState> :
+  T extends 'narrowAngleCalibration' ? Observable<MotionMasterMessage.Status.NarrowAngleCalibration> :
   Observable<any>;
 
-/**
- * Class representing a Motion Master client.
- *
- * It's composed out of input, output and notification streams:
- * - Subscribe to input to receive messages from Motion Master DEALER socket.
- * - Send messages to output stream.
- * - Subscribe to notification stream to receive messages published on a certain topic on Motion Master SUB socket.
- *
- * This class comes with properties and helper methods for:
- * - Automatically decoding messages.
- * - Sending requests and returing typed observables of the matching status messages.
- * - Selecting notification messages with optional decoding.
- * - Selecting device at position.
- */
 export class MotionMasterClient {
 
-  motionMasterMessage$: Observable<IMotionMasterMessage>;
+  readonly input$ = new Subject<IMotionMasterMessage>();
+  readonly output$ = new Subject<IMotionMasterMessage>();
 
-  status$: Observable<MotionMasterMessage.IStatus | null | undefined>;
-
-  systemEvent$: Observable<MotionMasterMessage.Status.ISystemEvent | null | undefined>;
-  deviceEvent$: Observable<MotionMasterMessage.Status.IDeviceEvent | null | undefined>;
-
-  constructor(
-    public readonly input$: Subject<IMotionMasterMessage>,
-    public readonly output$: Subject<IMotionMasterMessage>,
-    public readonly notification$: Subject<[string, IMotionMasterMessage]>,
-  ) {
-    this.motionMasterMessage$ = this.input$;
-    this.status$ = this.motionMasterMessage$.pipe(map((message) => message.status));
-    this.systemEvent$ = this.status$.pipe(map((status) => status ? status['systemEvent'] : undefined));
-    this.deviceEvent$ = this.status$.pipe(map((status) => status ? status['deviceEvent'] : undefined));
-  }
+  status$ = this.input$.pipe(map((message) => message.status));
 
   requestPingSystem(messageId?: string) {
     const pingSystem = MotionMasterMessage.Request.PingSystem.create();
@@ -334,7 +288,7 @@ export class MotionMasterClient {
    * @returns an observable of motion master messages
    */
   selectMessage(messageId: string) {
-    return this.motionMasterMessage$.pipe(
+    return this.input$.pipe(
       filter((message) => message.id === messageId),
     );
   }
@@ -350,27 +304,14 @@ export class MotionMasterClient {
    */
   selectMessageStatus<T extends StatusType>(type: T, messageId?: string): StatusTypeObservable<T> {
     const message$ = messageId === undefined
-      ? this.motionMasterMessage$
-      : this.motionMasterMessage$.pipe(
+      ? this.input$
+      : this.input$.pipe(
         filter((message) => message.id === messageId),
       );
 
     // we expect Status to be ALWAYS defined on input message
     const status$ = message$.pipe(map((message) => message.status)) as Observable<MotionMasterMessage.Status>;
     return status$.pipe(map((status) => status[type])) as any;
-  }
-
-  /**
-   * Select notifications by topic.
-   * @param topic to filter incoming notifications by
-   * @returns an observable of topic and MotionMasterMessage
-   */
-  selectNotification<T extends boolean>(topic: string | null | undefined):
-    T extends true ? Observable<{ topic: string, message: IMotionMasterMessage }> : Observable<{ topic: string, message: IMotionMasterMessage }> {
-    return this.notification$.pipe(
-      filter((notif) => notif[0].toString() === topic),
-      map((notif) => ({ topic, message: notif[1] })),
-    ) as any;
   }
 
   /**

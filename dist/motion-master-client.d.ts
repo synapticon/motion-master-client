@@ -1,19 +1,5 @@
-import { motionmaster } from '@synapticon/motion-master-proto';
 import { Observable, Subject } from 'rxjs';
-export import MotionMasterMessage = motionmaster.MotionMasterMessage;
-export import IMotionMasterMessage = motionmaster.IMotionMasterMessage;
-/**
- * Encode MotionMasterMessage to typed array.
- * @param message an instance of MotionMasterMessage.
- * @returns Uint8Array
- */
-export declare function encodeMotionMasterMessage(message: IMotionMasterMessage): Uint8Array;
-/**
- * Decode MotionMasterMessage from typed array.
- * @param data Uint8Array to decode
- * @returns MotionMasterMessage
- */
-export declare function decodeMotionMasterMessage(data: Uint8Array): motionmaster.MotionMasterMessage;
+import { IMotionMasterMessage, MotionMasterMessage } from './util';
 export declare type RequestType = keyof MotionMasterMessage.IRequest;
 export declare type StatusType = keyof MotionMasterMessage.IStatus;
 export declare type SignalGeneratorType = keyof MotionMasterMessage.Request.ISetSignalGeneratorParameters;
@@ -23,30 +9,11 @@ export declare type DeviceAddressType = number | null | undefined;
  * Select observable of Status message based on status type argument.
  * @see https://www.typescriptlang.org/docs/handbook/advanced-types.html#conditional-types
  */
-export declare type StatusTypeObservable<T extends StatusType> = T extends 'systemPong' ? Observable<MotionMasterMessage.Status.ISystemPong> : T extends 'systemVersion' ? Observable<MotionMasterMessage.Status.ISystemVersion> : T extends 'systemEvent' ? Observable<MotionMasterMessage.Status.ISystemEvent> : T extends 'deviceInfo' ? Observable<MotionMasterMessage.Status.IDeviceInfo> : T extends 'deviceParameterInfo' ? Observable<MotionMasterMessage.Status.IDeviceParameterInfo> : T extends 'deviceParameterValues' ? Observable<MotionMasterMessage.Status.IDeviceParameterValues> : T extends 'multiDeviceParameterValues' ? Observable<MotionMasterMessage.Status.IMultiDeviceParameterValues> : T extends 'deviceFileList' ? Observable<MotionMasterMessage.Status.IDeviceFileList> : T extends 'deviceFile' ? Observable<MotionMasterMessage.Status.IDeviceFile> : T extends 'deviceEvent' ? Observable<MotionMasterMessage.Status.IDeviceEvent> : T extends 'deviceFirmwareInstallation' ? Observable<MotionMasterMessage.Status.IDeviceFirmwareInstallation> : T extends 'deviceLog' ? Observable<MotionMasterMessage.Status.IDeviceLog> : T extends 'deviceFaultReset' ? Observable<MotionMasterMessage.Status.IDeviceFaultReset> : T extends 'coggingTorqueRecording' ? Observable<MotionMasterMessage.Status.ICoggingTorqueRecording> : T extends 'coggingTorqueData' ? Observable<MotionMasterMessage.Status.ICoggingTorqueData> : T extends 'offsetDetection' ? Observable<MotionMasterMessage.Status.IOffsetDetection> : T extends 'plantIdentification' ? Observable<MotionMasterMessage.Status.IPlantIdentification> : T extends 'autoTuning' ? Observable<MotionMasterMessage.Status.IAutoTuning> : T extends 'motionController' ? Observable<MotionMasterMessage.Status.IMotionController> : T extends 'signalGenerator' ? Observable<MotionMasterMessage.Status.ISignalGenerator> : T extends 'monitoringParameterValues' ? Observable<MotionMasterMessage.Status.IMonitoringParameterValues> : T extends 'deviceStop' ? Observable<MotionMasterMessage.Status.IDeviceStop> : T extends 'ethercatNetworkState' ? Observable<MotionMasterMessage.Status.IEthercatNetworkState> : Observable<any>;
-/**
- * Class representing a Motion Master client.
- *
- * It's composed out of input, output and notification streams:
- * - Subscribe to input to receive messages from Motion Master DEALER socket.
- * - Send messages to output stream.
- * - Subscribe to notification stream to receive messages published on a certain topic on Motion Master SUB socket.
- *
- * This class comes with properties and helper methods for:
- * - Automatically decoding messages.
- * - Sending requests and returing typed observables of the matching status messages.
- * - Selecting notification messages with optional decoding.
- * - Selecting device at position.
- */
+export declare type StatusTypeObservable<T extends StatusType> = T extends 'systemPong' ? Observable<MotionMasterMessage.Status.ISystemPong> : T extends 'systemVersion' ? Observable<MotionMasterMessage.Status.ISystemVersion> : T extends 'systemEvent' ? Observable<MotionMasterMessage.Status.ISystemEvent> : T extends 'deviceInfo' ? Observable<MotionMasterMessage.Status.IDeviceInfo> : T extends 'deviceParameterInfo' ? Observable<MotionMasterMessage.Status.IDeviceParameterInfo> : T extends 'deviceParameterValues' ? Observable<MotionMasterMessage.Status.IDeviceParameterValues> : T extends 'multiDeviceParameterValues' ? Observable<MotionMasterMessage.Status.IMultiDeviceParameterValues> : T extends 'deviceFileList' ? Observable<MotionMasterMessage.Status.IDeviceFileList> : T extends 'deviceFile' ? Observable<MotionMasterMessage.Status.IDeviceFile> : T extends 'deviceEvent' ? Observable<MotionMasterMessage.Status.IDeviceEvent> : T extends 'deviceFirmwareInstallation' ? Observable<MotionMasterMessage.Status.IDeviceFirmwareInstallation> : T extends 'deviceLog' ? Observable<MotionMasterMessage.Status.IDeviceLog> : T extends 'deviceFaultReset' ? Observable<MotionMasterMessage.Status.IDeviceFaultReset> : T extends 'coggingTorqueRecording' ? Observable<MotionMasterMessage.Status.ICoggingTorqueRecording> : T extends 'coggingTorqueData' ? Observable<MotionMasterMessage.Status.ICoggingTorqueData> : T extends 'offsetDetection' ? Observable<MotionMasterMessage.Status.IOffsetDetection> : T extends 'plantIdentification' ? Observable<MotionMasterMessage.Status.IPlantIdentification> : T extends 'autoTuning' ? Observable<MotionMasterMessage.Status.IAutoTuning> : T extends 'motionController' ? Observable<MotionMasterMessage.Status.IMotionController> : T extends 'signalGenerator' ? Observable<MotionMasterMessage.Status.ISignalGenerator> : T extends 'monitoringParameterValues' ? Observable<MotionMasterMessage.Status.IMonitoringParameterValues> : T extends 'deviceStop' ? Observable<MotionMasterMessage.Status.IDeviceStop> : T extends 'ethercatNetworkState' ? Observable<MotionMasterMessage.Status.IEthercatNetworkState> : T extends 'narrowAngleCalibration' ? Observable<MotionMasterMessage.Status.NarrowAngleCalibration> : Observable<any>;
 export declare class MotionMasterClient {
     readonly input$: Subject<IMotionMasterMessage>;
     readonly output$: Subject<IMotionMasterMessage>;
-    readonly notification$: Subject<[string, IMotionMasterMessage]>;
-    motionMasterMessage$: Observable<IMotionMasterMessage>;
     status$: Observable<MotionMasterMessage.IStatus | null | undefined>;
-    systemEvent$: Observable<MotionMasterMessage.Status.ISystemEvent | null | undefined>;
-    deviceEvent$: Observable<MotionMasterMessage.Status.IDeviceEvent | null | undefined>;
-    constructor(input$: Subject<IMotionMasterMessage>, output$: Subject<IMotionMasterMessage>, notification$: Subject<[string, IMotionMasterMessage]>);
     requestPingSystem(messageId?: string): Observable<MotionMasterMessage.Status.ISystemPong>;
     requestGetSystemVersion(messageId?: string): Observable<MotionMasterMessage.Status.ISystemVersion>;
     requestGetDeviceInfo(messageId?: string): Observable<MotionMasterMessage.Status.IDeviceInfo>;
@@ -77,7 +44,7 @@ export declare class MotionMasterClient {
     requestStopMonitoringDeviceParameterValues(startMonitoringRequestId: string, messageId?: string): Observable<MotionMasterMessage.Status.IMonitoringParameterValues>;
     requestGetEthercatNetworkState(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.IEthercatNetworkState>;
     requestSetEthercatNetworkState(deviceAddress: DeviceAddressType, state: MotionMasterMessage.Request.SetEthercatNetworkState.State, messageId?: string): Observable<MotionMasterMessage.Status.IEthercatNetworkState>;
-    requestStartNarrowAngleCalibration(deviceAddress: DeviceAddressType, messageId?: string): Observable<any>;
+    requestStartNarrowAngleCalibration(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.NarrowAngleCalibration>;
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain
@@ -93,7 +60,7 @@ export declare class MotionMasterClient {
      * @param messageId
      * @returns an observable of motion master messages
      */
-    selectMessage(messageId: string): Observable<motionmaster.IMotionMasterMessage>;
+    selectMessage(messageId: string): Observable<IMotionMasterMessage>;
     /**
      * Select incoming messages by id (optionally) and get their status response.
      *
@@ -104,18 +71,6 @@ export declare class MotionMasterClient {
      * @param type of status message received as a response
      */
     selectMessageStatus<T extends StatusType>(type: T, messageId?: string): StatusTypeObservable<T>;
-    /**
-     * Select notifications by topic.
-     * @param topic to filter incoming notifications by
-     * @returns an observable of topic and MotionMasterMessage
-     */
-    selectNotification<T extends boolean>(topic: string | null | undefined): T extends true ? Observable<{
-        topic: string;
-        message: IMotionMasterMessage;
-    }> : Observable<{
-        topic: string;
-        message: IMotionMasterMessage;
-    }>;
     /**
      * Send Request message to output.
      * @param request proto message

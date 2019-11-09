@@ -1,4 +1,4 @@
 export { MotionMasterClient } from './motion-master-client';
-export { encodeMotionMasterMessage } from './motion-master-client';
-export { decodeMotionMasterMessage } from './motion-master-client';
+export { MotionMasterNotification } from './motion-master-notification';
+export { decodeMotionMasterMessage, encodeMotionMasterMessage, IMotionMasterMessage, MotionMasterMessage, } from './util';
 //# sourceMappingURL=index.d.ts.map

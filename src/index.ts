@@ -1,4 +1,9 @@
 export { MotionMasterClient } from './motion-master-client';
+export { MotionMasterNotification } from './motion-master-notification';
 
-export { encodeMotionMasterMessage } from './motion-master-client';
-export { decodeMotionMasterMessage } from './motion-master-client';
+export {
+  decodeMotionMasterMessage,
+  encodeMotionMasterMessage,
+  IMotionMasterMessage,
+  MotionMasterMessage,
+} from './util';
