@@ -5,27 +5,17 @@ import { webSocket, WebSocketSubject, WebSocketSubjectConfig } from 'rxjs/webSoc
 import { MotionMasterClient } from './motion-master-client';
 import { MotionMasterMessage } from './util';
 
-export interface IMotionMasterClientWebSocketConnectionConfig {
-  aliveTimeout: number;
-  pingDelay: number;
-  url: string;
-}
-
 export class MotionMasterClientWebSocketConnection {
 
   client = new MotionMasterClient();
 
-  config: IMotionMasterClientWebSocketConnectionConfig = {
-    aliveTimeout: 1000,
-    pingDelay: 200,
-    url: `ws://${location.hostname}:63524`,
-  };
-
   readonly connected$ = new BehaviorSubject<boolean>(false);
 
+  pingDelay = 200;
   private pingSystemIntervalObserver = { next: () => this.client.requestPingSystem() };
   private pingSystemIntervalSubscription = new Subscription();
 
+  aliveTimeout = 1000;
   readonly alive$ = new BehaviorSubject<boolean>(false);
   private aliveTimeoutId = 0;
 
@@ -40,7 +30,7 @@ export class MotionMasterClientWebSocketConnection {
 
   private openObserver = {
     next: () => {
-      this.pingSystemIntervalSubscription = interval(this.config.pingDelay).subscribe(this.pingSystemIntervalObserver);
+      this.pingSystemIntervalSubscription = interval(this.pingDelay).subscribe(this.pingSystemIntervalObserver);
       this.connected$.next(true);
     },
   };
@@ -51,7 +41,7 @@ export class MotionMasterClientWebSocketConnection {
     deserializer: (e: MessageEvent) => new Uint8Array(e.data),
     openObserver: this.openObserver,
     serializer: (value) => value,
-    url: this.config.url,
+    url: this.wssUrl,
   };
 
   wss$: WebSocketSubject<Uint8Array> = webSocket(this.wssConfig);
@@ -63,11 +53,7 @@ export class MotionMasterClientWebSocketConnection {
   private messageSubscription = new Subscription();
   private clientOutputSubscription = new Subscription();
 
-  constructor(config?: Partial<IMotionMasterClientWebSocketConnectionConfig>) {
-    if (config) {
-      this.config = { ...this.config, ...config };
-    }
-  }
+  constructor(public wssUrl = `ws://${location.hostname}:63524`) { }
 
   close() {
     this.messageSubscription.unsubscribe();
@@ -94,7 +80,7 @@ export class MotionMasterClientWebSocketConnection {
       this.alive$.next(true);
     }
     self.clearTimeout(this.aliveTimeoutId);
-    this.aliveTimeoutId = self.setTimeout(() => this.alive$.next(false), this.config.aliveTimeout);
+    this.aliveTimeoutId = self.setTimeout(() => this.alive$.next(false), this.aliveTimeout);
   }
 
 }

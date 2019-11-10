@@ -7,29 +7,37 @@ export class MotionMasterNotification {
 
   readonly input$ = new Subject<{ topic: string, message: IMotionMasterMessage }>();
 
-  message$ = this.input$.pipe(
-    filter(({ topic }) => topic === 'notification'),
-    pluck('message'),
-  );
+  /**
+   * Notification messages are system and device events.
+   */
+  notification$ = this.selectByTopic('notification');
 
-  systemEvent$ = this.message$.pipe(
+  /**
+   * An observable of system event status messages.
+   * Motion Master goes through several states until it gets to initialized.
+   */
+  systemEvent$ = this.notification$.pipe(
     pluck('status'),
     map((status) => status ? status.systemEvent : null),
   ) as Observable<MotionMasterMessage.Status.ISystemEvent>;
 
-  deviceEvent$ = this.message$.pipe(
+  /**
+   * An observable of device event status messages.
+   */
+  deviceEvent$ = this.notification$.pipe(
     pluck('status'),
     map((status) => status ? status.deviceEvent : null),
   ) as Observable<MotionMasterMessage.Status.IDeviceEvent>;
 
-  monitoring$ = this.input$.pipe(
-    filter(({ topic }) => topic !== 'notification'),
-  );
-
-  selectByTopic(selectTopic: string) {
+  /**
+   * Select messages by topic.
+   * @param t topic to filter by
+   * @returns an observable of messages
+   */
+  selectByTopic(t: string) {
     return this.input$.pipe(
-      filter(({ topic }) => topic === selectTopic),
-      map(({ message }) => message),
+      filter(({ topic }) => topic === t),
+      pluck('message'),
     );
   }
 

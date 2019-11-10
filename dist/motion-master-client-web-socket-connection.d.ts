@@ -2,17 +2,14 @@ import { BehaviorSubject } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { MotionMasterClient } from './motion-master-client';
 import { MotionMasterMessage } from './util';
-export interface IMotionMasterClientWebSocketConnectionConfig {
-    aliveTimeout: number;
-    pingDelay: number;
-    url: string;
-}
 export declare class MotionMasterClientWebSocketConnection {
+    wssUrl: string;
     client: MotionMasterClient;
-    config: IMotionMasterClientWebSocketConnectionConfig;
     readonly connected$: BehaviorSubject<boolean>;
+    pingDelay: number;
     private pingSystemIntervalObserver;
     private pingSystemIntervalSubscription;
+    aliveTimeout: number;
     readonly alive$: BehaviorSubject<boolean>;
     private aliveTimeoutId;
     private closeObserver;
@@ -22,7 +19,7 @@ export declare class MotionMasterClientWebSocketConnection {
     message$: import("rxjs").Observable<MotionMasterMessage>;
     private messageSubscription;
     private clientOutputSubscription;
-    constructor(config?: Partial<IMotionMasterClientWebSocketConnectionConfig>);
+    constructor(wssUrl?: string);
     close(): void;
     open(): void;
     private keepalive;

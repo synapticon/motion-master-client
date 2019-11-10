@@ -5,13 +5,24 @@ export declare class MotionMasterNotification {
         topic: string;
         message: IMotionMasterMessage;
     }>;
-    message$: Observable<IMotionMasterMessage>;
+    /**
+     * Notification messages are system and device events.
+     */
+    notification$: Observable<IMotionMasterMessage>;
+    /**
+     * An observable of system event status messages.
+     * Motion Master goes through several states until it gets to initialized.
+     */
     systemEvent$: Observable<MotionMasterMessage.Status.ISystemEvent>;
+    /**
+     * An observable of device event status messages.
+     */
     deviceEvent$: Observable<MotionMasterMessage.Status.IDeviceEvent>;
-    monitoring$: Observable<{
-        topic: string;
-        message: IMotionMasterMessage;
-    }>;
-    selectByTopic(selectTopic: string): Observable<IMotionMasterMessage>;
+    /**
+     * Select messages by topic.
+     * @param t topic to filter by
+     * @returns an observable of messages
+     */
+    selectByTopic(t: string): Observable<IMotionMasterMessage>;
 }
 //# sourceMappingURL=motion-master-notification.d.ts.map

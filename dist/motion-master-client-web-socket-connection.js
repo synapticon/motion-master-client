@@ -1,15 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
@@ -17,17 +6,16 @@ var webSocket_1 = require("rxjs/webSocket");
 var motion_master_client_1 = require("./motion-master-client");
 var util_1 = require("./util");
 var MotionMasterClientWebSocketConnection = /** @class */ (function () {
-    function MotionMasterClientWebSocketConnection(config) {
+    function MotionMasterClientWebSocketConnection(wssUrl) {
         var _this = this;
+        if (wssUrl === void 0) { wssUrl = "ws://" + location.hostname + ":63524"; }
+        this.wssUrl = wssUrl;
         this.client = new motion_master_client_1.MotionMasterClient();
-        this.config = {
-            aliveTimeout: 1000,
-            pingDelay: 200,
-            url: "ws://" + location.hostname + ":63524",
-        };
         this.connected$ = new rxjs_1.BehaviorSubject(false);
+        this.pingDelay = 200;
         this.pingSystemIntervalObserver = { next: function () { return _this.client.requestPingSystem(); } };
         this.pingSystemIntervalSubscription = new rxjs_1.Subscription();
+        this.aliveTimeout = 1000;
         this.alive$ = new rxjs_1.BehaviorSubject(false);
         this.aliveTimeoutId = 0;
         this.closeObserver = {
@@ -40,7 +28,7 @@ var MotionMasterClientWebSocketConnection = /** @class */ (function () {
         };
         this.openObserver = {
             next: function () {
-                _this.pingSystemIntervalSubscription = rxjs_1.interval(_this.config.pingDelay).subscribe(_this.pingSystemIntervalObserver);
+                _this.pingSystemIntervalSubscription = rxjs_1.interval(_this.pingDelay).subscribe(_this.pingSystemIntervalObserver);
                 _this.connected$.next(true);
             },
         };
@@ -50,15 +38,12 @@ var MotionMasterClientWebSocketConnection = /** @class */ (function () {
             deserializer: function (e) { return new Uint8Array(e.data); },
             openObserver: this.openObserver,
             serializer: function (value) { return value; },
-            url: this.config.url,
+            url: this.wssUrl,
         };
         this.wss$ = webSocket_1.webSocket(this.wssConfig);
         this.message$ = this.wss$.pipe(operators_1.map(function (data) { return util_1.MotionMasterMessage.decode(data); }));
         this.messageSubscription = new rxjs_1.Subscription();
         this.clientOutputSubscription = new rxjs_1.Subscription();
-        if (config) {
-            this.config = __assign(__assign({}, this.config), config);
-        }
     }
     MotionMasterClientWebSocketConnection.prototype.close = function () {
         this.messageSubscription.unsubscribe();
@@ -80,7 +65,7 @@ var MotionMasterClientWebSocketConnection = /** @class */ (function () {
             this.alive$.next(true);
         }
         self.clearTimeout(this.aliveTimeoutId);
-        this.aliveTimeoutId = self.setTimeout(function () { return _this.alive$.next(false); }, this.config.aliveTimeout);
+        this.aliveTimeoutId = self.setTimeout(function () { return _this.alive$.next(false); }, this.aliveTimeout);
     };
     return MotionMasterClientWebSocketConnection;
 }());
