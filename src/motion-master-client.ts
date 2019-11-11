@@ -151,7 +151,7 @@ export class MotionMasterClient {
     return this.selectMessageStatus('offsetDetection', id);
   }
 
-  requestStartPlantIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, cutoffFrequency: number, messageId: string) {
+  requestStartPlantIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, cutoffFrequency: number, messageId?: string) {
     const startPlantIdentification = MotionMasterMessage.Request.StartPlantIdentification.create({
       deviceAddress,
       durationSeconds,
