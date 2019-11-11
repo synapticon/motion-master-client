@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { MotionMasterClient } from './motion-master-client';
 import { MotionMasterMessage } from './util';
@@ -16,7 +16,7 @@ export declare class MotionMasterClientWebSocketConnection {
     private openObserver;
     private wssConfig;
     wss$: WebSocketSubject<Uint8Array>;
-    message$: import("rxjs").Observable<MotionMasterMessage>;
+    message$: Observable<MotionMasterMessage>;
     private messageSubscription;
     private clientOutputSubscription;
     constructor(wssUrl?: string);

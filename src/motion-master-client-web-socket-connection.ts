@@ -1,4 +1,4 @@
-import { BehaviorSubject, interval, Subscription } from 'rxjs';
+import { BehaviorSubject, interval, Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 import { webSocket, WebSocketSubject, WebSocketSubjectConfig } from 'rxjs/webSocket';
 
@@ -46,7 +46,7 @@ export class MotionMasterClientWebSocketConnection {
 
   wss$: WebSocketSubject<Uint8Array> = webSocket(this.wssConfig);
 
-  message$ = this.wss$.pipe(
+  message$: Observable<MotionMasterMessage> = this.wss$.pipe(
     map((data) => MotionMasterMessage.decode(data)),
   );
 
