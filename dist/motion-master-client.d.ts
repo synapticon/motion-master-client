@@ -31,7 +31,7 @@ export declare class MotionMasterClient {
     requestStartCoggingTorqueRecording(deviceAddress: DeviceAddressType, skipAutoTuning: boolean, messageId?: string): Observable<MotionMasterMessage.Status.ICoggingTorqueRecording>;
     requestGetCoggingTorqueData(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.ICoggingTorqueData>;
     requestStartOffsetDetection(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.IOffsetDetection>;
-    requestStartPlantIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, cutoffFrequency: number, messageId: string): Observable<MotionMasterMessage.Status.IPlantIdentification>;
+    requestStartPlantIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, cutoffFrequency: number, messageId?: string): Observable<MotionMasterMessage.Status.IPlantIdentification>;
     requestComputePositionAutoTuningGains(deviceAddress: number, positionParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IPositionParameters, messageId?: string): Observable<MotionMasterMessage.Status.IAutoTuning>;
     requestComputeVelocityAutoTuningGains(deviceAddress: number, velocityParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IVelocityParameters, messageId?: string): Observable<MotionMasterMessage.Status.IAutoTuning>;
     requestSetMotionControllerParameters(deviceAddress: DeviceAddressType, target: number, messageId?: string): string;
