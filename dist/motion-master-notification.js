@@ -16,11 +16,15 @@ var MotionMasterNotification = /** @class */ (function () {
          * An observable of system event status messages.
          * Motion Master goes through several states until it gets to initialized.
          */
-        this.systemEvent$ = this.notification$.pipe(operators_1.filter(function (message) { return (message.status && 'systemEvent' in message.status) === true; }));
+        this.systemEvent$ = this.notification$.pipe(operators_1.filter(function (message) { return (message.status && 'systemEvent' in message.status) === true; }), 
+        // tslint:disable-next-line: no-non-null-assertion
+        operators_1.map(function (message) { return message.status.systemEvent; }));
         /**
          * An observable of device event status messages.
          */
-        this.deviceEvent$ = this.notification$.pipe(operators_1.filter(function (message) { return (message.status && 'deviceEvent' in message.status) === true; }));
+        this.deviceEvent$ = this.notification$.pipe(operators_1.filter(function (message) { return (message.status && 'deviceEvent' in message.status) === true; }), 
+        // tslint:disable-next-line: no-non-null-assertion
+        operators_1.map(function (message) { return message.status.deviceEvent; }));
     }
     /**
      * Select messages by topic.
