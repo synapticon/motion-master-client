@@ -41,32 +41,29 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
     /**
      * Subscribe to a topic and optionally buffer messages.
      * First subscription will open WebSocket connection.
-     * @param topic topic to subscribe to
-     * @param bufferSize how many messages to buffer before sending
+     * @param data subscribe data
      * @returns subscription
      */
-    MotionMasterNotificationWebSocketConnection.prototype.subscribe = function (topic, bufferSize) {
+    MotionMasterNotificationWebSocketConnection.prototype.subscribe = function (data) {
         var _this = this;
-        if (bufferSize === void 0) { bufferSize = 1; }
-        this.unsubscribe(topic);
+        var _a = data.bufferSize, bufferSize = _a === void 0 ? 1 : _a, id = data.id, topic = data.topic;
         var observable = this.selectByTopic(topic, true).pipe(operators_1.bufferCount(bufferSize));
         // TODO: Distinct until changed get device parameter values.
         var subscription = observable.subscribe(function (messages) {
             messages.forEach(function (message) { return _this.notification.input$.next({ topic: topic, message: message }); });
         });
-        this.subscriptions[topic] = subscription;
-        return subscription;
+        this.subscriptions[id] = subscription;
     };
     /**
-     * Unsubscribe from a previously subscribed topic.
+     * Unsubscribe from a previous subscription.
      * WebSocket connection will close on last unsubscribe.
-     * @param topic topic to unsubscribe from
+     * @param id message id related to previous subscription
      */
-    MotionMasterNotificationWebSocketConnection.prototype.unsubscribe = function (topic) {
+    MotionMasterNotificationWebSocketConnection.prototype.unsubscribe = function (id) {
         // TODO: Emit all buffered messages before unsubscribe.
-        if (this.subscriptions[topic]) {
-            this.subscriptions[topic].unsubscribe();
-            delete this.subscriptions[topic];
+        if (this.subscriptions[id]) {
+            this.subscriptions[id].unsubscribe();
+            delete this.subscriptions[id];
         }
     };
     /**
@@ -74,7 +71,7 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
      */
     MotionMasterNotificationWebSocketConnection.prototype.unsubscriberAll = function () {
         var _this = this;
-        Object.keys(this.subscriptions).forEach(function (topic) { return _this.unsubscribe(topic); });
+        Object.keys(this.subscriptions).forEach(function (id) { return _this.unsubscribe(id); });
     };
     /**
      * Select incoming messages by topic and optionally decode the content.

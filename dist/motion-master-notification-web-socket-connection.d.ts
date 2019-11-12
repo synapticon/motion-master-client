@@ -1,6 +1,7 @@
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { WebSocketSubject, WebSocketSubjectConfig } from 'rxjs/webSocket';
 import { MotionMasterNotification } from './motion-master-notification';
+import { IMotionMasterNotificationSubscribeData } from './motion-master-notification-subscribe-data';
 import { MotionMasterMessage } from './util';
 export declare class MotionMasterNotificationWebSocketConnection {
     wssUrl: string;
@@ -23,17 +24,16 @@ export declare class MotionMasterNotificationWebSocketConnection {
     /**
      * Subscribe to a topic and optionally buffer messages.
      * First subscription will open WebSocket connection.
-     * @param topic topic to subscribe to
-     * @param bufferSize how many messages to buffer before sending
+     * @param data subscribe data
      * @returns subscription
      */
-    subscribe(topic: string, bufferSize?: number): Subscription;
+    subscribe(data: IMotionMasterNotificationSubscribeData): void;
     /**
-     * Unsubscribe from a previously subscribed topic.
+     * Unsubscribe from a previous subscription.
      * WebSocket connection will close on last unsubscribe.
-     * @param topic topic to unsubscribe from
+     * @param id message id related to previous subscription
      */
-    unsubscribe(topic: string): void;
+    unsubscribe(id: string): void;
     /**
      * Unsubscribe from all previously subscribed topics.
      */

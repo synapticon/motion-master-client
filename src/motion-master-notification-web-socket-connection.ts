@@ -3,6 +3,7 @@ import { bufferCount, filter, map } from 'rxjs/operators';
 import { webSocket, WebSocketSubject, WebSocketSubjectConfig } from 'rxjs/webSocket';
 
 import { MotionMasterNotification } from './motion-master-notification';
+import { IMotionMasterNotificationSubscribeData } from './motion-master-notification-subscribe-data';
 import { MotionMasterMessage } from './util';
 
 export class MotionMasterNotificationWebSocketConnection {
@@ -49,12 +50,11 @@ export class MotionMasterNotificationWebSocketConnection {
   /**
    * Subscribe to a topic and optionally buffer messages.
    * First subscription will open WebSocket connection.
-   * @param topic topic to subscribe to
-   * @param bufferSize how many messages to buffer before sending
+   * @param data subscribe data
    * @returns subscription
    */
-  subscribe(topic: string, bufferSize: number = 1) {
-    this.unsubscribe(topic);
+  subscribe(data: IMotionMasterNotificationSubscribeData) {
+    const { bufferSize = 1, id, topic } = data;
 
     const observable = this.selectByTopic(topic, true).pipe(
       bufferCount(bufferSize),
@@ -66,21 +66,19 @@ export class MotionMasterNotificationWebSocketConnection {
       messages.forEach((message) => this.notification.input$.next({ topic, message }));
     });
 
-    this.subscriptions[topic] = subscription;
-
-    return subscription;
+    this.subscriptions[id] = subscription;
   }
 
   /**
-   * Unsubscribe from a previously subscribed topic.
+   * Unsubscribe from a previous subscription.
    * WebSocket connection will close on last unsubscribe.
-   * @param topic topic to unsubscribe from
+   * @param id message id related to previous subscription
    */
-  unsubscribe(topic: string) {
+  unsubscribe(id: string) {
     // TODO: Emit all buffered messages before unsubscribe.
-    if (this.subscriptions[topic]) {
-      this.subscriptions[topic].unsubscribe();
-      delete this.subscriptions[topic];
+    if (this.subscriptions[id]) {
+      this.subscriptions[id].unsubscribe();
+      delete this.subscriptions[id];
     }
   }
 
@@ -88,7 +86,7 @@ export class MotionMasterNotificationWebSocketConnection {
    * Unsubscribe from all previously subscribed topics.
    */
   unsubscriberAll() {
-    Object.keys(this.subscriptions).forEach((topic) => this.unsubscribe(topic));
+    Object.keys(this.subscriptions).forEach((id) => this.unsubscribe(id));
   }
 
   /**
@@ -97,9 +95,7 @@ export class MotionMasterNotificationWebSocketConnection {
    * @param decode to MotionMasterMessage or leave the content as Uint8Array
    * @returns an observable of topic and depending on the value of decode argument: MotionMasterMessage when true, Uint8Array otherwise
    */
-  selectByTopic<T extends boolean>(topic: string, decode: T): T extends true
-    ? Observable<MotionMasterMessage>
-    : Observable<Uint8Array> {
+  selectByTopic<T extends boolean>(topic: string, decode: T): T extends true ? Observable<MotionMasterMessage> : Observable<Uint8Array> {
     return this.buffer$.pipe(
       filter((data) => data[0] === topic),
       map((data) => decode
