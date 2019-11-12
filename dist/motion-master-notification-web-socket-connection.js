@@ -49,9 +49,7 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
         var _a = data.bufferSize, bufferSize = _a === void 0 ? 1 : _a, id = data.id, topic = data.topic;
         var observable = this.selectByTopic(topic, true).pipe(operators_1.bufferCount(bufferSize));
         // TODO: Distinct until changed get device parameter values.
-        var subscription = observable.subscribe(function (messages) {
-            messages.forEach(function (message) { return _this.notification.input$.next({ topic: topic, message: message }); });
-        });
+        var subscription = observable.subscribe(function (messages) { return _this.notification.input$.next({ topic: topic, messages: messages }); });
         this.subscriptions[id] = subscription;
     };
     /**

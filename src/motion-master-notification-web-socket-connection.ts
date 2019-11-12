@@ -62,9 +62,7 @@ export class MotionMasterNotificationWebSocketConnection {
 
     // TODO: Distinct until changed get device parameter values.
 
-    const subscription = observable.subscribe((messages) => {
-      messages.forEach((message) => this.notification.input$.next({ topic, message }));
-    });
+    const subscription = observable.subscribe((messages) => this.notification.input$.next({ topic, messages }));
 
     this.subscriptions[id] = subscription;
   }

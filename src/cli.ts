@@ -939,20 +939,20 @@ function connectToMotionMaster(cmd: Command) {
     },
   });
 
-  // feed notification data coming from Motion Master to MotionMasterClient
+  // feed notification data coming from Motion Master to MotionMasterNotification
   notificationSocket.on('message', (topic: Uint8Array, message: Uint8Array) => {
-    motionMasterNotification.input$.next({ topic: topic.toString(), message: decodeMotionMasterMessage(message) });
+    motionMasterNotification.input$.next({ topic: topic.toString(), messages: [decodeMotionMasterMessage(message)] });
   });
 }
 
 function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParameterValues: MotionMasterMessage.Request.IStartMonitoringDeviceParameterValues) {
   const messageId = v4();
 
-  motionMasterNotification.selectByTopic(startMonitoringDeviceParameterValues.topic || '').subscribe((message) => {
+  motionMasterNotification.selectMessagesByTopic(startMonitoringDeviceParameterValues.topic || '').subscribe((messages) => {
     const timestamp = Date.now();
     const topic = startMonitoringDeviceParameterValues.topic;
     console.log(
-      util.inspect({ timestamp, topic, message }, inspectOptions),
+      util.inspect({ timestamp, topic, messages }, inspectOptions),
     );
   });
 

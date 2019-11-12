@@ -1016,17 +1016,17 @@ function connectToMotionMaster(cmd) {
             process.exit(ExitStatus.TIMEOUT);
         },
     });
-    // feed notification data coming from Motion Master to MotionMasterClient
+    // feed notification data coming from Motion Master to MotionMasterNotification
     notificationSocket.on('message', function (topic, message) {
-        motionMasterNotification.input$.next({ topic: topic.toString(), message: util_2.decodeMotionMasterMessage(message) });
+        motionMasterNotification.input$.next({ topic: topic.toString(), messages: [util_2.decodeMotionMasterMessage(message)] });
     });
 }
 function requestStartMonitoringDeviceParameterValues(startMonitoringDeviceParameterValues) {
     var messageId = uuid_1.v4();
-    motionMasterNotification.selectByTopic(startMonitoringDeviceParameterValues.topic || '').subscribe(function (message) {
+    motionMasterNotification.selectMessagesByTopic(startMonitoringDeviceParameterValues.topic || '').subscribe(function (messages) {
         var timestamp = Date.now();
         var topic = startMonitoringDeviceParameterValues.topic;
-        console.log(util_1.default.inspect({ timestamp: timestamp, topic: topic, message: message }, inspectOptions));
+        console.log(util_1.default.inspect({ timestamp: timestamp, topic: topic, messages: messages }, inspectOptions));
     });
     motionMasterClient.sendRequest({ startMonitoringDeviceParameterValues: startMonitoringDeviceParameterValues }, messageId);
 }
