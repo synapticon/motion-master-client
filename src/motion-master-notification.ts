@@ -1,5 +1,5 @@
-import { from, Observable, Subject } from 'rxjs';
-import { filter, pluck, switchMap } from 'rxjs/operators';
+import { from, Subject } from 'rxjs';
+import { filter, map, pluck, switchMap } from 'rxjs/operators';
 
 import { IMotionMasterMessage } from './util';
 
@@ -13,7 +13,7 @@ export class MotionMasterNotification {
   /**
    * Notification messages are system and device events.
    */
-  readonly notification$: Observable<IMotionMasterMessage> = this.selectMessagesByTopic('notification').pipe(
+  readonly notification$ = this.selectMessagesByTopic('notification').pipe(
     switchMap((messages) => from(messages)),
   );
 
@@ -21,15 +21,19 @@ export class MotionMasterNotification {
    * An observable of system event status messages.
    * Motion Master goes through several states until it gets to initialized.
    */
-  readonly systemEvent$: Observable<IMotionMasterMessage> = this.notification$.pipe(
+  readonly systemEvent$ = this.notification$.pipe(
     filter((message) => (message.status && 'systemEvent' in message.status) === true),
+    // tslint:disable-next-line: no-non-null-assertion
+    map((message) => message.status!.systemEvent!),
   );
 
   /**
    * An observable of device event status messages.
    */
-  readonly deviceEvent$: Observable<IMotionMasterMessage> = this.notification$.pipe(
+  readonly deviceEvent$ = this.notification$.pipe(
     filter((message) => (message.status && 'deviceEvent' in message.status) === true),
+    // tslint:disable-next-line: no-non-null-assertion
+    map((message) => message.status!.deviceEvent!),
   );
 
   /**
