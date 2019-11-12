@@ -1,10 +1,10 @@
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { bufferCount, filter, map } from 'rxjs/operators';
+import { bufferCount, distinctUntilChanged, filter, map } from 'rxjs/operators';
 import { webSocket, WebSocketSubject, WebSocketSubjectConfig } from 'rxjs/webSocket';
 
 import { MotionMasterNotification } from './motion-master-notification';
 import { IMotionMasterNotificationSubscribeData } from './motion-master-notification-subscribe-data';
-import { MotionMasterMessage } from './util';
+import { MotionMasterMessage, compareParameterValues } from './util';
 
 export class MotionMasterNotificationWebSocketConnection {
 
@@ -32,12 +32,12 @@ export class MotionMasterNotificationWebSocketConnection {
     url: this.wssUrl,
   };
 
-  wss$: WebSocketSubject<string | ArrayBuffer> = webSocket(this.wssConfig);
+  wss$: WebSocketSubject<any> = webSocket(this.wssConfig);
 
   /**
    * Topic and Motion Master message are sent as a separate WebSocket messages.
    * Collect both topic and Motion Master message and then emit.
-   * TODO: Ensure that this works as expected or switch to a single WebSocket message!
+   * @todo ensure that bufferCount buffers topic first and message buffer second in all cases.
    */
   buffer$ = this.wss$.pipe(
     bufferCount(2),
@@ -54,15 +54,21 @@ export class MotionMasterNotificationWebSocketConnection {
    * @returns subscription
    */
   subscribe(data: IMotionMasterNotificationSubscribeData) {
-    const { bufferSize = 1, id, topic } = data;
+    const { bufferSize = 1, distinct = false, id, topic } = data;
 
-    const observable = this.selectByTopic(topic, true).pipe(
+    let observable = this.selectBufferByTopic(topic, true);
+
+    if (distinct) {
+      observable = observable.pipe(
+        distinctUntilChanged(compareParameterValues),
+      );
+    }
+
+    const messages$ = observable.pipe(
       bufferCount(bufferSize),
     );
 
-    // TODO: Distinct until changed get device parameter values.
-
-    const subscription = observable.subscribe((messages) => this.notification.input$.next({ topic, messages }));
+    const subscription = messages$.subscribe((messages) => this.notification.input$.next({ topic, messages }));
 
     this.subscriptions[id] = subscription;
   }
@@ -70,10 +76,10 @@ export class MotionMasterNotificationWebSocketConnection {
   /**
    * Unsubscribe from a previous subscription.
    * WebSocket connection will close on last unsubscribe.
+   * @todo find a way to emit all buffered messages before unsubscribe.
    * @param id message id related to previous subscription
    */
   unsubscribe(id: string) {
-    // TODO: Emit all buffered messages before unsubscribe.
     if (this.subscriptions[id]) {
       this.subscriptions[id].unsubscribe();
       delete this.subscriptions[id];
@@ -88,12 +94,12 @@ export class MotionMasterNotificationWebSocketConnection {
   }
 
   /**
-   * Select incoming messages by topic and optionally decode the content.
+   * Select incoming buffer by topic and optionally decode it to MotionMasterMessage.
    * @param topic to filter incoming messages by
    * @param decode to MotionMasterMessage or leave the content as Uint8Array
    * @returns an observable of topic and depending on the value of decode argument: MotionMasterMessage when true, Uint8Array otherwise
    */
-  selectByTopic<T extends boolean>(topic: string, decode: T): T extends true ? Observable<MotionMasterMessage> : Observable<Uint8Array> {
+  selectBufferByTopic<T extends boolean>(topic: string, decode: T): T extends true ? Observable<MotionMasterMessage> : Observable<Uint8Array> {
     return this.buffer$.pipe(
       filter((data) => data[0] === topic),
       map((data) => decode

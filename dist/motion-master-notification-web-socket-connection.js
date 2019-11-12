@@ -33,7 +33,7 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
         /**
          * Topic and Motion Master message are sent as a separate WebSocket messages.
          * Collect both topic and Motion Master message and then emit.
-         * TODO: Ensure that this works as expected or switch to a single WebSocket message!
+         * @todo ensure that bufferCount buffers topic first and message buffer second in all cases.
          */
         this.buffer$ = this.wss$.pipe(operators_1.bufferCount(2));
         this.subscriptions = Object.create(null);
@@ -46,19 +46,22 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
      */
     MotionMasterNotificationWebSocketConnection.prototype.subscribe = function (data) {
         var _this = this;
-        var _a = data.bufferSize, bufferSize = _a === void 0 ? 1 : _a, id = data.id, topic = data.topic;
-        var observable = this.selectByTopic(topic, true).pipe(operators_1.bufferCount(bufferSize));
-        // TODO: Distinct until changed get device parameter values.
-        var subscription = observable.subscribe(function (messages) { return _this.notification.input$.next({ topic: topic, messages: messages }); });
+        var _a = data.bufferSize, bufferSize = _a === void 0 ? 1 : _a, _b = data.distinct, distinct = _b === void 0 ? false : _b, id = data.id, topic = data.topic;
+        var observable = this.selectBufferByTopic(topic, true);
+        if (distinct) {
+            observable = observable.pipe(operators_1.distinctUntilChanged(util_1.compareParameterValues));
+        }
+        var messages$ = observable.pipe(operators_1.bufferCount(bufferSize));
+        var subscription = messages$.subscribe(function (messages) { return _this.notification.input$.next({ topic: topic, messages: messages }); });
         this.subscriptions[id] = subscription;
     };
     /**
      * Unsubscribe from a previous subscription.
      * WebSocket connection will close on last unsubscribe.
+     * @todo find a way to emit all buffered messages before unsubscribe.
      * @param id message id related to previous subscription
      */
     MotionMasterNotificationWebSocketConnection.prototype.unsubscribe = function (id) {
-        // TODO: Emit all buffered messages before unsubscribe.
         if (this.subscriptions[id]) {
             this.subscriptions[id].unsubscribe();
             delete this.subscriptions[id];
@@ -72,12 +75,12 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
         Object.keys(this.subscriptions).forEach(function (id) { return _this.unsubscribe(id); });
     };
     /**
-     * Select incoming messages by topic and optionally decode the content.
+     * Select incoming buffer by topic and optionally decode it to MotionMasterMessage.
      * @param topic to filter incoming messages by
      * @param decode to MotionMasterMessage or leave the content as Uint8Array
      * @returns an observable of topic and depending on the value of decode argument: MotionMasterMessage when true, Uint8Array otherwise
      */
-    MotionMasterNotificationWebSocketConnection.prototype.selectByTopic = function (topic, decode) {
+    MotionMasterNotificationWebSocketConnection.prototype.selectBufferByTopic = function (topic, decode) {
         return this.buffer$.pipe(operators_1.filter(function (data) { return data[0] === topic; }), operators_1.map(function (data) { return decode
             ? util_1.MotionMasterMessage.decode(new Uint8Array(data[1]))
             : new Uint8Array(data[1]); }));

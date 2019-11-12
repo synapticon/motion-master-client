@@ -15,8 +15,8 @@ export declare class MotionMasterClientWebSocketConnection {
     private closeObserver;
     private openObserver;
     private wssConfig;
-    wss$: WebSocketSubject<Uint8Array>;
-    message$: Observable<MotionMasterMessage>;
+    readonly wss$: WebSocketSubject<Uint8Array>;
+    readonly message$: Observable<MotionMasterMessage>;
     private messageSubscription;
     private clientOutputSubscription;
     constructor(wssUrl?: string);

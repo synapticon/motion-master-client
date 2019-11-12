@@ -13,4 +13,10 @@ export declare function encodeMotionMasterMessage(message: IMotionMasterMessage)
  * @returns MotionMasterMessage
  */
 export declare function decodeMotionMasterMessage(data: Uint8Array): motionmaster.MotionMasterMessage;
+/**
+ * @todo handle all type values (rawValue for example) and enable no-non-null-assertion rule.
+ * @param x MotionMasterMessage
+ * @param y MotionMasterMessage
+ */
+export declare function compareParameterValues(x: MotionMasterMessage, y: MotionMasterMessage): boolean;
 //# sourceMappingURL=util.d.ts.map

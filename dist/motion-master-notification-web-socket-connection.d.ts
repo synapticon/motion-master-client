@@ -10,13 +10,13 @@ export declare class MotionMasterNotificationWebSocketConnection {
     private closeObserver;
     private openObserver;
     wssConfig: WebSocketSubjectConfig<string | ArrayBuffer>;
-    wss$: WebSocketSubject<string | ArrayBuffer>;
+    wss$: WebSocketSubject<any>;
     /**
      * Topic and Motion Master message are sent as a separate WebSocket messages.
      * Collect both topic and Motion Master message and then emit.
-     * TODO: Ensure that this works as expected or switch to a single WebSocket message!
+     * @todo ensure that bufferCount buffers topic first and message buffer second in all cases.
      */
-    buffer$: Observable<(string | ArrayBuffer)[]>;
+    buffer$: Observable<any[]>;
     subscriptions: {
         [key: string]: Subscription;
     };
@@ -31,6 +31,7 @@ export declare class MotionMasterNotificationWebSocketConnection {
     /**
      * Unsubscribe from a previous subscription.
      * WebSocket connection will close on last unsubscribe.
+     * @todo find a way to emit all buffered messages before unsubscribe.
      * @param id message id related to previous subscription
      */
     unsubscribe(id: string): void;
@@ -39,11 +40,11 @@ export declare class MotionMasterNotificationWebSocketConnection {
      */
     unsubscriberAll(): void;
     /**
-     * Select incoming messages by topic and optionally decode the content.
+     * Select incoming buffer by topic and optionally decode it to MotionMasterMessage.
      * @param topic to filter incoming messages by
      * @param decode to MotionMasterMessage or leave the content as Uint8Array
      * @returns an observable of topic and depending on the value of decode argument: MotionMasterMessage when true, Uint8Array otherwise
      */
-    selectByTopic<T extends boolean>(topic: string, decode: T): T extends true ? Observable<MotionMasterMessage> : Observable<Uint8Array>;
+    selectBufferByTopic<T extends boolean>(topic: string, decode: T): T extends true ? Observable<MotionMasterMessage> : Observable<Uint8Array>;
 }
 //# sourceMappingURL=motion-master-notification-web-socket-connection.d.ts.map

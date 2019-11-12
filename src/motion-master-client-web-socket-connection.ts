@@ -44,9 +44,9 @@ export class MotionMasterClientWebSocketConnection {
     url: this.wssUrl,
   };
 
-  wss$: WebSocketSubject<Uint8Array> = webSocket(this.wssConfig);
+  readonly wss$: WebSocketSubject<Uint8Array> = webSocket(this.wssConfig);
 
-  message$: Observable<MotionMasterMessage> = this.wss$.pipe(
+  readonly message$: Observable<MotionMasterMessage> = this.wss$.pipe(
     map((data) => MotionMasterMessage.decode(data)),
   );
 
