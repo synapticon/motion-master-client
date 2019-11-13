@@ -1,10 +1,11 @@
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { bufferCount, distinctUntilChanged, filter, map } from 'rxjs/operators';
 import { webSocket, WebSocketSubject, WebSocketSubjectConfig } from 'rxjs/webSocket';
+import { v4 } from 'uuid';
 
 import { MotionMasterNotification } from './motion-master-notification';
 import { IMotionMasterNotificationSubscribeData } from './motion-master-notification-subscribe-data';
-import { MotionMasterMessage, compareParameterValues } from './util';
+import { compareParameterValues, MotionMasterMessage } from './util';
 
 export class MotionMasterNotificationWebSocketConnection {
 
@@ -51,10 +52,10 @@ export class MotionMasterNotificationWebSocketConnection {
    * Subscribe to a topic and optionally buffer messages.
    * First subscription will open WebSocket connection.
    * @param data subscribe data
-   * @returns subscription
+   * @returns subscription id
    */
   subscribe(data: IMotionMasterNotificationSubscribeData) {
-    const { bufferSize = 1, distinct = false, id, topic } = data;
+    const { bufferSize = 1, distinct = false, id = v4(), topic } = data;
 
     let observable = this.selectBufferByTopic(topic, true);
 
@@ -71,6 +72,8 @@ export class MotionMasterNotificationWebSocketConnection {
     const subscription = messages$.subscribe((messages) => this.notification.input$.next({ topic, messages }));
 
     this.subscriptions[id] = subscription;
+
+    return id;
   }
 
   /**

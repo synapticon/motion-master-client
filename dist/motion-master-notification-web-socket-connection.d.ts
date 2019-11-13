@@ -25,9 +25,9 @@ export declare class MotionMasterNotificationWebSocketConnection {
      * Subscribe to a topic and optionally buffer messages.
      * First subscription will open WebSocket connection.
      * @param data subscribe data
-     * @returns subscription
+     * @returns subscription id
      */
-    subscribe(data: IMotionMasterNotificationSubscribeData): void;
+    subscribe(data: IMotionMasterNotificationSubscribeData): string;
     /**
      * Unsubscribe from a previous subscription.
      * WebSocket connection will close on last unsubscribe.

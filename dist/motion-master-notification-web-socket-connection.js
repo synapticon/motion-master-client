@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
 var webSocket_1 = require("rxjs/webSocket");
+var uuid_1 = require("uuid");
 var motion_master_notification_1 = require("./motion-master-notification");
 var util_1 = require("./util");
 var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
@@ -42,11 +43,11 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
      * Subscribe to a topic and optionally buffer messages.
      * First subscription will open WebSocket connection.
      * @param data subscribe data
-     * @returns subscription
+     * @returns subscription id
      */
     MotionMasterNotificationWebSocketConnection.prototype.subscribe = function (data) {
         var _this = this;
-        var _a = data.bufferSize, bufferSize = _a === void 0 ? 1 : _a, _b = data.distinct, distinct = _b === void 0 ? false : _b, id = data.id, topic = data.topic;
+        var _a = data.bufferSize, bufferSize = _a === void 0 ? 1 : _a, _b = data.distinct, distinct = _b === void 0 ? false : _b, _c = data.id, id = _c === void 0 ? uuid_1.v4() : _c, topic = data.topic;
         var observable = this.selectBufferByTopic(topic, true);
         if (distinct) {
             observable = observable.pipe(operators_1.distinctUntilChanged(util_1.compareParameterValues));
@@ -54,6 +55,7 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
         var messages$ = observable.pipe(operators_1.bufferCount(bufferSize));
         var subscription = messages$.subscribe(function (messages) { return _this.notification.input$.next({ topic: topic, messages: messages }); });
         this.subscriptions[id] = subscription;
+        return id;
     };
     /**
      * Unsubscribe from a previous subscription.
