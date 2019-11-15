@@ -1,6 +1,6 @@
 {
   "name": "@synapticon/motion-master-client",
-  "version": "1.5.8",
+  "version": "1.5.9",
   "private": false,
   "description": "",
   "main": "./dist/index.js",
