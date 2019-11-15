@@ -11,7 +11,7 @@ export class MotionMasterClientWebSocketConnection {
 
   readonly connected$ = new BehaviorSubject<boolean>(false);
 
-  pingDelay = 200;
+  pingDelay = 150;
   private pingSystemIntervalObserver = { next: () => this.client.requestPingSystem() };
   private pingSystemIntervalSubscription = new Subscription();
 
