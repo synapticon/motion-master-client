@@ -708,7 +708,7 @@ function requestAction(type, args, cmd) {
                     _b.label = 34;
                 case 34:
                     {
-                        exitOnMessageReceived(messageId, 30000, util_2.MotionMasterMessage.Status.NarrowAngleCalibration.Success.Code.DONE);
+                        exitOnMessageReceived(messageId, 180000, util_2.MotionMasterMessage.Status.NarrowAngleCalibration.Success.Code.DONE);
                         motionMasterClient.requestStartNarrowAngleCalibration(deviceAddress);
                         return [3 /*break*/, 36];
                     }
