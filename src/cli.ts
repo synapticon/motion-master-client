@@ -679,7 +679,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       break;
     }
     case 'startNarrowAngleCalibration': {
-      exitOnMessageReceived(messageId, 30000, MotionMasterMessage.Status.NarrowAngleCalibration.Success.Code.DONE);
+      exitOnMessageReceived(messageId, 180000, MotionMasterMessage.Status.NarrowAngleCalibration.Success.Code.DONE);
 
       motionMasterClient.requestStartNarrowAngleCalibration(deviceAddress);
 
