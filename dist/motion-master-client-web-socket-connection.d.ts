@@ -4,13 +4,23 @@ import { MotionMasterClient } from './motion-master-client';
 import { MotionMasterMessage } from './util';
 export declare class MotionMasterClientWebSocketConnection {
     wssUrl: string;
-    client: MotionMasterClient;
+    pingSystemPeriod: number;
+    aliveTimeout: number;
+    /**
+     * An instance of MotionMasterClient bound to this WebSocket connection.
+     */
+    readonly client: MotionMasterClient;
+    /**
+     * Emits a boolean value when connection gets opened or closed.
+     */
     readonly connected$: BehaviorSubject<boolean>;
-    pingDelay: number;
+    /**
+     * Emits a boolean value when Motion Master is considered alive. True when messages are received
+     * in regular interval, or false when alive timeout expires.
+     */
+    readonly alive$: BehaviorSubject<boolean>;
     private pingSystemIntervalObserver;
     private pingSystemIntervalSubscription;
-    aliveTimeout: number;
-    readonly alive$: BehaviorSubject<boolean>;
     private aliveTimeoutId;
     private closeObserver;
     private openObserver;
@@ -19,7 +29,13 @@ export declare class MotionMasterClientWebSocketConnection {
     readonly message$: Observable<MotionMasterMessage>;
     private messageSubscription;
     private clientOutputSubscription;
-    constructor(wssUrl?: string);
+    /**
+     * MotionMasterClientWebSocketConnection constructor.
+     * @param wssUrl Motion Master Bridge WebSocket client URL.
+     * @param pingSystemPeriod timeframe in which to send ping system message to Motion Master.
+     * @param aliveTimeout how long to wait for Motion Master message before emitting it's not alive.
+     */
+    constructor(wssUrl?: string, pingSystemPeriod?: number, aliveTimeout?: number);
     close(): void;
     open(): void;
     private keepalive;

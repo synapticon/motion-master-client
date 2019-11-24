@@ -6,17 +6,35 @@ var webSocket_1 = require("rxjs/webSocket");
 var motion_master_client_1 = require("./motion-master-client");
 var util_1 = require("./util");
 var MotionMasterClientWebSocketConnection = /** @class */ (function () {
-    function MotionMasterClientWebSocketConnection(wssUrl) {
+    /**
+     * MotionMasterClientWebSocketConnection constructor.
+     * @param wssUrl Motion Master Bridge WebSocket client URL.
+     * @param pingSystemPeriod timeframe in which to send ping system message to Motion Master.
+     * @param aliveTimeout how long to wait for Motion Master message before emitting it's not alive.
+     */
+    function MotionMasterClientWebSocketConnection(wssUrl, pingSystemPeriod, aliveTimeout) {
         var _this = this;
         if (wssUrl === void 0) { wssUrl = "ws://" + location.hostname + ":63524"; }
+        if (pingSystemPeriod === void 0) { pingSystemPeriod = 150; }
+        if (aliveTimeout === void 0) { aliveTimeout = 1000; }
         this.wssUrl = wssUrl;
+        this.pingSystemPeriod = pingSystemPeriod;
+        this.aliveTimeout = aliveTimeout;
+        /**
+         * An instance of MotionMasterClient bound to this WebSocket connection.
+         */
         this.client = new motion_master_client_1.MotionMasterClient();
+        /**
+         * Emits a boolean value when connection gets opened or closed.
+         */
         this.connected$ = new rxjs_1.BehaviorSubject(false);
-        this.pingDelay = 150;
+        /**
+         * Emits a boolean value when Motion Master is considered alive. True when messages are received
+         * in regular interval, or false when alive timeout expires.
+         */
+        this.alive$ = new rxjs_1.BehaviorSubject(false);
         this.pingSystemIntervalObserver = { next: function () { return _this.client.requestPingSystem(); } };
         this.pingSystemIntervalSubscription = new rxjs_1.Subscription();
-        this.aliveTimeout = 1000;
-        this.alive$ = new rxjs_1.BehaviorSubject(false);
         this.aliveTimeoutId = 0;
         this.closeObserver = {
             next: function () {
@@ -28,7 +46,7 @@ var MotionMasterClientWebSocketConnection = /** @class */ (function () {
         };
         this.openObserver = {
             next: function () {
-                _this.pingSystemIntervalSubscription = rxjs_1.interval(_this.pingDelay).subscribe(_this.pingSystemIntervalObserver);
+                _this.pingSystemIntervalSubscription = rxjs_1.interval(_this.pingSystemPeriod).subscribe(_this.pingSystemIntervalObserver);
                 _this.connected$.next(true);
             },
         };

@@ -37,6 +37,9 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
          * @todo ensure that bufferCount buffers topic first and message buffer second in all cases.
          */
         this.buffer$ = this.wss$.pipe(operators_1.bufferCount(2));
+        /**
+         * Map request message ids to subscriptions.
+         */
         this.subscriptions = Object.create(null);
     }
     /**

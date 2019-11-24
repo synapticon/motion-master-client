@@ -17,6 +17,9 @@ export declare class MotionMasterNotificationWebSocketConnection {
      * @todo ensure that bufferCount buffers topic first and message buffer second in all cases.
      */
     buffer$: Observable<any[]>;
+    /**
+     * Map request message ids to subscriptions.
+     */
     subscriptions: {
         [key: string]: Subscription;
     };

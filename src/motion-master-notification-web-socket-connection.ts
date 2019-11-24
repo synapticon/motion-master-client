@@ -44,9 +44,14 @@ export class MotionMasterNotificationWebSocketConnection {
     bufferCount(2),
   );
 
+  /**
+   * Map request message ids to subscriptions.
+   */
   subscriptions: { [key: string]: Subscription } = Object.create(null);
 
-  constructor(public wssUrl = `ws://${location.hostname}:63525`) { }
+  constructor(
+    public wssUrl = `ws://${location.hostname}:63525`,
+  ) { }
 
   /**
    * Subscribe to a topic and optionally buffer messages.

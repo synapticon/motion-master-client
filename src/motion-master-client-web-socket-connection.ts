@@ -7,16 +7,26 @@ import { MotionMasterMessage } from './util';
 
 export class MotionMasterClientWebSocketConnection {
 
-  client = new MotionMasterClient();
+  /**
+   * An instance of MotionMasterClient bound to this WebSocket connection.
+   */
+  readonly client = new MotionMasterClient();
 
+  /**
+   * Emits a boolean value when connection gets opened or closed.
+   */
   readonly connected$ = new BehaviorSubject<boolean>(false);
 
-  pingDelay = 150;
+  /**
+   * Emits a boolean value when Motion Master is considered alive. True when messages are received
+   * in regular interval, or false when alive timeout expires.
+   */
+  readonly alive$ = new BehaviorSubject<boolean>(false);
+
   private pingSystemIntervalObserver = { next: () => this.client.requestPingSystem() };
+
   private pingSystemIntervalSubscription = new Subscription();
 
-  aliveTimeout = 1000;
-  readonly alive$ = new BehaviorSubject<boolean>(false);
   private aliveTimeoutId = 0;
 
   private closeObserver = {
@@ -30,7 +40,7 @@ export class MotionMasterClientWebSocketConnection {
 
   private openObserver = {
     next: () => {
-      this.pingSystemIntervalSubscription = interval(this.pingDelay).subscribe(this.pingSystemIntervalObserver);
+      this.pingSystemIntervalSubscription = interval(this.pingSystemPeriod).subscribe(this.pingSystemIntervalObserver);
       this.connected$.next(true);
     },
   };
@@ -53,7 +63,17 @@ export class MotionMasterClientWebSocketConnection {
   private messageSubscription = new Subscription();
   private clientOutputSubscription = new Subscription();
 
-  constructor(public wssUrl = `ws://${location.hostname}:63524`) { }
+  /**
+   * MotionMasterClientWebSocketConnection constructor.
+   * @param wssUrl Motion Master Bridge WebSocket client URL.
+   * @param pingSystemPeriod timeframe in which to send ping system message to Motion Master.
+   * @param aliveTimeout how long to wait for Motion Master message before emitting it's not alive.
+   */
+  constructor(
+    public wssUrl = `ws://${location.hostname}:63524`,
+    public pingSystemPeriod = 150,
+    public aliveTimeout = 1000,
+  ) { }
 
   close() {
     this.messageSubscription.unsubscribe();
