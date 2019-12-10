@@ -179,6 +179,11 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ startNarrowAngleCalibration: startNarrowAngleCalibration }, messageId);
         return this.selectMessageStatus('narrowAngleCalibration', id);
     };
+    MotionMasterClient.prototype.requestSetSystemClientTimeout = function (timeoutMs, messageId) {
+        var setSystemClientTimeout = util_1.MotionMasterMessage.Request.SetSystemClientTimeout.create({ timeoutMs: timeoutMs });
+        var id = this.sendRequest({ setSystemClientTimeout: setSystemClientTimeout }, messageId);
+        return id;
+    };
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain

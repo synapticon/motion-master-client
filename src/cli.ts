@@ -685,6 +685,13 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
 
       break;
     }
+    case 'setSystemClientTimeout': {
+      const timeoutMs = parseInt(args[0], 10);
+      motionMasterClient.requestSetSystemClientTimeout(timeoutMs, messageId);
+
+      process.exit(ExitStatus.SUCCESS);
+      break;
+    }
     default: {
       throw new Error(`Request "${type}" doesn\'t exist`);
     }
