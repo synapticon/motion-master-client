@@ -128,6 +128,10 @@ program
   .action(startPlantIdentificationAction);
 
 program
+  .command('startSystemIdentification <durationSeconds> <torqueAmplitude> <startFrequency> <endFrequency> <cutoffFrequency>')
+  .action(startSystemIdentificationAction);
+
+program
   .command('monitor <topic> [params...]')
   .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
   .action(monitorAction);
@@ -692,6 +696,19 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       process.exit(ExitStatus.SUCCESS);
       break;
     }
+    case 'startSystemIdentification': {
+      exitOnMessageReceived(messageId, 60000, MotionMasterMessage.Status.SystemIdentification.Success.Code.DONE);
+
+      const durationSeconds = parseFloat(args[0]);
+      const torqueAmplitude = parseInt(args[1], 10);
+      const startFrequency = parseFloat(args[2]);
+      const endFrequency = parseFloat(args[3]);
+      const cutoffFrequency = parseFloat(args[4]);
+
+      motionMasterClient.requestStartSystemIdentification(deviceAddress, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, messageId);
+
+      break;
+    }
     default: {
       throw new Error(`Request "${type}" doesn\'t exist`);
     }
@@ -854,11 +871,11 @@ async function startCoggingTorqueRecordingAction(cmd: Command) {
 }
 
 async function startPlantIdentificationAction(
-  durationSeconds: number,
-  torqueAmplitude: number,
-  startFrequency: number,
-  endFrequency: number,
-  cutoffFrequency: number,
+  durationSeconds: any,
+  torqueAmplitude: any,
+  startFrequency: any,
+  endFrequency: any,
+  cutoffFrequency: any,
   cmd: Command,
 ) {
   connectToMotionMaster(cmd.parent);
@@ -867,6 +884,12 @@ async function startPlantIdentificationAction(
   const messageId = v4();
   printOnMessageReceived(messageId, cmd.parent.outputFormat as OutputFormat);
   exitOnMessageReceived(messageId, 60000, MotionMasterMessage.Status.PlantIdentification.Success.Code.DONE);
+
+  durationSeconds = parseFloat(durationSeconds);
+  torqueAmplitude = parseInt(torqueAmplitude, 10);
+  startFrequency = parseInt(startFrequency, 10);
+  endFrequency = parseInt(endFrequency, 10);
+  cutoffFrequency = parseInt(cutoffFrequency, 10);
 
   const startPlantIdentification: MotionMasterMessage.Request.IStartPlantIdentification = {
     deviceAddress,
@@ -878,6 +901,39 @@ async function startPlantIdentificationAction(
   };
 
   motionMasterClient.sendRequest({ startPlantIdentification }, messageId);
+}
+
+async function startSystemIdentificationAction(
+  durationSeconds: any,
+  torqueAmplitude: any,
+  startFrequency: any,
+  endFrequency: any,
+  cutoffFrequency: any,
+  cmd: Command,
+) {
+  connectToMotionMaster(cmd.parent);
+  const deviceAddress = await getCommandDeviceAddressAsync(cmd.parent);
+
+  const messageId = v4();
+  printOnMessageReceived(messageId, cmd.parent.outputFormat as OutputFormat);
+  exitOnMessageReceived(messageId, 60000, MotionMasterMessage.Status.SystemIdentification.Success.Code.DONE);
+
+  durationSeconds = parseFloat(durationSeconds);
+  torqueAmplitude = parseInt(torqueAmplitude, 10);
+  startFrequency = parseFloat(startFrequency);
+  endFrequency = parseFloat(endFrequency);
+  cutoffFrequency = parseFloat(cutoffFrequency);
+
+  const startSystemIdentification: MotionMasterMessage.Request.IStartSystemIdentification = {
+    deviceAddress,
+    durationSeconds,
+    torqueAmplitude,
+    startFrequency,
+    endFrequency,
+    cutoffFrequency,
+  };
+
+  motionMasterClient.sendRequest({ startSystemIdentification }, messageId);
 }
 
 async function monitorAction(topic: string, params: string[], cmd: Command) {

@@ -184,6 +184,18 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ setSystemClientTimeout: setSystemClientTimeout }, messageId);
         return id;
     };
+    MotionMasterClient.prototype.requestStartSystemIdentification = function (deviceAddress, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, messageId) {
+        var startSystemIdentification = util_1.MotionMasterMessage.Request.StartSystemIdentification.create({
+            deviceAddress: deviceAddress,
+            durationSeconds: durationSeconds,
+            torqueAmplitude: torqueAmplitude,
+            startFrequency: startFrequency,
+            endFrequency: endFrequency,
+            cutoffFrequency: cutoffFrequency,
+        });
+        var id = this.sendRequest({ startSystemIdentification: startSystemIdentification }, messageId);
+        return this.selectMessageStatus('systemIdentification', id);
+    };
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain

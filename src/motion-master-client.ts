@@ -40,6 +40,7 @@ export type StatusTypeObservable<T extends StatusType> =
   T extends 'deviceStop' ? Observable<MotionMasterMessage.Status.IDeviceStop> :
   T extends 'ethercatNetworkState' ? Observable<MotionMasterMessage.Status.IEthercatNetworkState> :
   T extends 'narrowAngleCalibration' ? Observable<MotionMasterMessage.Status.NarrowAngleCalibration> :
+  T extends 'systemIdentification' ? Observable<MotionMasterMessage.Status.ISystemIdentification> :
   Observable<any>;
 
 export class MotionMasterClient {
@@ -264,6 +265,19 @@ export class MotionMasterClient {
     const setSystemClientTimeout = MotionMasterMessage.Request.SetSystemClientTimeout.create({ timeoutMs });
     const id = this.sendRequest({ setSystemClientTimeout }, messageId);
     return id;
+  }
+
+  requestStartSystemIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, cutoffFrequency: number, messageId?: string) {
+    const startSystemIdentification = MotionMasterMessage.Request.StartSystemIdentification.create({
+      deviceAddress,
+      durationSeconds,
+      torqueAmplitude,
+      startFrequency,
+      endFrequency,
+      cutoffFrequency,
+    });
+    const id = this.sendRequest({ startSystemIdentification }, messageId);
+    return this.selectMessageStatus('systemIdentification', id);
   }
 
   /**
