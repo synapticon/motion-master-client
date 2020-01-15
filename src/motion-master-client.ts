@@ -267,14 +267,13 @@ export class MotionMasterClient {
     return id;
   }
 
-  requestStartSystemIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, cutoffFrequency: number, messageId?: string) {
+  requestStartSystemIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, messageId?: string) {
     const startSystemIdentification = MotionMasterMessage.Request.StartSystemIdentification.create({
       deviceAddress,
       durationSeconds,
       torqueAmplitude,
       startFrequency,
       endFrequency,
-      cutoffFrequency,
     });
     const id = this.sendRequest({ startSystemIdentification }, messageId);
     return this.selectMessageStatus('systemIdentification', id);

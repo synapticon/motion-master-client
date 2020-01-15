@@ -128,7 +128,7 @@ program
   .action(startPlantIdentificationAction);
 
 program
-  .command('startSystemIdentification <durationSeconds> <torqueAmplitude> <startFrequency> <endFrequency> <cutoffFrequency>')
+  .command('startSystemIdentification <durationSeconds> <torqueAmplitude> <startFrequency> <endFrequency>')
   .action(startSystemIdentificationAction);
 
 program
@@ -703,9 +703,8 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       const torqueAmplitude = parseInt(args[1], 10);
       const startFrequency = parseFloat(args[2]);
       const endFrequency = parseFloat(args[3]);
-      const cutoffFrequency = parseFloat(args[4]);
 
-      motionMasterClient.requestStartSystemIdentification(deviceAddress, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, messageId);
+      motionMasterClient.requestStartSystemIdentification(deviceAddress, durationSeconds, torqueAmplitude, startFrequency, endFrequency, messageId);
 
       break;
     }
@@ -908,7 +907,6 @@ async function startSystemIdentificationAction(
   torqueAmplitude: any,
   startFrequency: any,
   endFrequency: any,
-  cutoffFrequency: any,
   cmd: Command,
 ) {
   connectToMotionMaster(cmd.parent);
@@ -922,7 +920,6 @@ async function startSystemIdentificationAction(
   torqueAmplitude = parseInt(torqueAmplitude, 10);
   startFrequency = parseFloat(startFrequency);
   endFrequency = parseFloat(endFrequency);
-  cutoffFrequency = parseFloat(cutoffFrequency);
 
   const startSystemIdentification: MotionMasterMessage.Request.IStartSystemIdentification = {
     deviceAddress,
@@ -930,7 +927,6 @@ async function startSystemIdentificationAction(
     torqueAmplitude,
     startFrequency,
     endFrequency,
-    cutoffFrequency,
   };
 
   motionMasterClient.sendRequest({ startSystemIdentification }, messageId);

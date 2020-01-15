@@ -184,14 +184,13 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ setSystemClientTimeout: setSystemClientTimeout }, messageId);
         return id;
     };
-    MotionMasterClient.prototype.requestStartSystemIdentification = function (deviceAddress, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, messageId) {
+    MotionMasterClient.prototype.requestStartSystemIdentification = function (deviceAddress, durationSeconds, torqueAmplitude, startFrequency, endFrequency, messageId) {
         var startSystemIdentification = util_1.MotionMasterMessage.Request.StartSystemIdentification.create({
             deviceAddress: deviceAddress,
             durationSeconds: durationSeconds,
             torqueAmplitude: torqueAmplitude,
             startFrequency: startFrequency,
             endFrequency: endFrequency,
-            cutoffFrequency: cutoffFrequency,
         });
         var id = this.sendRequest({ startSystemIdentification: startSystemIdentification }, messageId);
         return this.selectMessageStatus('systemIdentification', id);

@@ -46,7 +46,7 @@ export declare class MotionMasterClient {
     requestSetEthercatNetworkState(deviceAddress: DeviceAddressType, state: MotionMasterMessage.Request.SetEthercatNetworkState.State, messageId?: string): Observable<MotionMasterMessage.Status.IEthercatNetworkState>;
     requestStartNarrowAngleCalibration(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.NarrowAngleCalibration>;
     requestSetSystemClientTimeout(timeoutMs: number, messageId?: string): string;
-    requestStartSystemIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, cutoffFrequency: number, messageId?: string): Observable<MotionMasterMessage.Status.ISystemIdentification>;
+    requestStartSystemIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, messageId?: string): Observable<MotionMasterMessage.Status.ISystemIdentification>;
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain

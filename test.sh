@@ -30,6 +30,7 @@ DEBUG=* npx node ./dist/cli.js request startCoggingTorqueRecording 1 # skipAutoT
 DEBUG=* npx node ./dist/cli.js request getCoggingTorqueData
 DEBUG=* npx node ./dist/cli.js request startOffsetDetection
 DEBUG=* npx node ./dist/cli.js request startPlantIdentification 3 300 2 60 30 # durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency
+DEBUG=* npx node ./dist/cli.js request startSystemIdentification 3 300 2 60 # durationSeconds, torqueAmplitude, startFrequency, endFrequency
 DEBUG=* npx node ./dist/cli.js request computeAutoTuningGains positionParameters 2 0.2 2.0 1 4 2 314 # controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub
 DEBUG=* npx node ./dist/cli.js request computeAutoTuningGains velocityParameters 100 100 # controllerType, velocityLoopBandwidth, velocityDamping
 DEBUG=* npx node ./dist/cli.js request startMonitoringDeviceParameterValues some-topic 0x6064:0 0x230A:0
