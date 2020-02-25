@@ -13,6 +13,7 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
         this.wssUrl = wssUrl;
         this.notification = new motion_master_notification_1.MotionMasterNotification();
         this.connected$ = new rxjs_1.BehaviorSubject(false);
+        this.decoder = new TextDecoder('utf-8');
         this.closeObserver = {
             next: function () {
                 _this.connected$.next(false);
@@ -32,11 +33,13 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
         };
         this.wss$ = webSocket_1.webSocket(this.wssConfig);
         /**
-         * Topic and Motion Master message are sent as a separate WebSocket messages.
-         * Collect both topic and Motion Master message and then emit.
-         * @todo ensure that bufferCount buffers topic first and message buffer second in all cases.
+         * Map the incoming array buffer to topic (string) and payload (encoded protobuf message).
          */
-        this.buffer$ = this.wss$.pipe(operators_1.bufferCount(2));
+        this.buffer$ = this.wss$.pipe(operators_1.map(function (buffer) {
+            var end = new Uint8Array(buffer, 0, 1)[0] + 1; // topic length is the 1st byte (topic MUST be less than 255 bytes long)
+            var topic = _this.decoder.decode(buffer.slice(1, end)); // topic starts from the 2nd byte
+            return [topic, buffer.slice(end)]; // the rest is the payload (encoded protobuf message)
+        }));
         /**
          * Map request message ids to subscriptions.
          */

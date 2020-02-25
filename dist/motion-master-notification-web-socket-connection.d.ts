@@ -7,16 +7,15 @@ export declare class MotionMasterNotificationWebSocketConnection {
     wssUrl: string;
     notification: MotionMasterNotification;
     readonly connected$: BehaviorSubject<boolean>;
+    private decoder;
     private closeObserver;
     private openObserver;
-    wssConfig: WebSocketSubjectConfig<string | ArrayBuffer>;
+    wssConfig: WebSocketSubjectConfig<ArrayBuffer>;
     wss$: WebSocketSubject<any>;
     /**
-     * Topic and Motion Master message are sent as a separate WebSocket messages.
-     * Collect both topic and Motion Master message and then emit.
-     * @todo ensure that bufferCount buffers topic first and message buffer second in all cases.
+     * Map the incoming array buffer to topic (string) and payload (encoded protobuf message).
      */
-    buffer$: Observable<any[]>;
+    buffer$: Observable<[string, ArrayBuffer]>;
     /**
      * Map request message ids to subscriptions.
      */

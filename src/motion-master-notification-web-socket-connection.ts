@@ -13,6 +13,8 @@ export class MotionMasterNotificationWebSocketConnection {
 
   readonly connected$ = new BehaviorSubject<boolean>(false);
 
+  private decoder = new TextDecoder('utf-8');
+
   private closeObserver = {
     next: () => {
       this.connected$.next(false);
@@ -25,7 +27,7 @@ export class MotionMasterNotificationWebSocketConnection {
     },
   };
 
-  wssConfig: WebSocketSubjectConfig<string | ArrayBuffer> = {
+  wssConfig: WebSocketSubjectConfig<ArrayBuffer> = {
     binaryType: 'arraybuffer',
     closeObserver: this.closeObserver,
     deserializer: (e: MessageEvent) => e.data,
@@ -36,12 +38,14 @@ export class MotionMasterNotificationWebSocketConnection {
   wss$: WebSocketSubject<any> = webSocket(this.wssConfig);
 
   /**
-   * Topic and Motion Master message are sent as a separate WebSocket messages.
-   * Collect both topic and Motion Master message and then emit.
-   * @todo ensure that bufferCount buffers topic first and message buffer second in all cases.
+   * Map the incoming array buffer to topic (string) and payload (encoded protobuf message).
    */
-  buffer$ = this.wss$.pipe(
-    bufferCount(2),
+  buffer$: Observable<[string, ArrayBuffer]> = this.wss$.pipe(
+    map((buffer: ArrayBuffer) => {
+      const end = new Uint8Array(buffer, 0, 1)[0] + 1; // topic length is the 1st byte (topic MUST be less than 255 bytes long)
+      const topic = this.decoder.decode(buffer.slice(1, end)); // topic starts from the 2nd byte
+      return [topic, buffer.slice(end)]; // the rest is the payload (encoded protobuf message)
+    }),
   );
 
   /**
@@ -111,8 +115,8 @@ export class MotionMasterNotificationWebSocketConnection {
     return this.buffer$.pipe(
       filter((data) => data[0] === topic),
       map((data) => decode
-        ? MotionMasterMessage.decode(new Uint8Array(data[1] as ArrayBuffer))
-        : new Uint8Array(data[1] as ArrayBuffer),
+        ? MotionMasterMessage.decode(new Uint8Array(data[1]))
+        : new Uint8Array(data[1]),
       ),
     ) as any;
   }
