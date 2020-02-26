@@ -195,6 +195,22 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ startSystemIdentification: startSystemIdentification }, messageId);
         return this.selectMessageStatus('systemIdentification', id);
     };
+    MotionMasterClient.prototype.requestGetCirculoEncoderMagnetDistance = function (deviceAddress, encoderPort, messageId) {
+        var getCirculoEncoderMagnetDistance = util_1.MotionMasterMessage.Request.GetCirculoEncoderMagnetDistance.create({
+            deviceAddress: deviceAddress,
+            encoderPort: encoderPort,
+        });
+        var id = this.sendRequest({ getCirculoEncoderMagnetDistance: getCirculoEncoderMagnetDistance }, messageId);
+        return this.selectMessageStatus('circuloEncoderMagnetDistance', id);
+    };
+    MotionMasterClient.prototype.requestStartCirculoEncoderNarrowAngleCalibrationProcedure = function (deviceAddress, encoderPort, messageId) {
+        var startCirculoEncoderNarrowAngleCalibrationProcedure = util_1.MotionMasterMessage.Request.StartCirculoEncoderNarrowAngleCalibrationProcedure.create({
+            deviceAddress: deviceAddress,
+            encoderPort: encoderPort,
+        });
+        var id = this.sendRequest({ startCirculoEncoderNarrowAngleCalibrationProcedure: startCirculoEncoderNarrowAngleCalibrationProcedure }, messageId);
+        return this.selectMessageStatus('circuloEncoderNarrowAngleCalibrationProcedure', id);
+    };
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain

@@ -41,6 +41,8 @@ export type StatusTypeObservable<T extends StatusType> =
   T extends 'ethercatNetworkState' ? Observable<MotionMasterMessage.Status.IEthercatNetworkState> :
   T extends 'narrowAngleCalibration' ? Observable<MotionMasterMessage.Status.NarrowAngleCalibration> :
   T extends 'systemIdentification' ? Observable<MotionMasterMessage.Status.ISystemIdentification> :
+  T extends 'circuloEncoderMagnetDistance' ? Observable<MotionMasterMessage.Status.ICirculoEncoderMagnetDistance> :
+  T extends 'circuloEncoderNarrowAngleCalibrationProcedure' ? Observable<MotionMasterMessage.Status.ICirculoEncoderNarrowAngleCalibrationProcedure> :
   Observable<any>;
 
 export class MotionMasterClient {
@@ -277,6 +279,24 @@ export class MotionMasterClient {
     });
     const id = this.sendRequest({ startSystemIdentification }, messageId);
     return this.selectMessageStatus('systemIdentification', id);
+  }
+
+  requestGetCirculoEncoderMagnetDistance(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string) {
+    const getCirculoEncoderMagnetDistance = MotionMasterMessage.Request.GetCirculoEncoderMagnetDistance.create({
+      deviceAddress,
+      encoderPort,
+    });
+    const id = this.sendRequest({ getCirculoEncoderMagnetDistance }, messageId);
+    return this.selectMessageStatus('circuloEncoderMagnetDistance', id);
+  }
+
+  requestStartCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string) {
+    const startCirculoEncoderNarrowAngleCalibrationProcedure = MotionMasterMessage.Request.StartCirculoEncoderNarrowAngleCalibrationProcedure.create({
+      deviceAddress,
+      encoderPort,
+    });
+    const id = this.sendRequest({ startCirculoEncoderNarrowAngleCalibrationProcedure }, messageId);
+    return this.selectMessageStatus('circuloEncoderNarrowAngleCalibrationProcedure', id);
   }
 
   /**

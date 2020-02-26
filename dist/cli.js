@@ -139,6 +139,9 @@ commander_1.default
     .command('startSystemIdentification <durationSeconds> <torqueAmplitude> <startFrequency> <endFrequency>')
     .action(startSystemIdentificationAction);
 commander_1.default
+    .command('startCirculoEncoderNarrowAngleCalibrationProcedure <encoderPort>')
+    .action(startCirculoEncoderNarrowAngleCalibrationProcedureAction);
+commander_1.default
     .command('monitor <topic> [params...]')
     .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
     .action(monitorAction);
@@ -149,7 +152,7 @@ commander_1.default.parse(process.argv);
 //
 function requestAction(type, args, cmd) {
     return __awaiter(this, void 0, void 0, function () {
-        var deviceAddress, messageId, _a, parameters, deviceParameterInfo_1, parameterValues, name_1, filepath, name_2, content, overwrite, name_3, filepath, firmwarePackageContent, getDeviceLog, skipAutoTuning, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, computeAutoTuningGainsType, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, signalGeneratorType, setSignalGeneratorParameters, target, sustainTime, target, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, target, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, torqueSlope, sustainTime, target, torqueSlope, sustainTime, repeat, target, torqueSlope, sustainTime, repeat, amplitude, frequency, repeat, parameters, getDeviceParameterValues, topic, startMonitoringRequestId, state, timeoutMs, durationSeconds, torqueAmplitude, startFrequency, endFrequency;
+        var deviceAddress, messageId, _a, parameters, deviceParameterInfo_1, parameterValues, name_1, filepath, name_2, content, overwrite, name_3, filepath, firmwarePackageContent, getDeviceLog, skipAutoTuning, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, computeAutoTuningGainsType, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, signalGeneratorType, setSignalGeneratorParameters, target, sustainTime, target, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, target, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, torqueSlope, sustainTime, target, torqueSlope, sustainTime, repeat, target, torqueSlope, sustainTime, repeat, amplitude, frequency, repeat, parameters, getDeviceParameterValues, topic, startMonitoringRequestId, state, timeoutMs, durationSeconds, torqueAmplitude, startFrequency, endFrequency, encoderPort, encoderPort;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -195,34 +198,36 @@ function requestAction(type, args, cmd) {
                         case 'startNarrowAngleCalibration': return [3 /*break*/, 34];
                         case 'setSystemClientTimeout': return [3 /*break*/, 35];
                         case 'startSystemIdentification': return [3 /*break*/, 36];
+                        case 'getCirculoEncoderMagnetDistance': return [3 /*break*/, 37];
+                        case 'startCirculoEncoderNarrowAngleCalibrationProcedure': return [3 /*break*/, 38];
                     }
-                    return [3 /*break*/, 37];
+                    return [3 /*break*/, 39];
                 case 2:
                     {
                         motionMasterClient.requestPingSystem(messageId);
                         process.exit(ExitStatus.SUCCESS);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 3;
                 case 3:
                     {
                         exitOnMessageReceived(messageId);
                         motionMasterClient.requestGetSystemVersion(messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 4;
                 case 4:
                     {
                         exitOnMessageReceived(messageId);
                         motionMasterClient.requestGetDeviceInfo(messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 5;
                 case 5:
                     {
                         exitOnMessageReceived(messageId);
                         motionMasterClient.requestGetDeviceParameterInfo(deviceAddress, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 6;
                 case 6:
@@ -231,7 +236,7 @@ function requestAction(type, args, cmd) {
                         parameters = args.map(paramToIndexSubindex);
                         validateParameters(parameters);
                         motionMasterClient.requestGetDeviceParameterValues(deviceAddress, parameters, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 7;
                 case 7:
@@ -246,7 +251,7 @@ function requestAction(type, args, cmd) {
                     deviceParameterInfo_1 = _b.sent();
                     parameterValues = args.map(function (paramValue) { return paramToIndexSubIndexValue(paramValue, deviceParameterInfo_1); });
                     motionMasterClient.requestSetDeviceParameterValues(deviceAddress, parameterValues, messageId);
-                    return [3 /*break*/, 38];
+                    return [3 /*break*/, 40];
                 case 10:
                     {
                         throw new Error("Request \"" + type + "\" is not yet implemented");
@@ -256,7 +261,7 @@ function requestAction(type, args, cmd) {
                     {
                         exitOnMessageReceived(messageId);
                         motionMasterClient.requestGetDeviceFileList(deviceAddress, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 12;
                 case 12:
@@ -264,7 +269,7 @@ function requestAction(type, args, cmd) {
                         exitOnMessageReceived(messageId);
                         name_1 = args[0];
                         motionMasterClient.requestGetDeviceFile(deviceAddress, name_1, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 13;
                 case 13:
@@ -275,7 +280,7 @@ function requestAction(type, args, cmd) {
                         content = fs_1.default.readFileSync(filepath);
                         overwrite = true;
                         motionMasterClient.requestSetDeviceFile(deviceAddress, name_2, content, overwrite, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 14;
                 case 14:
@@ -283,21 +288,21 @@ function requestAction(type, args, cmd) {
                         exitOnMessageReceived(messageId);
                         name_3 = args[0];
                         motionMasterClient.requestDeleteDeviceFile(deviceAddress, name_3, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 15;
                 case 15:
                     {
                         exitOnMessageReceived(messageId);
                         motionMasterClient.requestResetDeviceFault(deviceAddress, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 16;
                 case 16:
                     {
                         motionMasterClient.requestStopDevice(deviceAddress, messageId);
                         process.exit(ExitStatus.SUCCESS);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 17;
                 case 17:
@@ -306,7 +311,7 @@ function requestAction(type, args, cmd) {
                         filepath = args[0];
                         firmwarePackageContent = fs_1.default.readFileSync(filepath);
                         motionMasterClient.requestStartDeviceFirmwareInstallation(deviceAddress, firmwarePackageContent, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 18;
                 case 18:
@@ -314,7 +319,7 @@ function requestAction(type, args, cmd) {
                         exitOnMessageReceived(messageId);
                         getDeviceLog = { deviceAddress: deviceAddress };
                         motionMasterClient.sendRequest({ getDeviceLog: getDeviceLog }, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 19;
                 case 19:
@@ -322,21 +327,21 @@ function requestAction(type, args, cmd) {
                         exitOnMessageReceived(messageId, 300000, util_2.MotionMasterMessage.Status.CoggingTorqueRecording.Success.Code.DONE);
                         skipAutoTuning = parseInt(args[0], 10) !== 0;
                         motionMasterClient.requestStartCoggingTorqueRecording(deviceAddress, skipAutoTuning, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 20;
                 case 20:
                     {
                         exitOnMessageReceived(messageId);
                         motionMasterClient.requestGetCoggingTorqueData(deviceAddress, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 21;
                 case 21:
                     {
                         exitOnMessageReceived(messageId, 180000, util_2.MotionMasterMessage.Status.OffsetDetection.Success.Code.DONE);
                         motionMasterClient.requestStartOffsetDetection(deviceAddress, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 22;
                 case 22:
@@ -348,7 +353,7 @@ function requestAction(type, args, cmd) {
                         endFrequency = parseInt(args[3], 10);
                         cutoffFrequency = parseInt(args[4], 10);
                         motionMasterClient.requestStartPlantIdentification(deviceAddress, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 23;
                 case 23:
@@ -397,7 +402,7 @@ function requestAction(type, args, cmd) {
                                 throw new Error("Unknown compute auto-tuning gains type: " + computeAutoTuningGainsType);
                             }
                         }
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 24;
                 case 24:
@@ -409,7 +414,7 @@ function requestAction(type, args, cmd) {
                         };
                         motionMasterClient.sendRequest({ setMotionControllerParameters: setMotionControllerParameters }, messageId);
                         process.exit(ExitStatus.SUCCESS);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 25;
                 case 25:
@@ -418,14 +423,14 @@ function requestAction(type, args, cmd) {
                         controllerType = parseInt(args[0], 10);
                         filter = parseInt(args[1], 10) !== 0;
                         motionMasterClient.requestEnableMotionController(deviceAddress, controllerType, filter, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 26;
                 case 26:
                     {
                         motionMasterClient.requestDisableMotionController(deviceAddress, messageId);
                         process.exit(ExitStatus.SUCCESS);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 27;
                 case 27:
@@ -661,21 +666,21 @@ function requestAction(type, args, cmd) {
                         }
                         motionMasterClient.sendRequest({ setSignalGeneratorParameters: setSignalGeneratorParameters }, messageId);
                         process.exit(ExitStatus.SUCCESS);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 28;
                 case 28:
                     {
                         exitOnMessageReceived(messageId, 2147483647, util_2.MotionMasterMessage.Status.SignalGenerator.Success.Code.DONE);
                         motionMasterClient.requestStartSignalGenerator(deviceAddress, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 29;
                 case 29:
                     {
                         motionMasterClient.requestStopSignalGenerator(deviceAddress, messageId);
                         process.exit(ExitStatus.SUCCESS);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 30;
                 case 30:
@@ -685,7 +690,7 @@ function requestAction(type, args, cmd) {
                         getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
                         topic = args[0];
                         requestStartMonitoringDeviceParameterValues({ getDeviceParameterValues: getDeviceParameterValues, interval: cmd.interval, topic: topic });
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 31;
                 case 31:
@@ -693,14 +698,14 @@ function requestAction(type, args, cmd) {
                         startMonitoringRequestId = args[0];
                         motionMasterClient.requestStopMonitoringDeviceParameterValues(startMonitoringRequestId, messageId);
                         process.exit(ExitStatus.SUCCESS);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 32;
                 case 32:
                     {
                         exitOnMessageReceived(messageId);
                         motionMasterClient.requestGetEthercatNetworkState(deviceAddress, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 33;
                 case 33:
@@ -708,14 +713,14 @@ function requestAction(type, args, cmd) {
                         exitOnMessageReceived(messageId);
                         state = parseInt(args[0], 10);
                         motionMasterClient.requestSetEthercatNetworkState(deviceAddress, state, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 34;
                 case 34:
                     {
                         exitOnMessageReceived(messageId, 180000, util_2.MotionMasterMessage.Status.NarrowAngleCalibration.Success.Code.DONE);
                         motionMasterClient.requestStartNarrowAngleCalibration(deviceAddress);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 35;
                 case 35:
@@ -723,7 +728,7 @@ function requestAction(type, args, cmd) {
                         timeoutMs = parseInt(args[0], 10);
                         motionMasterClient.requestSetSystemClientTimeout(timeoutMs, messageId);
                         process.exit(ExitStatus.SUCCESS);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 36;
                 case 36:
@@ -734,15 +739,31 @@ function requestAction(type, args, cmd) {
                         startFrequency = parseFloat(args[2]);
                         endFrequency = parseFloat(args[3]);
                         motionMasterClient.requestStartSystemIdentification(deviceAddress, durationSeconds, torqueAmplitude, startFrequency, endFrequency, messageId);
-                        return [3 /*break*/, 38];
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 37;
                 case 37:
                     {
-                        throw new Error("Request \"" + type + "\" doesn't exist");
+                        exitOnMessageReceived(messageId);
+                        encoderPort = parseInt(args[0], 10);
+                        motionMasterClient.requestGetCirculoEncoderMagnetDistance(deviceAddress, encoderPort, messageId);
+                        return [3 /*break*/, 40];
                     }
                     _b.label = 38;
-                case 38: return [2 /*return*/];
+                case 38:
+                    {
+                        exitOnMessageReceived(messageId, 60000, util_2.MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure.Success.Code.DONE);
+                        encoderPort = parseInt(args[0], 10);
+                        motionMasterClient.requestStartCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress, encoderPort, messageId);
+                        return [3 /*break*/, 40];
+                    }
+                    _b.label = 39;
+                case 39:
+                    {
+                        throw new Error("Request \"" + type + "\" doesn't exist");
+                    }
+                    _b.label = 40;
+                case 40: return [2 /*return*/];
             }
         });
     });
@@ -1010,6 +1031,30 @@ function startSystemIdentificationAction(durationSeconds, torqueAmplitude, start
                         endFrequency: endFrequency,
                     };
                     motionMasterClient.sendRequest({ startSystemIdentification: startSystemIdentification }, messageId);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function startCirculoEncoderNarrowAngleCalibrationProcedureAction(encoderPort, cmd) {
+    return __awaiter(this, void 0, void 0, function () {
+        var deviceAddress, messageId, startCirculoEncoderNarrowAngleCalibrationProcedure;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    connectToMotionMaster(cmd.parent);
+                    return [4 /*yield*/, getCommandDeviceAddressAsync(cmd.parent)];
+                case 1:
+                    deviceAddress = _a.sent();
+                    messageId = uuid_1.v4();
+                    printOnMessageReceived(messageId, cmd.parent.outputFormat);
+                    exitOnMessageReceived(messageId, 60000, util_2.MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure.Success.Code.DONE);
+                    encoderPort = parseInt(encoderPort, 10);
+                    startCirculoEncoderNarrowAngleCalibrationProcedure = {
+                        deviceAddress: deviceAddress,
+                        encoderPort: encoderPort,
+                    };
+                    motionMasterClient.sendRequest({ startCirculoEncoderNarrowAngleCalibrationProcedure: startCirculoEncoderNarrowAngleCalibrationProcedure }, messageId);
                     return [2 /*return*/];
             }
         });
