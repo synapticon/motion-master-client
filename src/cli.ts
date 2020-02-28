@@ -132,6 +132,10 @@ program
   .action(startSystemIdentificationAction);
 
 program
+  .command('startCirculoEncoderNarrowAngleCalibrationProcedure <encoderPort>')
+  .action(startCirculoEncoderNarrowAngleCalibrationProcedureAction);
+
+program
   .command('monitor <topic> [params...]')
   .option('-i, --interval <value>', 'sending interval in microseconds', parseOptionValueAsInt, 1 * 1000 * 1000)
   .action(monitorAction);
@@ -708,6 +712,22 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
 
       break;
     }
+    case 'getCirculoEncoderMagnetDistance': {
+      exitOnMessageReceived(messageId);
+
+      const encoderPort = parseInt(args[0], 10);
+      motionMasterClient.requestGetCirculoEncoderMagnetDistance(deviceAddress, encoderPort, messageId);
+
+      break;
+    }
+    case 'startCirculoEncoderNarrowAngleCalibrationProcedure': {
+      exitOnMessageReceived(messageId, 60000, MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure.Success.Code.DONE);
+
+      const encoderPort = parseInt(args[0], 10);
+      motionMasterClient.requestStartCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress, encoderPort, messageId);
+
+      break;
+    }
     default: {
       throw new Error(`Request "${type}" doesn\'t exist`);
     }
@@ -930,6 +950,27 @@ async function startSystemIdentificationAction(
   };
 
   motionMasterClient.sendRequest({ startSystemIdentification }, messageId);
+}
+
+async function startCirculoEncoderNarrowAngleCalibrationProcedureAction(
+  encoderPort: any,
+  cmd: Command,
+) {
+  connectToMotionMaster(cmd.parent);
+  const deviceAddress = await getCommandDeviceAddressAsync(cmd.parent);
+
+  const messageId = v4();
+  printOnMessageReceived(messageId, cmd.parent.outputFormat as OutputFormat);
+  exitOnMessageReceived(messageId, 60000, MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure.Success.Code.DONE);
+
+  encoderPort = parseInt(encoderPort, 10);
+
+  const startCirculoEncoderNarrowAngleCalibrationProcedure: MotionMasterMessage.Request.IStartCirculoEncoderNarrowAngleCalibrationProcedure = {
+    deviceAddress,
+    encoderPort,
+  };
+
+  motionMasterClient.sendRequest({ startCirculoEncoderNarrowAngleCalibrationProcedure }, messageId);
 }
 
 async function monitorAction(topic: string, params: string[], cmd: Command) {
