@@ -1,14 +1,14 @@
 import { from, Subject } from 'rxjs';
 import { filter, map, pluck, switchMap } from 'rxjs/operators';
 
-import { IMotionMasterMessage } from './util';
+import { MotionMasterMessage } from './util';
 
 export class MotionMasterNotification {
 
   /**
    * Buffered messages by topic.
    */
-  readonly input$ = new Subject<{ topic: string, messages: IMotionMasterMessage[] }>();
+  readonly input$ = new Subject<{ topic: string, messages: MotionMasterMessage[] }>();
 
   /**
    * Notification messages are system and device events.
