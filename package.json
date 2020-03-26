@@ -1,6 +1,6 @@
 {
   "name": "@synapticon/motion-master-client",
-  "version": "1.10.0",
+  "version": "1.10.1-fix-cannot-freeze-array-buffer.0",
   "private": false,
   "description": "",
   "main": "./dist/index.js",
