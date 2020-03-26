@@ -6,9 +6,16 @@ var uuid_1 = require("uuid");
 var util_1 = require("./util");
 var MotionMasterClient = /** @class */ (function () {
     function MotionMasterClient() {
+        /**
+         * Decoded message instances coming from Motion Master.
+         * @see https://github.com/protobufjs/protobuf.js#toolset Message.decode
+         */
         this.input$ = new rxjs_1.Subject();
+        /**
+         * Message instances or objects going to Motion Master.
+         * @see https://github.com/protobufjs/protobuf.js#toolset Message.encode
+         */
         this.output$ = new rxjs_1.Subject();
-        this.status$ = this.input$.pipe(operators_1.map(function (message) { return message.status; }));
     }
     MotionMasterClient.prototype.requestPingSystem = function (messageId) {
         var pingSystem = util_1.MotionMasterMessage.Request.PingSystem.create();

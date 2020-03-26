@@ -16,41 +16,48 @@ export type DeviceAddressType = number | null | undefined;
  * @see https://www.typescriptlang.org/docs/handbook/advanced-types.html#conditional-types
  */
 export type StatusTypeObservable<T extends StatusType> =
-  T extends 'systemPong' ? Observable<MotionMasterMessage.Status.ISystemPong> :
-  T extends 'systemVersion' ? Observable<MotionMasterMessage.Status.ISystemVersion> :
-  T extends 'systemEvent' ? Observable<MotionMasterMessage.Status.ISystemEvent> :
-  T extends 'deviceInfo' ? Observable<MotionMasterMessage.Status.IDeviceInfo> :
-  T extends 'deviceParameterInfo' ? Observable<MotionMasterMessage.Status.IDeviceParameterInfo> :
-  T extends 'deviceParameterValues' ? Observable<MotionMasterMessage.Status.IDeviceParameterValues> :
-  T extends 'multiDeviceParameterValues' ? Observable<MotionMasterMessage.Status.IMultiDeviceParameterValues> :
-  T extends 'deviceFileList' ? Observable<MotionMasterMessage.Status.IDeviceFileList> :
-  T extends 'deviceFile' ? Observable<MotionMasterMessage.Status.IDeviceFile> :
-  T extends 'deviceEvent' ? Observable<MotionMasterMessage.Status.IDeviceEvent> :
-  T extends 'deviceFirmwareInstallation' ? Observable<MotionMasterMessage.Status.IDeviceFirmwareInstallation> :
-  T extends 'deviceLog' ? Observable<MotionMasterMessage.Status.IDeviceLog> :
-  T extends 'deviceFaultReset' ? Observable<MotionMasterMessage.Status.IDeviceFaultReset> :
-  T extends 'coggingTorqueRecording' ? Observable<MotionMasterMessage.Status.ICoggingTorqueRecording> :
-  T extends 'coggingTorqueData' ? Observable<MotionMasterMessage.Status.ICoggingTorqueData> :
-  T extends 'offsetDetection' ? Observable<MotionMasterMessage.Status.IOffsetDetection> :
-  T extends 'plantIdentification' ? Observable<MotionMasterMessage.Status.IPlantIdentification> :
-  T extends 'autoTuning' ? Observable<MotionMasterMessage.Status.IAutoTuning> :
-  T extends 'motionController' ? Observable<MotionMasterMessage.Status.IMotionController> :
-  T extends 'signalGenerator' ? Observable<MotionMasterMessage.Status.ISignalGenerator> :
-  T extends 'monitoringParameterValues' ? Observable<MotionMasterMessage.Status.IMonitoringParameterValues> :
-  T extends 'deviceStop' ? Observable<MotionMasterMessage.Status.IDeviceStop> :
-  T extends 'ethercatNetworkState' ? Observable<MotionMasterMessage.Status.IEthercatNetworkState> :
+  T extends 'systemPong' ? Observable<MotionMasterMessage.Status.SystemPong> :
+  T extends 'systemVersion' ? Observable<MotionMasterMessage.Status.SystemVersion> :
+  T extends 'systemEvent' ? Observable<MotionMasterMessage.Status.SystemEvent> :
+  T extends 'deviceInfo' ? Observable<MotionMasterMessage.Status.DeviceInfo> :
+  T extends 'deviceParameterInfo' ? Observable<MotionMasterMessage.Status.DeviceParameterInfo> :
+  T extends 'deviceParameterValues' ? Observable<MotionMasterMessage.Status.DeviceParameterValues> :
+  T extends 'multiDeviceParameterValues' ? Observable<MotionMasterMessage.Status.MultiDeviceParameterValues> :
+  T extends 'deviceFileList' ? Observable<MotionMasterMessage.Status.DeviceFileList> :
+  T extends 'deviceFile' ? Observable<MotionMasterMessage.Status.DeviceFile> :
+  T extends 'deviceEvent' ? Observable<MotionMasterMessage.Status.DeviceEvent> :
+  T extends 'deviceFirmwareInstallation' ? Observable<MotionMasterMessage.Status.DeviceFirmwareInstallation> :
+  T extends 'deviceLog' ? Observable<MotionMasterMessage.Status.DeviceLog> :
+  T extends 'deviceFaultReset' ? Observable<MotionMasterMessage.Status.DeviceFaultReset> :
+  T extends 'coggingTorqueRecording' ? Observable<MotionMasterMessage.Status.CoggingTorqueRecording> :
+  T extends 'coggingTorqueData' ? Observable<MotionMasterMessage.Status.CoggingTorqueData> :
+  T extends 'offsetDetection' ? Observable<MotionMasterMessage.Status.OffsetDetection> :
+  T extends 'plantIdentification' ? Observable<MotionMasterMessage.Status.PlantIdentification> :
+  T extends 'autoTuning' ? Observable<MotionMasterMessage.Status.AutoTuning> :
+  T extends 'motionController' ? Observable<MotionMasterMessage.Status.MotionController> :
+  T extends 'signalGenerator' ? Observable<MotionMasterMessage.Status.SignalGenerator> :
+  T extends 'monitoringParameterValues' ? Observable<MotionMasterMessage.Status.MonitoringParameterValues> :
+  T extends 'deviceStop' ? Observable<MotionMasterMessage.Status.DeviceStop> :
+  T extends 'ethercatNetworkState' ? Observable<MotionMasterMessage.Status.EthercatNetworkState> :
   T extends 'narrowAngleCalibration' ? Observable<MotionMasterMessage.Status.NarrowAngleCalibration> :
-  T extends 'systemIdentification' ? Observable<MotionMasterMessage.Status.ISystemIdentification> :
-  T extends 'circuloEncoderMagnetDistance' ? Observable<MotionMasterMessage.Status.ICirculoEncoderMagnetDistance> :
-  T extends 'circuloEncoderNarrowAngleCalibrationProcedure' ? Observable<MotionMasterMessage.Status.ICirculoEncoderNarrowAngleCalibrationProcedure> :
+  T extends 'systemIdentification' ? Observable<MotionMasterMessage.Status.SystemIdentification> :
+  T extends 'circuloEncoderMagnetDistance' ? Observable<MotionMasterMessage.Status.CirculoEncoderMagnetDistance> :
+  T extends 'circuloEncoderNarrowAngleCalibrationProcedure' ? Observable<MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure> :
   Observable<any>;
 
 export class MotionMasterClient {
 
-  readonly input$ = new Subject<IMotionMasterMessage>();
-  readonly output$ = new Subject<IMotionMasterMessage>();
+  /**
+   * Decoded message instances coming from Motion Master.
+   * @see https://github.com/protobufjs/protobuf.js#toolset Message.decode
+   */
+  readonly input$ = new Subject<MotionMasterMessage>();
 
-  status$ = this.input$.pipe(map((message) => message.status));
+  /**
+   * Message instances or objects going to Motion Master.
+   * @see https://github.com/protobufjs/protobuf.js#toolset Message.encode
+   */
+  readonly output$ = new Subject<IMotionMasterMessage>();
 
   requestPingSystem(messageId?: string) {
     const pingSystem = MotionMasterMessage.Request.PingSystem.create();

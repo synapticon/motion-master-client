@@ -9,46 +9,53 @@ export declare type DeviceAddressType = number | null | undefined;
  * Select observable of Status message based on status type argument.
  * @see https://www.typescriptlang.org/docs/handbook/advanced-types.html#conditional-types
  */
-export declare type StatusTypeObservable<T extends StatusType> = T extends 'systemPong' ? Observable<MotionMasterMessage.Status.ISystemPong> : T extends 'systemVersion' ? Observable<MotionMasterMessage.Status.ISystemVersion> : T extends 'systemEvent' ? Observable<MotionMasterMessage.Status.ISystemEvent> : T extends 'deviceInfo' ? Observable<MotionMasterMessage.Status.IDeviceInfo> : T extends 'deviceParameterInfo' ? Observable<MotionMasterMessage.Status.IDeviceParameterInfo> : T extends 'deviceParameterValues' ? Observable<MotionMasterMessage.Status.IDeviceParameterValues> : T extends 'multiDeviceParameterValues' ? Observable<MotionMasterMessage.Status.IMultiDeviceParameterValues> : T extends 'deviceFileList' ? Observable<MotionMasterMessage.Status.IDeviceFileList> : T extends 'deviceFile' ? Observable<MotionMasterMessage.Status.IDeviceFile> : T extends 'deviceEvent' ? Observable<MotionMasterMessage.Status.IDeviceEvent> : T extends 'deviceFirmwareInstallation' ? Observable<MotionMasterMessage.Status.IDeviceFirmwareInstallation> : T extends 'deviceLog' ? Observable<MotionMasterMessage.Status.IDeviceLog> : T extends 'deviceFaultReset' ? Observable<MotionMasterMessage.Status.IDeviceFaultReset> : T extends 'coggingTorqueRecording' ? Observable<MotionMasterMessage.Status.ICoggingTorqueRecording> : T extends 'coggingTorqueData' ? Observable<MotionMasterMessage.Status.ICoggingTorqueData> : T extends 'offsetDetection' ? Observable<MotionMasterMessage.Status.IOffsetDetection> : T extends 'plantIdentification' ? Observable<MotionMasterMessage.Status.IPlantIdentification> : T extends 'autoTuning' ? Observable<MotionMasterMessage.Status.IAutoTuning> : T extends 'motionController' ? Observable<MotionMasterMessage.Status.IMotionController> : T extends 'signalGenerator' ? Observable<MotionMasterMessage.Status.ISignalGenerator> : T extends 'monitoringParameterValues' ? Observable<MotionMasterMessage.Status.IMonitoringParameterValues> : T extends 'deviceStop' ? Observable<MotionMasterMessage.Status.IDeviceStop> : T extends 'ethercatNetworkState' ? Observable<MotionMasterMessage.Status.IEthercatNetworkState> : T extends 'narrowAngleCalibration' ? Observable<MotionMasterMessage.Status.NarrowAngleCalibration> : T extends 'systemIdentification' ? Observable<MotionMasterMessage.Status.ISystemIdentification> : T extends 'circuloEncoderMagnetDistance' ? Observable<MotionMasterMessage.Status.ICirculoEncoderMagnetDistance> : T extends 'circuloEncoderNarrowAngleCalibrationProcedure' ? Observable<MotionMasterMessage.Status.ICirculoEncoderNarrowAngleCalibrationProcedure> : Observable<any>;
+export declare type StatusTypeObservable<T extends StatusType> = T extends 'systemPong' ? Observable<MotionMasterMessage.Status.SystemPong> : T extends 'systemVersion' ? Observable<MotionMasterMessage.Status.SystemVersion> : T extends 'systemEvent' ? Observable<MotionMasterMessage.Status.SystemEvent> : T extends 'deviceInfo' ? Observable<MotionMasterMessage.Status.DeviceInfo> : T extends 'deviceParameterInfo' ? Observable<MotionMasterMessage.Status.DeviceParameterInfo> : T extends 'deviceParameterValues' ? Observable<MotionMasterMessage.Status.DeviceParameterValues> : T extends 'multiDeviceParameterValues' ? Observable<MotionMasterMessage.Status.MultiDeviceParameterValues> : T extends 'deviceFileList' ? Observable<MotionMasterMessage.Status.DeviceFileList> : T extends 'deviceFile' ? Observable<MotionMasterMessage.Status.DeviceFile> : T extends 'deviceEvent' ? Observable<MotionMasterMessage.Status.DeviceEvent> : T extends 'deviceFirmwareInstallation' ? Observable<MotionMasterMessage.Status.DeviceFirmwareInstallation> : T extends 'deviceLog' ? Observable<MotionMasterMessage.Status.DeviceLog> : T extends 'deviceFaultReset' ? Observable<MotionMasterMessage.Status.DeviceFaultReset> : T extends 'coggingTorqueRecording' ? Observable<MotionMasterMessage.Status.CoggingTorqueRecording> : T extends 'coggingTorqueData' ? Observable<MotionMasterMessage.Status.CoggingTorqueData> : T extends 'offsetDetection' ? Observable<MotionMasterMessage.Status.OffsetDetection> : T extends 'plantIdentification' ? Observable<MotionMasterMessage.Status.PlantIdentification> : T extends 'autoTuning' ? Observable<MotionMasterMessage.Status.AutoTuning> : T extends 'motionController' ? Observable<MotionMasterMessage.Status.MotionController> : T extends 'signalGenerator' ? Observable<MotionMasterMessage.Status.SignalGenerator> : T extends 'monitoringParameterValues' ? Observable<MotionMasterMessage.Status.MonitoringParameterValues> : T extends 'deviceStop' ? Observable<MotionMasterMessage.Status.DeviceStop> : T extends 'ethercatNetworkState' ? Observable<MotionMasterMessage.Status.EthercatNetworkState> : T extends 'narrowAngleCalibration' ? Observable<MotionMasterMessage.Status.NarrowAngleCalibration> : T extends 'systemIdentification' ? Observable<MotionMasterMessage.Status.SystemIdentification> : T extends 'circuloEncoderMagnetDistance' ? Observable<MotionMasterMessage.Status.CirculoEncoderMagnetDistance> : T extends 'circuloEncoderNarrowAngleCalibrationProcedure' ? Observable<MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure> : Observable<any>;
 export declare class MotionMasterClient {
-    readonly input$: Subject<IMotionMasterMessage>;
+    /**
+     * Decoded message instances coming from Motion Master.
+     * @see https://github.com/protobufjs/protobuf.js#toolset Message.decode
+     */
+    readonly input$: Subject<MotionMasterMessage>;
+    /**
+     * Message instances or objects going to Motion Master.
+     * @see https://github.com/protobufjs/protobuf.js#toolset Message.encode
+     */
     readonly output$: Subject<IMotionMasterMessage>;
-    status$: Observable<MotionMasterMessage.IStatus | null | undefined>;
-    requestPingSystem(messageId?: string): Observable<MotionMasterMessage.Status.ISystemPong>;
-    requestGetSystemVersion(messageId?: string): Observable<MotionMasterMessage.Status.ISystemVersion>;
-    requestGetDeviceInfo(messageId?: string): Observable<MotionMasterMessage.Status.IDeviceInfo>;
-    requestGetDeviceParameterInfo(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.IDeviceParameterInfo>;
-    requestGetDeviceParameterValues(deviceAddress: DeviceAddressType, parameters: MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[], messageId?: string): Observable<MotionMasterMessage.Status.IDeviceParameterValues>;
-    requestSetDeviceParameterValues(deviceAddress: DeviceAddressType, parameterValues: MotionMasterMessage.Request.SetDeviceParameterValues.IParameterValue[], messageId?: string): Observable<MotionMasterMessage.Status.IDeviceParameterValues>;
-    requestGetDeviceFileList(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.IDeviceFileList>;
-    requestGetDeviceFile(deviceAddress: DeviceAddressType, name: string, messageId?: string): Observable<MotionMasterMessage.Status.IDeviceFile>;
-    requestSetDeviceFile(deviceAddress: DeviceAddressType, name: string, content: Uint8Array, overwrite: boolean, messageId?: string): Observable<MotionMasterMessage.Status.IDeviceFile>;
-    requestDeleteDeviceFile(deviceAddress: DeviceAddressType, name: string, messageId?: string): Observable<MotionMasterMessage.Status.IDeviceFile>;
-    requestResetDeviceFault(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.IDeviceFaultReset>;
+    requestPingSystem(messageId?: string): Observable<MotionMasterMessage.Status.SystemPong>;
+    requestGetSystemVersion(messageId?: string): Observable<MotionMasterMessage.Status.SystemVersion>;
+    requestGetDeviceInfo(messageId?: string): Observable<MotionMasterMessage.Status.DeviceInfo>;
+    requestGetDeviceParameterInfo(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.DeviceParameterInfo>;
+    requestGetDeviceParameterValues(deviceAddress: DeviceAddressType, parameters: MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[], messageId?: string): Observable<MotionMasterMessage.Status.DeviceParameterValues>;
+    requestSetDeviceParameterValues(deviceAddress: DeviceAddressType, parameterValues: MotionMasterMessage.Request.SetDeviceParameterValues.IParameterValue[], messageId?: string): Observable<MotionMasterMessage.Status.DeviceParameterValues>;
+    requestGetDeviceFileList(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.DeviceFileList>;
+    requestGetDeviceFile(deviceAddress: DeviceAddressType, name: string, messageId?: string): Observable<MotionMasterMessage.Status.DeviceFile>;
+    requestSetDeviceFile(deviceAddress: DeviceAddressType, name: string, content: Uint8Array, overwrite: boolean, messageId?: string): Observable<MotionMasterMessage.Status.DeviceFile>;
+    requestDeleteDeviceFile(deviceAddress: DeviceAddressType, name: string, messageId?: string): Observable<MotionMasterMessage.Status.DeviceFile>;
+    requestResetDeviceFault(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.DeviceFaultReset>;
     requestStopDevice(deviceAddress: DeviceAddressType, messageId?: string): string;
-    requestStartDeviceFirmwareInstallation(deviceAddress: DeviceAddressType, firmwarePackageContent: Uint8Array, messageId?: string): Observable<MotionMasterMessage.Status.IDeviceFirmwareInstallation>;
-    requestGetDeviceLog(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.IDeviceLog>;
-    requestStartCoggingTorqueRecording(deviceAddress: DeviceAddressType, skipAutoTuning: boolean, messageId?: string): Observable<MotionMasterMessage.Status.ICoggingTorqueRecording>;
-    requestGetCoggingTorqueData(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.ICoggingTorqueData>;
-    requestStartOffsetDetection(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.IOffsetDetection>;
-    requestStartPlantIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, cutoffFrequency: number, messageId?: string): Observable<MotionMasterMessage.Status.IPlantIdentification>;
-    requestComputePositionAutoTuningGains(deviceAddress: number, positionParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IPositionParameters, messageId?: string): Observable<MotionMasterMessage.Status.IAutoTuning>;
-    requestComputeVelocityAutoTuningGains(deviceAddress: number, velocityParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IVelocityParameters, messageId?: string): Observable<MotionMasterMessage.Status.IAutoTuning>;
+    requestStartDeviceFirmwareInstallation(deviceAddress: DeviceAddressType, firmwarePackageContent: Uint8Array, messageId?: string): Observable<MotionMasterMessage.Status.DeviceFirmwareInstallation>;
+    requestGetDeviceLog(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.DeviceLog>;
+    requestStartCoggingTorqueRecording(deviceAddress: DeviceAddressType, skipAutoTuning: boolean, messageId?: string): Observable<MotionMasterMessage.Status.CoggingTorqueRecording>;
+    requestGetCoggingTorqueData(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.CoggingTorqueData>;
+    requestStartOffsetDetection(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.OffsetDetection>;
+    requestStartPlantIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, cutoffFrequency: number, messageId?: string): Observable<MotionMasterMessage.Status.PlantIdentification>;
+    requestComputePositionAutoTuningGains(deviceAddress: number, positionParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IPositionParameters, messageId?: string): Observable<MotionMasterMessage.Status.AutoTuning>;
+    requestComputeVelocityAutoTuningGains(deviceAddress: number, velocityParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IVelocityParameters, messageId?: string): Observable<MotionMasterMessage.Status.AutoTuning>;
     requestSetMotionControllerParameters(deviceAddress: DeviceAddressType, target: number, messageId?: string): string;
-    requestEnableMotionController(deviceAddress: DeviceAddressType, controllerType: MotionMasterMessage.Request.EnableMotionController.ControllerType, filterValue: boolean, messageId?: string): Observable<MotionMasterMessage.Status.IMotionController>;
-    requestDisableMotionController(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.IMotionController>;
+    requestEnableMotionController(deviceAddress: DeviceAddressType, controllerType: MotionMasterMessage.Request.EnableMotionController.ControllerType, filterValue: boolean, messageId?: string): Observable<MotionMasterMessage.Status.MotionController>;
+    requestDisableMotionController(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.MotionController>;
     requestSetSignalGeneratorParameters(setSignalGeneratorParameters: MotionMasterMessage.Request.ISetSignalGeneratorParameters, messageId?: string): string;
-    requestStartSignalGenerator(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.ISignalGenerator>;
-    requestStopSignalGenerator(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.ISignalGenerator>;
-    requestStartMonitoringDeviceParameterValues(deviceAddress: DeviceAddressType, parameters: MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[], interval: number, topic: string, messageId?: string): Observable<MotionMasterMessage.Status.IMonitoringParameterValues>;
-    requestStopMonitoringDeviceParameterValues(startMonitoringRequestId: string, messageId?: string): Observable<MotionMasterMessage.Status.IMonitoringParameterValues>;
-    requestGetEthercatNetworkState(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.IEthercatNetworkState>;
-    requestSetEthercatNetworkState(deviceAddress: DeviceAddressType, state: MotionMasterMessage.Request.SetEthercatNetworkState.State, messageId?: string): Observable<MotionMasterMessage.Status.IEthercatNetworkState>;
+    requestStartSignalGenerator(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.SignalGenerator>;
+    requestStopSignalGenerator(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.SignalGenerator>;
+    requestStartMonitoringDeviceParameterValues(deviceAddress: DeviceAddressType, parameters: MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[], interval: number, topic: string, messageId?: string): Observable<MotionMasterMessage.Status.MonitoringParameterValues>;
+    requestStopMonitoringDeviceParameterValues(startMonitoringRequestId: string, messageId?: string): Observable<MotionMasterMessage.Status.MonitoringParameterValues>;
+    requestGetEthercatNetworkState(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.EthercatNetworkState>;
+    requestSetEthercatNetworkState(deviceAddress: DeviceAddressType, state: MotionMasterMessage.Request.SetEthercatNetworkState.State, messageId?: string): Observable<MotionMasterMessage.Status.EthercatNetworkState>;
     requestStartNarrowAngleCalibration(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.NarrowAngleCalibration>;
     requestSetSystemClientTimeout(timeoutMs: number, messageId?: string): string;
-    requestStartSystemIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, messageId?: string): Observable<MotionMasterMessage.Status.ISystemIdentification>;
-    requestGetCirculoEncoderMagnetDistance(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string): Observable<MotionMasterMessage.Status.ICirculoEncoderMagnetDistance>;
-    requestStartCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string): Observable<MotionMasterMessage.Status.ICirculoEncoderNarrowAngleCalibrationProcedure>;
+    requestStartSystemIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, messageId?: string): Observable<MotionMasterMessage.Status.SystemIdentification>;
+    requestGetCirculoEncoderMagnetDistance(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderMagnetDistance>;
+    requestStartCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure>;
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain
@@ -64,7 +71,7 @@ export declare class MotionMasterClient {
      * @param messageId
      * @returns an observable of motion master messages
      */
-    selectMessage(messageId: string): Observable<IMotionMasterMessage>;
+    selectMessage(messageId: string): Observable<MotionMasterMessage>;
     /**
      * Select incoming messages by id (optionally) and get their status response.
      *
