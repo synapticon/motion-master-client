@@ -27,18 +27,22 @@ export function decodeMotionMasterMessage(data: Uint8Array) {
  * @param y MotionMasterMessage
  */
 export function compareParameterValues(x: MotionMasterMessage, y: MotionMasterMessage) {
-  // tslint:disable: no-non-null-assertion
-  const xValues = x.status!.monitoringParameterValues!.deviceParameterValues!.parameterValues;
-  const yValues = y.status!.monitoringParameterValues!.deviceParameterValues!.parameterValues;
-  for (let i = 0; i < xValues!.length; i++) {
-    if ((xValues![i].intValue !== yValues![i].intValue)
-      || (xValues![i].uintValue !== yValues![i].uintValue)
-      || (xValues![i].floatValue !== yValues![i].floatValue)
-      || (xValues![i].stringValue !== yValues![i].stringValue)
-    ) {
-      return false;
+  const xvals = x.status?.monitoringParameterValues?.deviceParameterValues?.parameterValues;
+  const yvals = y.status?.monitoringParameterValues?.deviceParameterValues?.parameterValues;
+
+  if (xvals && yvals) {
+    for (let i = 0; i < xvals.length; i++) {
+      if ((xvals[i].intValue !== yvals[i].intValue)
+        || (xvals[i].uintValue !== yvals[i].uintValue)
+        || (xvals[i].floatValue !== yvals[i].floatValue)
+        || (xvals[i].stringValue !== yvals[i].stringValue)
+      ) {
+        return false;
+      }
     }
+  } else {
+    throw new Error(`Device parameterValues are empty: ${x.status} ${y.status}`);
   }
+
   return true;
-  // tslint:enable: no-non-null-assertion
 }

@@ -26,19 +26,23 @@ exports.decodeMotionMasterMessage = decodeMotionMasterMessage;
  * @param y MotionMasterMessage
  */
 function compareParameterValues(x, y) {
-    // tslint:disable: no-non-null-assertion
-    var xValues = x.status.monitoringParameterValues.deviceParameterValues.parameterValues;
-    var yValues = y.status.monitoringParameterValues.deviceParameterValues.parameterValues;
-    for (var i = 0; i < xValues.length; i++) {
-        if ((xValues[i].intValue !== yValues[i].intValue)
-            || (xValues[i].uintValue !== yValues[i].uintValue)
-            || (xValues[i].floatValue !== yValues[i].floatValue)
-            || (xValues[i].stringValue !== yValues[i].stringValue)) {
-            return false;
+    var _a, _b, _c, _d, _e, _f;
+    var xvals = (_c = (_b = (_a = x.status) === null || _a === void 0 ? void 0 : _a.monitoringParameterValues) === null || _b === void 0 ? void 0 : _b.deviceParameterValues) === null || _c === void 0 ? void 0 : _c.parameterValues;
+    var yvals = (_f = (_e = (_d = y.status) === null || _d === void 0 ? void 0 : _d.monitoringParameterValues) === null || _e === void 0 ? void 0 : _e.deviceParameterValues) === null || _f === void 0 ? void 0 : _f.parameterValues;
+    if (xvals && yvals) {
+        for (var i = 0; i < xvals.length; i++) {
+            if ((xvals[i].intValue !== yvals[i].intValue)
+                || (xvals[i].uintValue !== yvals[i].uintValue)
+                || (xvals[i].floatValue !== yvals[i].floatValue)
+                || (xvals[i].stringValue !== yvals[i].stringValue)) {
+                return false;
+            }
         }
     }
+    else {
+        throw new Error("Device parameterValues are empty: " + x.status + " " + y.status);
+    }
     return true;
-    // tslint:enable: no-non-null-assertion
 }
 exports.compareParameterValues = compareParameterValues;
 //# sourceMappingURL=util.js.map

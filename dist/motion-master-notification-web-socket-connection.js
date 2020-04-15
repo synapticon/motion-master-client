@@ -59,7 +59,9 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
             observable = observable.pipe(operators_1.distinctUntilChanged(util_1.compareParameterValues));
         }
         var messages$ = observable.pipe(operators_1.bufferCount(bufferSize));
-        var subscription = messages$.subscribe(function (messages) { return _this.notification.input$.next({ topic: topic, messages: messages }); });
+        var subscription = messages$.subscribe(function (messages) {
+            _this.notification.input$.next({ topic: topic, messages: messages });
+        });
         this.subscriptions[id] = subscription;
         return id;
     };

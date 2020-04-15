@@ -78,7 +78,9 @@ export class MotionMasterNotificationWebSocketConnection {
       bufferCount(bufferSize),
     );
 
-    const subscription = messages$.subscribe((messages) => this.notification.input$.next({ topic, messages }));
+    const subscription = messages$.subscribe((messages) => {
+      this.notification.input$.next({ topic, messages });
+    });
 
     this.subscriptions[id] = subscription;
 
