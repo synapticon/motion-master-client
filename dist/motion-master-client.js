@@ -218,6 +218,16 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ startCirculoEncoderNarrowAngleCalibrationProcedure: startCirculoEncoderNarrowAngleCalibrationProcedure }, messageId);
         return this.selectMessageStatus('circuloEncoderNarrowAngleCalibrationProcedure', id);
     };
+    MotionMasterClient.prototype.requestGetDeviceCia402State = function (deviceAddress, messageId) {
+        var getDeviceCia402State = util_1.MotionMasterMessage.Request.GetDeviceCiA402State.create({ deviceAddress: deviceAddress });
+        var id = this.sendRequest({ getDeviceCia402State: getDeviceCia402State }, messageId);
+        return this.selectMessageStatus('deviceCia402State', id);
+    };
+    MotionMasterClient.prototype.requestSetDeviceCia402State = function (deviceAddress, state, messageId) {
+        var setDeviceCia402State = util_1.MotionMasterMessage.Request.SetDeviceCiA402State.create({ deviceAddress: deviceAddress, state: state });
+        var id = this.sendRequest({ setDeviceCia402State: setDeviceCia402State }, messageId);
+        return this.selectMessageStatus('deviceCia402State', id);
+    };
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain

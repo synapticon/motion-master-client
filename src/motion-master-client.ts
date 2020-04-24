@@ -43,6 +43,7 @@ export type StatusTypeObservable<T extends StatusType> =
   T extends 'systemIdentification' ? Observable<MotionMasterMessage.Status.SystemIdentification> :
   T extends 'circuloEncoderMagnetDistance' ? Observable<MotionMasterMessage.Status.CirculoEncoderMagnetDistance> :
   T extends 'circuloEncoderNarrowAngleCalibrationProcedure' ? Observable<MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure> :
+  T extends 'deviceCia402State' ? Observable<MotionMasterMessage.Status.DeviceCiA402State> :
   Observable<any>;
 
 export class MotionMasterClient {
@@ -304,6 +305,18 @@ export class MotionMasterClient {
     });
     const id = this.sendRequest({ startCirculoEncoderNarrowAngleCalibrationProcedure }, messageId);
     return this.selectMessageStatus('circuloEncoderNarrowAngleCalibrationProcedure', id);
+  }
+
+  requestGetDeviceCia402State(deviceAddress: DeviceAddressType, messageId?: string) {
+    const getDeviceCia402State = MotionMasterMessage.Request.GetDeviceCiA402State.create({ deviceAddress });
+    const id = this.sendRequest({ getDeviceCia402State }, messageId);
+    return this.selectMessageStatus('deviceCia402State', id);
+  }
+
+  requestSetDeviceCia402State(deviceAddress: DeviceAddressType, state: MotionMasterMessage.Status.DeviceCiA402State.State, messageId?: string) {
+    const setDeviceCia402State = MotionMasterMessage.Request.SetDeviceCiA402State.create({ deviceAddress, state });
+    const id = this.sendRequest({ setDeviceCia402State }, messageId);
+    return this.selectMessageStatus('deviceCia402State', id);
   }
 
   /**
