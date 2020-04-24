@@ -21,7 +21,7 @@
   "author": "Marko Sanković <msankovic@synapticon.com> (https://github.com/markosankovic)",
   "license": "MIT",
   "dependencies": {
-    "@synapticon/motion-master-proto": "^4.1.0",
+    "@synapticon/motion-master-proto": "^4.2.0",
     "commander": "^5.0.0",
     "debug": "^4.1.1",
     "long": "^4.0.0",
