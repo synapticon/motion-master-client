@@ -61,6 +61,7 @@ See the examples in [test.sh](test.sh).
       getCoggingTorqueData
       startOffsetDetection
       startPlantIdentification
+      startSystemIdentification
       computeAutoTuningGains
       setMotionControllerParameters
       enableMotionController
@@ -70,6 +71,15 @@ See the examples in [test.sh](test.sh).
       stopSignalGenerator
       startMonitoringDeviceParameterValues
       stopMonitoringDeviceParameterValues
+      getEthercatNetworkState
+      setEthercatNetworkState
+      startNarrowAngleCalibration
+      setSystemClientTimeout
+      getCirculoEncoderMagnetDistance
+      startCirculoEncoderNarrowAngleCalibrationProcedure
+      getDeviceCiA402State
+      setDeviceCiA402State
+      getSystemLog
 
 ### monitor
 

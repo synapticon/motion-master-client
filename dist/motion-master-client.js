@@ -228,6 +228,11 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ setDeviceCia402State: setDeviceCia402State }, messageId);
         return this.selectMessageStatus('deviceCia402State', id);
     };
+    MotionMasterClient.prototype.requestGetSystemLog = function (deviceAddress, messageId) {
+        var getSystemLog = util_1.MotionMasterMessage.Request.GetSystemLog.create({ deviceAddress: deviceAddress });
+        var id = this.sendRequest({ getSystemLog: getSystemLog }, messageId);
+        return this.selectMessageStatus('systemLog', id);
+    };
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain
