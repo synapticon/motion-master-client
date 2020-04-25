@@ -320,8 +320,8 @@ export class MotionMasterClient {
     return this.selectMessageStatus('deviceCia402State', id);
   }
 
-  requestGetSystemLog(deviceAddress: DeviceAddressType, messageId?: string) {
-    const getSystemLog = MotionMasterMessage.Request.GetSystemLog.create({ deviceAddress });
+  requestGetSystemLog(messageId?: string) {
+    const getSystemLog = MotionMasterMessage.Request.GetSystemLog.create({});
     const id = this.sendRequest({ getSystemLog }, messageId);
     return this.selectMessageStatus('systemLog', id);
   }
@@ -334,7 +334,7 @@ export class MotionMasterClient {
   selectDeviceAtPosition(position: number) {
     return this.requestGetDeviceInfo().pipe(
       first(),
-      map((deviceInfo) => {
+      map((deviceInfo: MotionMasterMessage.Status.IDeviceInfo) => {
         if (deviceInfo.devices) {
           return deviceInfo.devices.find((device) => device.position === position);
         } else {

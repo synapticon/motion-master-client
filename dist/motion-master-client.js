@@ -228,8 +228,8 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ setDeviceCia402State: setDeviceCia402State }, messageId);
         return this.selectMessageStatus('deviceCia402State', id);
     };
-    MotionMasterClient.prototype.requestGetSystemLog = function (deviceAddress, messageId) {
-        var getSystemLog = util_1.MotionMasterMessage.Request.GetSystemLog.create({ deviceAddress: deviceAddress });
+    MotionMasterClient.prototype.requestGetSystemLog = function (messageId) {
+        var getSystemLog = util_1.MotionMasterMessage.Request.GetSystemLog.create({});
         var id = this.sendRequest({ getSystemLog: getSystemLog }, messageId);
         return this.selectMessageStatus('systemLog', id);
     };

@@ -778,8 +778,8 @@ function requestAction(type, args, cmd) {
                     _b.label = 41;
                 case 41:
                     {
-                        exitOnMessageReceived(messageId, 30000);
-                        motionMasterClient.requestGetSystemLog(deviceAddress);
+                        exitOnMessageReceived(messageId);
+                        motionMasterClient.requestGetSystemLog(messageId);
                         return [3 /*break*/, 43];
                     }
                     _b.label = 42;

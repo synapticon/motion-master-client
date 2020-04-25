@@ -58,7 +58,7 @@ export declare class MotionMasterClient {
     requestStartCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure>;
     requestGetDeviceCia402State(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.DeviceCiA402State>;
     requestSetDeviceCia402State(deviceAddress: DeviceAddressType, state: MotionMasterMessage.Status.DeviceCiA402State.State, messageId?: string): Observable<MotionMasterMessage.Status.DeviceCiA402State>;
-    requestGetSystemLog(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.SystemLog>;
+    requestGetSystemLog(messageId?: string): Observable<MotionMasterMessage.Status.SystemLog>;
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain

@@ -744,9 +744,9 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       break;
     }
     case 'getSystemLog': {
-      exitOnMessageReceived(messageId, 30000);
+      exitOnMessageReceived(messageId);
 
-      motionMasterClient.requestGetSystemLog(deviceAddress);
+      motionMasterClient.requestGetSystemLog(messageId);
 
       break;
     }
