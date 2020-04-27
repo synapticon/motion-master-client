@@ -13,7 +13,8 @@
     "build": "npx tsc --build tsconfig.json",
     "watch": "npx tsc --watch",
     "motion-master-client": "node dist/cli.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "licenses": "npx license-checker --csv --out tmp/licenses.csv --customPath licenses.format.json"
   },
   "bin": {
     "motion-master-client": "dist/cli.js"
@@ -38,6 +39,7 @@
     "@types/uuid": "^7.0.3",
     "@types/yaml": "^1.9.7",
     "@types/zeromq": "^4.6.3",
+    "license-checker": "^25.0.1",
     "tslint": "^6.1.1",
     "typescript": "^3.8.3"
   }
