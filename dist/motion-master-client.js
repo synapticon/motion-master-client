@@ -37,8 +37,9 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ getDeviceParameterInfo: getDeviceParameterInfo }, messageId);
         return this.selectMessageStatus('deviceParameterInfo', id);
     };
-    MotionMasterClient.prototype.requestGetDeviceParameterValues = function (deviceAddress, parameters, messageId) {
-        var getDeviceParameterValues = util_1.MotionMasterMessage.Request.GetDeviceParameterValues.create({ deviceAddress: deviceAddress, parameters: parameters });
+    MotionMasterClient.prototype.requestGetDeviceParameterValues = function (deviceAddress, parameters, sendProgress, messageId) {
+        if (sendProgress === void 0) { sendProgress = false; }
+        var getDeviceParameterValues = util_1.MotionMasterMessage.Request.GetDeviceParameterValues.create({ deviceAddress: deviceAddress, parameters: parameters, sendProgress: sendProgress });
         var id = this.sendRequest({ getDeviceParameterValues: getDeviceParameterValues }, messageId);
         return this.selectMessageStatus('deviceParameterValues', id);
     };

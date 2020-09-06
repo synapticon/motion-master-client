@@ -25,7 +25,7 @@ export declare class MotionMasterClient {
     requestGetSystemVersion(messageId?: string): Observable<MotionMasterMessage.Status.SystemVersion>;
     requestGetDeviceInfo(messageId?: string): Observable<MotionMasterMessage.Status.DeviceInfo>;
     requestGetDeviceParameterInfo(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.DeviceParameterInfo>;
-    requestGetDeviceParameterValues(deviceAddress: DeviceAddressType, parameters: MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[], messageId?: string): Observable<MotionMasterMessage.Status.DeviceParameterValues>;
+    requestGetDeviceParameterValues(deviceAddress: DeviceAddressType, parameters: MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[], sendProgress?: boolean, messageId?: string): Observable<MotionMasterMessage.Status.DeviceParameterValues>;
     requestSetDeviceParameterValues(deviceAddress: DeviceAddressType, parameterValues: MotionMasterMessage.Request.SetDeviceParameterValues.IParameterValue[], messageId?: string): Observable<MotionMasterMessage.Status.DeviceParameterValues>;
     requestGetDeviceFileList(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.DeviceFileList>;
     requestGetDeviceFile(deviceAddress: DeviceAddressType, name: string, messageId?: string): Observable<MotionMasterMessage.Status.DeviceFile>;

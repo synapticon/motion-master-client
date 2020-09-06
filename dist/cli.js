@@ -238,7 +238,7 @@ function requestAction(type, args, cmd) {
                         exitOnMessageReceived(messageId);
                         parameters = args.map(paramToIndexSubindex);
                         validateParameters(parameters);
-                        motionMasterClient.requestGetDeviceParameterValues(deviceAddress, parameters, messageId);
+                        motionMasterClient.requestGetDeviceParameterValues(deviceAddress, parameters, false, messageId);
                         return [3 /*break*/, 43];
                     }
                     _b.label = 7;
