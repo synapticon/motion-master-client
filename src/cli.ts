@@ -96,6 +96,7 @@ program
 
 program
   .command('upload [params...]')
+  .option('-s, --send-progress')
   .action(uploadAction);
 
 program
@@ -759,6 +760,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
 async function uploadAction(params: string[], cmd: Command) {
   connectToMotionMaster(cmd.parent);
   const deviceAddress = await getCommandDeviceAddressAsync(cmd.parent);
+  const sendProgress = cmd.sendProgress;
 
   const messageId = v4();
   printOnMessageReceived(messageId, cmd.parent.outputFormat as OutputFormat);
@@ -766,7 +768,7 @@ async function uploadAction(params: string[], cmd: Command) {
 
   const parameters: MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] = params.map(paramToIndexSubindex);
   validateParameters(parameters);
-  const getDeviceParameterValues: MotionMasterMessage.Request.IGetDeviceParameterValues = { deviceAddress, parameters };
+  const getDeviceParameterValues: MotionMasterMessage.Request.IGetDeviceParameterValues = { deviceAddress, parameters, sendProgress };
 
   motionMasterClient.sendRequest({ getDeviceParameterValues }, messageId);
 }

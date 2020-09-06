@@ -112,6 +112,7 @@ commander_1.default
     .action(requestAction);
 commander_1.default
     .command('upload [params...]')
+    .option('-s, --send-progress')
     .action(uploadAction);
 commander_1.default
     .command('download [paramValues...]')
@@ -795,7 +796,7 @@ function requestAction(type, args, cmd) {
 }
 function uploadAction(params, cmd) {
     return __awaiter(this, void 0, void 0, function () {
-        var deviceAddress, messageId, parameters, getDeviceParameterValues;
+        var deviceAddress, sendProgress, messageId, parameters, getDeviceParameterValues;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -803,12 +804,13 @@ function uploadAction(params, cmd) {
                     return [4 /*yield*/, getCommandDeviceAddressAsync(cmd.parent)];
                 case 1:
                     deviceAddress = _a.sent();
+                    sendProgress = cmd.sendProgress;
                     messageId = uuid_1.v4();
                     printOnMessageReceived(messageId, cmd.parent.outputFormat);
                     exitOnMessageReceived(messageId);
                     parameters = params.map(paramToIndexSubindex);
                     validateParameters(parameters);
-                    getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters };
+                    getDeviceParameterValues = { deviceAddress: deviceAddress, parameters: parameters, sendProgress: sendProgress };
                     motionMasterClient.sendRequest({ getDeviceParameterValues: getDeviceParameterValues }, messageId);
                     return [2 /*return*/];
             }
