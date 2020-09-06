@@ -187,7 +187,7 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
 
       const parameters: MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[] = args.map(paramToIndexSubindex);
       validateParameters(parameters);
-      motionMasterClient.requestGetDeviceParameterValues(deviceAddress, parameters, messageId);
+      motionMasterClient.requestGetDeviceParameterValues(deviceAddress, parameters, false, messageId);
 
       break;
     }

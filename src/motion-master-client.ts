@@ -85,8 +85,8 @@ export class MotionMasterClient {
     return this.selectMessageStatus('deviceParameterInfo', id);
   }
 
-  requestGetDeviceParameterValues(deviceAddress: DeviceAddressType, parameters: MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[], messageId?: string) {
-    const getDeviceParameterValues = MotionMasterMessage.Request.GetDeviceParameterValues.create({ deviceAddress, parameters });
+  requestGetDeviceParameterValues(deviceAddress: DeviceAddressType, parameters: MotionMasterMessage.Request.GetDeviceParameterValues.IParameter[], sendProgress = false, messageId?: string) {
+    const getDeviceParameterValues = MotionMasterMessage.Request.GetDeviceParameterValues.create({ deviceAddress, parameters, sendProgress });
     const id = this.sendRequest({ getDeviceParameterValues }, messageId);
     return this.selectMessageStatus('deviceParameterValues', id);
   }
