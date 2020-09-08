@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.compareParameterValues = exports.decodeMotionMasterMessage = exports.encodeMotionMasterMessage = exports.MotionMasterMessage = void 0;
 var motion_master_proto_1 = require("@synapticon/motion-master-proto");
 exports.MotionMasterMessage = motion_master_proto_1.motionmaster.MotionMasterMessage;
 /**
