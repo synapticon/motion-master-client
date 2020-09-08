@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MotionMasterNotificationWebSocketConnection = void 0;
 var rxjs_1 = require("rxjs");
+var lodash_1 = require("lodash");
 var operators_1 = require("rxjs/operators");
 var webSocket_1 = require("rxjs/webSocket");
 var uuid_1 = require("uuid");
@@ -57,7 +58,12 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
         var _a = data.bufferSize, bufferSize = _a === void 0 ? 1 : _a, _b = data.distinct, distinct = _b === void 0 ? false : _b, _c = data.id, id = _c === void 0 ? uuid_1.v4() : _c, topic = data.topic;
         var observable = this.selectBufferByTopic(topic, true);
         if (distinct) {
-            observable = observable.pipe(operators_1.distinctUntilChanged(util_1.compareParameterValues));
+            observable = observable.pipe(
+            // compare values only, ignore timestamps
+            operators_1.distinctUntilChanged(function (x, y) {
+                var _a, _b, _c, _d, _e, _f;
+                return lodash_1.isEqual((_c = (_b = (_a = x === null || x === void 0 ? void 0 : x.status) === null || _a === void 0 ? void 0 : _a.monitoringParameterValues) === null || _b === void 0 ? void 0 : _b.deviceParameterValues) === null || _c === void 0 ? void 0 : _c.parameterValues, (_f = (_e = (_d = y === null || y === void 0 ? void 0 : y.status) === null || _d === void 0 ? void 0 : _d.monitoringParameterValues) === null || _e === void 0 ? void 0 : _e.deviceParameterValues) === null || _f === void 0 ? void 0 : _f.parameterValues);
+            }));
         }
         var messages$ = observable.pipe(operators_1.bufferCount(bufferSize));
         var subscription = messages$.subscribe(function (messages) {

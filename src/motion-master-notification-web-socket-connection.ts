@@ -1,11 +1,12 @@
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { isEqual } from 'lodash';
 import { bufferCount, distinctUntilChanged, filter, map } from 'rxjs/operators';
 import { webSocket, WebSocketSubject, WebSocketSubjectConfig } from 'rxjs/webSocket';
 import { v4 } from 'uuid';
 
 import { MotionMasterNotification } from './motion-master-notification';
 import { IMotionMasterNotificationSubscribeData } from './motion-master-notification-subscribe-data';
-import { compareParameterValues, MotionMasterMessage } from './util';
+import { MotionMasterMessage } from './util';
 
 export class MotionMasterNotificationWebSocketConnection {
 
@@ -70,7 +71,11 @@ export class MotionMasterNotificationWebSocketConnection {
 
     if (distinct) {
       observable = observable.pipe(
-        distinctUntilChanged(compareParameterValues),
+        // compare values only, ignore timestamps
+        distinctUntilChanged((x, y) => isEqual(
+          x?.status?.monitoringParameterValues?.deviceParameterValues?.parameterValues,
+          y?.status?.monitoringParameterValues?.deviceParameterValues?.parameterValues,
+        )),
       );
     }
 
