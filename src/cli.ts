@@ -1189,7 +1189,7 @@ function validateParameters(parameters: MotionMasterMessage.Request.GetDevicePar
   }
 }
 
-async function getCommandDeviceAddressAsync(cmd: Command): Promise<DeviceAddressType> {
+async function getCommandDeviceAddressAsync(cmd: Command): Promise<DeviceAddressType | null> {
   if (cmd.deviceAddress) {
     return cmd.deviceAddress;
   } else if (Number.isInteger(cmd.devicePosition)) {
@@ -1197,7 +1197,8 @@ async function getCommandDeviceAddressAsync(cmd: Command): Promise<DeviceAddress
     if (device) {
       return device.deviceAddress;
     } else {
-      throw new Error(`There is no device at position ${cmd.devicePosition}`);
+      console.warn(`WARNING: Cannot get device at position ${cmd.devicePosition} or device list is empty.`);
+      return null;
     }
   } else {
     return null;

@@ -1275,7 +1275,8 @@ function getCommandDeviceAddressAsync(cmd) {
                         return [2 /*return*/, device.deviceAddress];
                     }
                     else {
-                        throw new Error("There is no device at position " + cmd.devicePosition);
+                        console.warn("WARNING: Cannot get device at position " + cmd.devicePosition + " or device list is empty.");
+                        return [2 /*return*/, null];
                     }
                     return [3 /*break*/, 4];
                 case 3: return [2 /*return*/, null];
