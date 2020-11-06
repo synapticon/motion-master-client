@@ -235,6 +235,14 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ getSystemLog: getSystemLog }, messageId);
         return this.selectMessageStatus('systemLog', id);
     };
+    MotionMasterClient.prototype.requestStartDeviceSiiRestore = function (devicePosition, siiContent, messageId) {
+        var startDeviceSiiRestore = util_1.MotionMasterMessage.Request.StartDeviceSiiRestore.create({
+            devicePosition: devicePosition,
+            siiContent: siiContent,
+        });
+        var id = this.sendRequest({ startDeviceSiiRestore: startDeviceSiiRestore }, messageId);
+        return this.selectMessageStatus('deviceSiiRestore', id);
+    };
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain

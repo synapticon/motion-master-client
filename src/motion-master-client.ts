@@ -45,6 +45,7 @@ export type StatusTypeObservable<T extends StatusType> =
   T extends 'circuloEncoderNarrowAngleCalibrationProcedure' ? Observable<MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure> :
   T extends 'deviceCia402State' ? Observable<MotionMasterMessage.Status.DeviceCiA402State> :
   T extends 'systemLog' ? Observable<MotionMasterMessage.Status.SystemLog> :
+  T extends 'deviceSiiRestore' ? Observable<MotionMasterMessage.Status.DeviceSiiRestore> :
   Observable<any>;
 
 export class MotionMasterClient {
@@ -324,6 +325,15 @@ export class MotionMasterClient {
     const getSystemLog = MotionMasterMessage.Request.GetSystemLog.create({});
     const id = this.sendRequest({ getSystemLog }, messageId);
     return this.selectMessageStatus('systemLog', id);
+  }
+
+  requestStartDeviceSiiRestore(devicePosition: number, siiContent: Uint8Array, messageId?: string) {
+    const startDeviceSiiRestore = MotionMasterMessage.Request.StartDeviceSiiRestore.create({
+      devicePosition,
+      siiContent,
+    });
+    const id = this.sendRequest({ startDeviceSiiRestore }, messageId);
+    return this.selectMessageStatus('deviceSiiRestore', id);
   }
 
   /**

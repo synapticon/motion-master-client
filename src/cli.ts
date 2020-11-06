@@ -751,6 +751,18 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
 
       break;
     }
+    case 'startDeviceSiiRestore': {
+      exitOnMessageReceived(messageId, 120000, MotionMasterMessage.Status.DeviceSiiRestore.Success.Code.DONE);
+
+      const devicePosition = parseInt(args[0], 10);
+
+      const filepath = args[1];
+      const firmwarePackageContent = fs.readFileSync(filepath);
+
+      motionMasterClient.requestStartDeviceSiiRestore(devicePosition, firmwarePackageContent, messageId);
+
+      break;
+    }
     default: {
       throw new Error(`Request "${type}" doesn\'t exist`);
     }
