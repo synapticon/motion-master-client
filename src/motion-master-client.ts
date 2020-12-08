@@ -46,6 +46,7 @@ export type StatusTypeObservable<T extends StatusType> =
   T extends 'deviceCia402State' ? Observable<MotionMasterMessage.Status.DeviceCiA402State> :
   T extends 'systemLog' ? Observable<MotionMasterMessage.Status.SystemLog> :
   T extends 'deviceSiiRestore' ? Observable<MotionMasterMessage.Status.DeviceSiiRestore> :
+  T extends 'openLoopFieldControl' ? Observable<MotionMasterMessage.Status.OpenLoopFieldControl> :
   Observable<any>;
 
 export class MotionMasterClient {
@@ -334,6 +335,19 @@ export class MotionMasterClient {
     });
     const id = this.sendRequest({ startDeviceSiiRestore }, messageId);
     return this.selectMessageStatus('deviceSiiRestore', id);
+  }
+
+  requestStartOpenLoopFieldControl(deviceAddress: DeviceAddressType, angle: number | Long, velocity: number, acceleration: number, torque: number, torqueSpeed: number, messageId?: string) {
+    const startOpenLoopFieldControl = MotionMasterMessage.Request.StartOpenLoopFieldControl.create({
+      deviceAddress,
+      angle,
+      velocity,
+      acceleration,
+      torque,
+      torqueSpeed,
+    });
+    const id = this.sendRequest({ startOpenLoopFieldControl }, messageId);
+    return this.selectMessageStatus('openLoopFieldControl', id);
   }
 
   /**

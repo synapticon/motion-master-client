@@ -243,6 +243,18 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ startDeviceSiiRestore: startDeviceSiiRestore }, messageId);
         return this.selectMessageStatus('deviceSiiRestore', id);
     };
+    MotionMasterClient.prototype.requestStartOpenLoopFieldControl = function (deviceAddress, angle, velocity, acceleration, torque, torqueSpeed, messageId) {
+        var startOpenLoopFieldControl = util_1.MotionMasterMessage.Request.StartOpenLoopFieldControl.create({
+            deviceAddress: deviceAddress,
+            angle: angle,
+            velocity: velocity,
+            acceleration: acceleration,
+            torque: torque,
+            torqueSpeed: torqueSpeed,
+        });
+        var id = this.sendRequest({ startOpenLoopFieldControl: startOpenLoopFieldControl }, messageId);
+        return this.selectMessageStatus('openLoopFieldControl', id);
+    };
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain

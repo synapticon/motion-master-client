@@ -763,6 +763,19 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
 
       break;
     }
+    case 'startOpenLoopFieldControl': {
+      exitOnMessageReceived(messageId, 2147483647, MotionMasterMessage.Status.OpenLoopFieldControl.Success.Code.DONE);
+
+      const angle = parseInt(args[0], 10);
+      const velocity = parseInt(args[1], 10);
+      const acceleration = parseInt(args[2], 10);
+      const torque = parseInt(args[3], 10);
+      const torqueSpeed = parseInt(args[4], 10);
+
+      motionMasterClient.requestStartOpenLoopFieldControl(deviceAddress, angle, velocity, acceleration, torque, torqueSpeed, messageId);
+
+      break;
+    }
     default: {
       throw new Error(`Request "${type}" doesn\'t exist`);
     }
