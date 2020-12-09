@@ -243,16 +243,26 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ startDeviceSiiRestore: startDeviceSiiRestore }, messageId);
         return this.selectMessageStatus('deviceSiiRestore', id);
     };
-    MotionMasterClient.prototype.requestStartOpenLoopFieldControl = function (deviceAddress, angle, velocity, acceleration, torque, torqueSpeed, messageId) {
-        var startOpenLoopFieldControl = util_1.MotionMasterMessage.Request.StartOpenLoopFieldControl.create({
-            deviceAddress: deviceAddress,
-            angle: angle,
-            velocity: velocity,
-            acceleration: acceleration,
-            torque: torque,
-            torqueSpeed: torqueSpeed,
-        });
-        var id = this.sendRequest({ startOpenLoopFieldControl: startOpenLoopFieldControl }, messageId);
+    MotionMasterClient.prototype.requestStartOpenLoopFieldControl = function (args) {
+        var startOpenLoopFieldControl;
+        var id;
+        switch (args.length) {
+            case 7:
+                var deviceAddress = args[0], angle = args[1], velocity = args[2], acceleration = args[3], torque = args[4], torqueSpeed = args[5];
+                startOpenLoopFieldControl = util_1.MotionMasterMessage.Request.StartOpenLoopFieldControl.create({
+                    deviceAddress: deviceAddress,
+                    angle: angle,
+                    velocity: velocity,
+                    acceleration: acceleration,
+                    torque: torque,
+                    torqueSpeed: torqueSpeed,
+                });
+                id = this.sendRequest({ startOpenLoopFieldControl: startOpenLoopFieldControl }, args[8]);
+                break;
+            default:
+                startOpenLoopFieldControl = util_1.MotionMasterMessage.Request.StartOpenLoopFieldControl.create(args[0]);
+                id = this.sendRequest({ startOpenLoopFieldControl: startOpenLoopFieldControl }, args[1]);
+        }
         return this.selectMessageStatus('openLoopFieldControl', id);
     };
     /**

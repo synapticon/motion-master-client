@@ -337,16 +337,30 @@ export class MotionMasterClient {
     return this.selectMessageStatus('deviceSiiRestore', id);
   }
 
-  requestStartOpenLoopFieldControl(deviceAddress: DeviceAddressType, angle: number | Long, velocity: number, acceleration: number, torque: number, torqueSpeed: number, messageId?: string) {
-    const startOpenLoopFieldControl = MotionMasterMessage.Request.StartOpenLoopFieldControl.create({
-      deviceAddress,
-      angle,
-      velocity,
-      acceleration,
-      torque,
-      torqueSpeed,
-    });
-    const id = this.sendRequest({ startOpenLoopFieldControl }, messageId);
+  requestStartOpenLoopFieldControl(deviceAddress: DeviceAddressType, angle: number | Long, velocity: number, acceleration: number, torque: number, torqueSpeed: number, messageId?: string): Observable<MotionMasterMessage.Status.OpenLoopFieldControl>;
+  requestStartOpenLoopFieldControl(properties: MotionMasterMessage.Request.IStartOpenLoopFieldControl, messageId?: string): Observable<MotionMasterMessage.Status.OpenLoopFieldControl>;
+  requestStartOpenLoopFieldControl(args: any): Observable<MotionMasterMessage.Status.OpenLoopFieldControl> {
+    let startOpenLoopFieldControl: MotionMasterMessage.Request.StartOpenLoopFieldControl;
+    let id: string;
+
+    switch (args.length) {
+      case 7:
+        const [deviceAddress, angle, velocity, acceleration, torque, torqueSpeed] = args;
+        startOpenLoopFieldControl = MotionMasterMessage.Request.StartOpenLoopFieldControl.create({
+          deviceAddress,
+          angle,
+          velocity,
+          acceleration,
+          torque,
+          torqueSpeed,
+        });
+        id = this.sendRequest({ startOpenLoopFieldControl }, args[8]);
+        break;
+      default:
+        startOpenLoopFieldControl = MotionMasterMessage.Request.StartOpenLoopFieldControl.create(args[0]);
+        id = this.sendRequest({ startOpenLoopFieldControl }, args[1]);
+    }
+
     return this.selectMessageStatus('openLoopFieldControl', id);
   }
 
