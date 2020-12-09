@@ -341,7 +341,7 @@ export class MotionMasterClient {
   requestStartOpenLoopFieldControl(properties: MotionMasterMessage.Request.IStartOpenLoopFieldControl, messageId?: string): Observable<MotionMasterMessage.Status.OpenLoopFieldControl>;
   requestStartOpenLoopFieldControl(args: any): Observable<MotionMasterMessage.Status.OpenLoopFieldControl> {
     let startOpenLoopFieldControl: MotionMasterMessage.Request.StartOpenLoopFieldControl;
-    let id: string;
+    let messageId: string;
 
     switch (args.length) {
       case 7:
@@ -354,13 +354,15 @@ export class MotionMasterClient {
           torque,
           torqueSpeed,
         });
-        id = this.sendRequest({ startOpenLoopFieldControl }, args[8]);
+        messageId = args[6];
         break;
       default:
         startOpenLoopFieldControl = MotionMasterMessage.Request.StartOpenLoopFieldControl.create(args[0]);
-        id = this.sendRequest({ startOpenLoopFieldControl }, args[1]);
+        messageId = args[1];
+        break;
     }
 
+    const id = this.sendRequest({ startOpenLoopFieldControl }, messageId);
     return this.selectMessageStatus('openLoopFieldControl', id);
   }
 

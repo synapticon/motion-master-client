@@ -245,7 +245,7 @@ var MotionMasterClient = /** @class */ (function () {
     };
     MotionMasterClient.prototype.requestStartOpenLoopFieldControl = function (args) {
         var startOpenLoopFieldControl;
-        var id;
+        var messageId;
         switch (args.length) {
             case 7:
                 var deviceAddress = args[0], angle = args[1], velocity = args[2], acceleration = args[3], torque = args[4], torqueSpeed = args[5];
@@ -257,12 +257,14 @@ var MotionMasterClient = /** @class */ (function () {
                     torque: torque,
                     torqueSpeed: torqueSpeed,
                 });
-                id = this.sendRequest({ startOpenLoopFieldControl: startOpenLoopFieldControl }, args[8]);
+                messageId = args[6];
                 break;
             default:
                 startOpenLoopFieldControl = util_1.MotionMasterMessage.Request.StartOpenLoopFieldControl.create(args[0]);
-                id = this.sendRequest({ startOpenLoopFieldControl: startOpenLoopFieldControl }, args[1]);
+                messageId = args[1];
+                break;
         }
+        var id = this.sendRequest({ startOpenLoopFieldControl: startOpenLoopFieldControl }, messageId);
         return this.selectMessageStatus('openLoopFieldControl', id);
     };
     /**
