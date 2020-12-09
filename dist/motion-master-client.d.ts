@@ -1,4 +1,3 @@
-/// <reference types="long" />
 import { Observable, Subject } from 'rxjs';
 import { IMotionMasterMessage, MotionMasterMessage } from './util';
 export declare type RequestType = keyof MotionMasterMessage.IRequest;
@@ -61,7 +60,6 @@ export declare class MotionMasterClient {
     requestSetDeviceCia402State(deviceAddress: DeviceAddressType, state: MotionMasterMessage.Status.DeviceCiA402State.State, messageId?: string): Observable<MotionMasterMessage.Status.DeviceCiA402State>;
     requestGetSystemLog(messageId?: string): Observable<MotionMasterMessage.Status.SystemLog>;
     requestStartDeviceSiiRestore(devicePosition: number, siiContent: Uint8Array, messageId?: string): Observable<MotionMasterMessage.Status.DeviceSiiRestore>;
-    requestStartOpenLoopFieldControl(deviceAddress: DeviceAddressType, angle: number | Long, velocity: number, acceleration: number, torque: number, torqueSpeed: number, messageId?: string): Observable<MotionMasterMessage.Status.OpenLoopFieldControl>;
     requestStartOpenLoopFieldControl(properties: MotionMasterMessage.Request.IStartOpenLoopFieldControl, messageId?: string): Observable<MotionMasterMessage.Status.OpenLoopFieldControl>;
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
