@@ -39,9 +39,9 @@ export declare class MotionMasterClient {
     requestGetCoggingTorqueData(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.CoggingTorqueData>;
     requestStartOffsetDetection(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.OffsetDetection>;
     requestStartPlantIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, cutoffFrequency: number, messageId?: string): Observable<MotionMasterMessage.Status.PlantIdentification>;
-    requestComputePositionAutoTuningGains(deviceAddress: number, positionParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IPositionParameters, messageId?: string): Observable<MotionMasterMessage.Status.AutoTuning>;
-    requestComputeVelocityAutoTuningGains(deviceAddress: number, velocityParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IVelocityParameters, messageId?: string): Observable<MotionMasterMessage.Status.AutoTuning>;
-    requestComputeFullAutoTuningGains(deviceAddress: number, type: number, messageId?: string): Observable<MotionMasterMessage.Status.FullAutoTuning>;
+    requestComputePositionAutoTuningGains(deviceAddress: DeviceAddressType, positionParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IPositionParameters, messageId?: string): Observable<MotionMasterMessage.Status.AutoTuning>;
+    requestComputeVelocityAutoTuningGains(deviceAddress: DeviceAddressType, velocityParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IVelocityParameters, messageId?: string): Observable<MotionMasterMessage.Status.AutoTuning>;
+    requestComputeFullAutoTuningGains(deviceAddress: DeviceAddressType, type: MotionMasterMessage.Request.ComputeFullAutoTuningGains.Type, messageId?: string): Observable<MotionMasterMessage.Status.FullAutoTuning>;
     requestSetMotionControllerParameters(deviceAddress: DeviceAddressType, target: number, messageId?: string): string;
     requestEnableMotionController(deviceAddress: DeviceAddressType, controllerType: MotionMasterMessage.Request.EnableMotionController.ControllerType, filterValue: boolean, messageId?: string): Observable<MotionMasterMessage.Status.MotionController>;
     requestDisableMotionController(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.MotionController>;
