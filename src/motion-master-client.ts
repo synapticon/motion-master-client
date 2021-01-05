@@ -180,7 +180,7 @@ export class MotionMasterClient {
   }
 
   requestComputePositionAutoTuningGains(
-    deviceAddress: number,
+    deviceAddress: DeviceAddressType,
     positionParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IPositionParameters,
     messageId?: string,
   ) {
@@ -190,7 +190,7 @@ export class MotionMasterClient {
   }
 
   requestComputeVelocityAutoTuningGains(
-    deviceAddress: number,
+    deviceAddress: DeviceAddressType,
     velocityParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IVelocityParameters,
     messageId?: string,
   ) {
@@ -200,8 +200,8 @@ export class MotionMasterClient {
   }
 
   requestComputeFullAutoTuningGains(
-    deviceAddress: number,
-    type: number,
+    deviceAddress: DeviceAddressType,
+    type: MotionMasterMessage.Request.ComputeFullAutoTuningGains.Type,
     messageId?: string,
   ) {
     const computeFullAutoTuningGains = MotionMasterMessage.Request.ComputeFullAutoTuningGains.create({ deviceAddress, type });

@@ -780,28 +780,21 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       break;
     }
     case 'computeFullAutoTuningGains': {
-      const computeFullAutoTuningGainsType = parseInt(args[0], 10)
+      const computeFullAutoTuningGainsType = parseInt(args[0], 10);
+
       switch (computeFullAutoTuningGainsType) {
         case 0: {
           exitOnMessageReceived(messageId, 10000, MotionMasterMessage.Status.FullAutoTuning.Success.Code.POSITION_DONE);
 
-          const computeFullAutoTuningGains: MotionMasterMessage.Request.IComputeFullAutoTuningGains = {
-            deviceAddress,
-            type: computeFullAutoTuningGainsType
-          };
+          motionMasterClient.requestComputeFullAutoTuningGains(deviceAddress, computeFullAutoTuningGainsType, messageId);
 
-          motionMasterClient.sendRequest({ computeFullAutoTuningGains }, messageId);
           break;
         }
         case 1: {
           exitOnMessageReceived(messageId, 10000, MotionMasterMessage.Status.FullAutoTuning.Success.Code.VELOCITY_DONE);
 
-          const computeFullAutoTuningGains: MotionMasterMessage.Request.IComputeFullAutoTuningGains = {
-            deviceAddress,
-            type: computeFullAutoTuningGainsType
-          };
+          motionMasterClient.requestComputeFullAutoTuningGains(deviceAddress, computeFullAutoTuningGainsType, messageId);
 
-          motionMasterClient.sendRequest({ computeFullAutoTuningGains }, messageId);
           break;
         }
         default: {
