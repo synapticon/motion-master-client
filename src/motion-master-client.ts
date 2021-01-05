@@ -47,6 +47,7 @@ export type StatusTypeObservable<T extends StatusType> =
   T extends 'systemLog' ? Observable<MotionMasterMessage.Status.SystemLog> :
   T extends 'deviceSiiRestore' ? Observable<MotionMasterMessage.Status.DeviceSiiRestore> :
   T extends 'openLoopFieldControl' ? Observable<MotionMasterMessage.Status.OpenLoopFieldControl> :
+  T extends 'fullAutoTuning' ? Observable<MotionMasterMessage.Status.FullAutoTuning> :
   Observable<any>;
 
 export class MotionMasterClient {
@@ -179,7 +180,7 @@ export class MotionMasterClient {
   }
 
   requestComputePositionAutoTuningGains(
-    deviceAddress: number,
+    deviceAddress: DeviceAddressType,
     positionParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IPositionParameters,
     messageId?: string,
   ) {
@@ -189,13 +190,23 @@ export class MotionMasterClient {
   }
 
   requestComputeVelocityAutoTuningGains(
-    deviceAddress: number,
+    deviceAddress: DeviceAddressType,
     velocityParameters: MotionMasterMessage.Request.ComputeAutoTuningGains.IVelocityParameters,
     messageId?: string,
   ) {
     const computeAutoTuningGains = MotionMasterMessage.Request.ComputeAutoTuningGains.create({ deviceAddress, velocityParameters });
     const id = this.sendRequest({ computeAutoTuningGains }, messageId);
     return this.selectMessageStatus('autoTuning', id);
+  }
+
+  requestComputeFullAutoTuningGains(
+    deviceAddress: DeviceAddressType,
+    type: MotionMasterMessage.Request.ComputeFullAutoTuningGains.Type,
+    messageId?: string,
+  ) {
+    const computeFullAutoTuningGains = MotionMasterMessage.Request.ComputeFullAutoTuningGains.create({ deviceAddress, type });
+    const id = this.sendRequest({ computeFullAutoTuningGains }, messageId);
+    return this.selectMessageStatus('fullAutoTuning', id);
   }
 
   requestSetMotionControllerParameters(deviceAddress: DeviceAddressType, target: number, messageId?: string) {

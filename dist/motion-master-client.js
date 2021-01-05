@@ -126,6 +126,11 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ computeAutoTuningGains: computeAutoTuningGains }, messageId);
         return this.selectMessageStatus('autoTuning', id);
     };
+    MotionMasterClient.prototype.requestComputeFullAutoTuningGains = function (deviceAddress, type, messageId) {
+        var computeFullAutoTuningGains = util_1.MotionMasterMessage.Request.ComputeFullAutoTuningGains.create({ deviceAddress: deviceAddress, type: type });
+        var id = this.sendRequest({ computeFullAutoTuningGains: computeFullAutoTuningGains }, messageId);
+        return this.selectMessageStatus('fullAutoTuning', id);
+    };
     MotionMasterClient.prototype.requestSetMotionControllerParameters = function (deviceAddress, target, messageId) {
         var setMotionControllerParameters = util_1.MotionMasterMessage.Request.SetMotionControllerParameters.create({
             deviceAddress: deviceAddress,
