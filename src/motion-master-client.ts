@@ -202,9 +202,10 @@ export class MotionMasterClient {
   requestComputeFullAutoTuningGains(
     deviceAddress: DeviceAddressType,
     type: MotionMasterMessage.Request.ComputeFullAutoTuningGains.Type,
+    controllerType: MotionMasterMessage.Request.ComputeAutoTuningGains.PositionParameters.ControllerType = MotionMasterMessage.Request.ComputeFullAutoTuningGains.ControllerType.UNSPECIFIED,
     messageId?: string,
   ) {
-    const computeFullAutoTuningGains = MotionMasterMessage.Request.ComputeFullAutoTuningGains.create({ deviceAddress, type });
+    const computeFullAutoTuningGains = MotionMasterMessage.Request.ComputeFullAutoTuningGains.create({ deviceAddress, type, controllerType });
     const id = this.sendRequest({ computeFullAutoTuningGains }, messageId);
     return this.selectMessageStatus('fullAutoTuning', id);
   }

@@ -780,25 +780,28 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       break;
     }
     case 'computeFullAutoTuningGains': {
-      const computeFullAutoTuningGainsType = parseInt(args[0], 10);
+      const tuningType = parseInt(args[0], 10); // POSITION (0), VELOCITY (1)
+      const controllerType = args[1] // UNSPECIFIED (0), PI_P (1), P_PI (2)
+        ? parseInt(args[1], 10)
+        : MotionMasterMessage.Request.ComputeFullAutoTuningGains.ControllerType.UNSPECIFIED;
 
-      switch (computeFullAutoTuningGainsType) {
+      switch (tuningType) {
         case 0: {
           exitOnMessageReceived(messageId, 10000, MotionMasterMessage.Status.FullAutoTuning.Success.Code.POSITION_DONE);
 
-          motionMasterClient.requestComputeFullAutoTuningGains(deviceAddress, computeFullAutoTuningGainsType, messageId);
+          motionMasterClient.requestComputeFullAutoTuningGains(deviceAddress, tuningType, controllerType, messageId);
 
           break;
         }
         case 1: {
           exitOnMessageReceived(messageId, 10000, MotionMasterMessage.Status.FullAutoTuning.Success.Code.VELOCITY_DONE);
 
-          motionMasterClient.requestComputeFullAutoTuningGains(deviceAddress, computeFullAutoTuningGainsType, messageId);
+          motionMasterClient.requestComputeFullAutoTuningGains(deviceAddress, tuningType, controllerType, messageId);
 
           break;
         }
         default: {
-          throw new Error(`Unknown compute auto-tuning gains type: ${computeFullAutoTuningGainsType}`);
+          throw new Error(`Unknown compute auto-tuning gains type: ${tuningType}`);
         }
       }
       break;

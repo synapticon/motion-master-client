@@ -153,7 +153,7 @@ commander_1.default.parse(process.argv);
 //
 function requestAction(type, args, cmd) {
     return __awaiter(this, void 0, void 0, function () {
-        var deviceAddress, messageId, _a, parameters, deviceParameterInfo_1, parameterValues, name_1, filepath, name_2, content, overwrite, name_3, filepath, firmwarePackageContent, getDeviceLog, skipAutoTuning, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, computeAutoTuningGainsType, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, signalGeneratorType, setSignalGeneratorParameters, target, sustainTime, target, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, target, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, torqueSlope, sustainTime, target, torqueSlope, sustainTime, repeat, target, torqueSlope, sustainTime, repeat, amplitude, frequency, repeat, parameters, getDeviceParameterValues, topic, startMonitoringRequestId, state, timeoutMs, durationSeconds, torqueAmplitude, startFrequency, endFrequency, encoderPort, encoderPort, state, devicePosition, filepath, firmwarePackageContent, properties, computeFullAutoTuningGainsType;
+        var deviceAddress, messageId, _a, parameters, deviceParameterInfo_1, parameterValues, name_1, filepath, name_2, content, overwrite, name_3, filepath, firmwarePackageContent, getDeviceLog, skipAutoTuning, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, computeAutoTuningGainsType, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, signalGeneratorType, setSignalGeneratorParameters, target, sustainTime, target, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, target, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, torqueSlope, sustainTime, target, torqueSlope, sustainTime, repeat, target, torqueSlope, sustainTime, repeat, amplitude, frequency, repeat, parameters, getDeviceParameterValues, topic, startMonitoringRequestId, state, timeoutMs, durationSeconds, torqueAmplitude, startFrequency, endFrequency, encoderPort, encoderPort, state, devicePosition, filepath, firmwarePackageContent, properties, tuningType, controllerType;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -814,20 +814,23 @@ function requestAction(type, args, cmd) {
                     _b.label = 44;
                 case 44:
                     {
-                        computeFullAutoTuningGainsType = parseInt(args[0], 10);
-                        switch (computeFullAutoTuningGainsType) {
+                        tuningType = parseInt(args[0], 10);
+                        controllerType = args[1] // UNSPECIFIED (0), PI_P (1), P_PI (2)
+                            ? parseInt(args[1], 10)
+                            : util_2.MotionMasterMessage.Request.ComputeFullAutoTuningGains.ControllerType.UNSPECIFIED;
+                        switch (tuningType) {
                             case 0: {
                                 exitOnMessageReceived(messageId, 10000, util_2.MotionMasterMessage.Status.FullAutoTuning.Success.Code.POSITION_DONE);
-                                motionMasterClient.requestComputeFullAutoTuningGains(deviceAddress, computeFullAutoTuningGainsType, messageId);
+                                motionMasterClient.requestComputeFullAutoTuningGains(deviceAddress, tuningType, controllerType, messageId);
                                 break;
                             }
                             case 1: {
                                 exitOnMessageReceived(messageId, 10000, util_2.MotionMasterMessage.Status.FullAutoTuning.Success.Code.VELOCITY_DONE);
-                                motionMasterClient.requestComputeFullAutoTuningGains(deviceAddress, computeFullAutoTuningGainsType, messageId);
+                                motionMasterClient.requestComputeFullAutoTuningGains(deviceAddress, tuningType, controllerType, messageId);
                                 break;
                             }
                             default: {
-                                throw new Error("Unknown compute auto-tuning gains type: " + computeFullAutoTuningGainsType);
+                                throw new Error("Unknown compute auto-tuning gains type: " + tuningType);
                             }
                         }
                         return [3 /*break*/, 46];
