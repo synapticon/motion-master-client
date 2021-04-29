@@ -254,6 +254,17 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ startOpenLoopFieldControl: startOpenLoopFieldControl }, messageId);
         return this.selectMessageStatus('openLoopFieldControl', id);
     };
+    MotionMasterClient.prototype.requestStartFullAutoTuning = function (deviceAddress, type, controllerType, messageId) {
+        if (controllerType === void 0) { controllerType = util_1.MotionMasterMessage.Request.StartFullAutoTuning.ControllerType.UNSPECIFIED; }
+        var startFullAutoTuning = util_1.MotionMasterMessage.Request.StartFullAutoTuning.create({ deviceAddress: deviceAddress, type: type, controllerType: controllerType });
+        var id = this.sendRequest({ startFullAutoTuning: startFullAutoTuning }, messageId);
+        return this.selectMessageStatus('fullAutoTuning', id);
+    };
+    MotionMasterClient.prototype.requestStopFullAutoTuning = function (deviceAddress, messageId) {
+        var stopFullAutoTuning = util_1.MotionMasterMessage.Request.StopFullAutoTuning.create({ deviceAddress: deviceAddress });
+        var id = this.sendRequest({ stopFullAutoTuning: stopFullAutoTuning }, messageId);
+        return this.selectMessageStatus('fullAutoTuning', id);
+    };
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain

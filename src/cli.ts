@@ -806,6 +806,38 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       }
       break;
     }
+    case 'startFullAutoTuning': {
+      const tuningType = parseInt(args[0], 10); // POSITION (0), VELOCITY (1)
+      const controllerType = args[1] // UNSPECIFIED (0), PI_P (1), P_PI (2)
+        ? parseInt(args[1], 10)
+        : MotionMasterMessage.Request.StartFullAutoTuning.ControllerType.UNSPECIFIED;
+
+      switch (tuningType) {
+        case 0: {
+          exitOnMessageReceived(messageId, 10000, MotionMasterMessage.Status.FullAutoTuning.Success.Code.POSITION_DONE);
+
+          motionMasterClient.requestStartFullAutoTuning(deviceAddress, tuningType, controllerType, messageId);
+
+          break;
+        }
+        case 1: {
+          exitOnMessageReceived(messageId, 10000, MotionMasterMessage.Status.FullAutoTuning.Success.Code.VELOCITY_DONE);
+
+          motionMasterClient.requestStartFullAutoTuning(deviceAddress, tuningType, controllerType, messageId);
+
+          break;
+        }
+        default: {
+          throw new Error(`Unknown start auto-tuning type: ${tuningType}`);
+        }
+      }
+      break;
+    }
+    case 'stopFullAutoTuning': {
+      motionMasterClient.requestStopFullAutoTuning(deviceAddress, messageId);
+
+      break;
+    }
     default: {
       throw new Error(`Request "${type}" doesn\'t exist`);
     }
