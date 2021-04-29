@@ -40,7 +40,7 @@ export declare class MotionMasterNotificationWebSocketConnection {
     /**
      * Unsubscribe from all previously subscribed topics.
      */
-    unsubscriberAll(): void;
+    unsubscribeAll(): void;
     /**
      * Select incoming buffer by topic and optionally decode it to MotionMasterMessage.
      * @param topic to filter incoming messages by

@@ -87,7 +87,7 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
     /**
      * Unsubscribe from all previously subscribed topics.
      */
-    MotionMasterNotificationWebSocketConnection.prototype.unsubscriberAll = function () {
+    MotionMasterNotificationWebSocketConnection.prototype.unsubscribeAll = function () {
         var _this = this;
         Object.keys(this.subscriptions).forEach(function (id) { return _this.unsubscribe(id); });
     };

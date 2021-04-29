@@ -108,7 +108,7 @@ export class MotionMasterNotificationWebSocketConnection {
   /**
    * Unsubscribe from all previously subscribed topics.
    */
-  unsubscriberAll() {
+  unsubscribeAll() {
     Object.keys(this.subscriptions).forEach((id) => this.unsubscribe(id));
   }
 
