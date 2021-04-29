@@ -70,7 +70,6 @@ var MotionMasterClientWebSocketConnection = /** @class */ (function () {
     };
     MotionMasterClientWebSocketConnection.prototype.open = function () {
         var _this = this;
-        this.close();
         this.messageSubscription = this.message$.pipe(operators_1.tap(function () { return _this.keepalive(); }), operators_1.filter(function (message) { return message && message.status ? !message.status.systemPong : false; })).subscribe(function (message) {
             _this.client.input$.next(message);
         });

@@ -81,8 +81,6 @@ export class MotionMasterClientWebSocketConnection {
   }
 
   open() {
-    this.close();
-
     this.messageSubscription = this.message$.pipe(
       tap(() => this.keepalive()),
       filter((message) => message && message.status ? !message.status.systemPong : false),
