@@ -308,6 +308,18 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
 
       break;
     }
+    case 'startSystemIdentification': {
+      exitOnMessageReceived(messageId, 60000, MotionMasterMessage.Status.SystemIdentification.Success.Code.DONE);
+
+      const durationSeconds = parseFloat(args[0]);
+      const torqueAmplitude = parseInt(args[1], 10);
+      const startFrequency = parseFloat(args[2]);
+      const endFrequency = parseFloat(args[3]);
+
+      motionMasterClient.requestStartSystemIdentification(deviceAddress, durationSeconds, torqueAmplitude, startFrequency, endFrequency, messageId);
+
+      break;
+    }
     case 'computeAutoTuningGains': {
       const computeAutoTuningGainsType = args[0] as ComputeAutoTuningGainsType;
       switch (computeAutoTuningGainsType) {
@@ -699,18 +711,6 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       motionMasterClient.requestSetSystemClientTimeout(timeoutMs, messageId);
 
       process.exit(ExitStatus.SUCCESS);
-      break;
-    }
-    case 'startSystemIdentification': {
-      exitOnMessageReceived(messageId, 60000, MotionMasterMessage.Status.SystemIdentification.Success.Code.DONE);
-
-      const durationSeconds = parseFloat(args[0]);
-      const torqueAmplitude = parseInt(args[1], 10);
-      const startFrequency = parseFloat(args[2]);
-      const endFrequency = parseFloat(args[3]);
-
-      motionMasterClient.requestStartSystemIdentification(deviceAddress, durationSeconds, torqueAmplitude, startFrequency, endFrequency, messageId);
-
       break;
     }
     case 'getCirculoEncoderMagnetDistance': {

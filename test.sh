@@ -18,13 +18,16 @@ DEBUG=* npx node ./dist/cli.js --device-position=1 request getDeviceParameterInf
 DEBUG=* npx node ./dist/cli.js -d 4020155199 request getDeviceParameterInfo # device serial number short flag
 DEBUG=* npx node ./dist/cli.js --device-address=4020155199 request getDeviceParameterInfo # device serial number multi-word option
 DEBUG=* npx node ./dist/cli.js request getDeviceParameterValues 0x607B:1 0x607B:2
+DEBUG=* npx node ./dist/cli.js request getMultiDeviceParameterValues
 DEBUG=* npx node ./dist/cli.js request setDeviceParameterValues 0x2705:0=5
+DEBUG=* npx node ./dist/cli.js request setMultiDeviceParameterValues
 DEBUG=* npx node ./dist/cli.js request getDeviceFileList
 DEBUG=* npx node ./dist/cli.js request getDeviceFile config.csv
 DEBUG=* npx node ./dist/cli.js request setDeviceFile tmp/heroes.json
 DEBUG=* npx node ./dist/cli.js request deleteDeviceFile heroes.json
 DEBUG=* npx node ./dist/cli.js request resetDeviceFault
 DEBUG=* npx node ./dist/cli.js request stopDevice
+DEBUG=* npx node ./dist/cli.js request startDeviceFirmwareInstallation
 DEBUG=* npx node ./dist/cli.js request getDeviceLog
 DEBUG=* npx node ./dist/cli.js request startCoggingTorqueRecording 1 # skipAutoTuning
 DEBUG=* npx node ./dist/cli.js request getCoggingTorqueData
@@ -33,8 +36,29 @@ DEBUG=* npx node ./dist/cli.js request startPlantIdentification 3 300 2 60 30 # 
 DEBUG=* npx node ./dist/cli.js request startSystemIdentification 3 300 2 60 # durationSeconds, torqueAmplitude, startFrequency, endFrequency
 DEBUG=* npx node ./dist/cli.js request computeAutoTuningGains positionParameters 2 0.2 2.0 1 4 2 314 # controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub
 DEBUG=* npx node ./dist/cli.js request computeAutoTuningGains velocityParameters 100 100 # controllerType, velocityLoopBandwidth, velocityDamping
+DEBUG=* npx node ./dist/cli.js request setMotionControllerParameters 1000
+DEBUG=* npx node ./dist/cli.js request setMotionControllerParameters -- -1000
+DEBUG=* npx node ./dist/cli.js request enableMotionController 0 0 # controllerType, filter
+DEBUG=* npx node ./dist/cli.js request disableMotionController
+DEBUG=* npx node ./dist/cli.js request setSignalGeneratorParameters velocitySineWave 500 1 0 # amplitude, frequency, repeat
+DEBUG=* npx node ./dist/cli.js request startSignalGenerator
+DEBUG=* npx node ./dist/cli.js request stopSignalGenerator
 DEBUG=* npx node ./dist/cli.js request startMonitoringDeviceParameterValues some-topic 0x6064:0 0x230A:0
 DEBUG=* npx node ./dist/cli.js request stopMonitoringDeviceParameterValues f02fbeda-c3e5-4d1e-a294-3f7e3b83be6b
+DEBUG=* npx node ./dist/cli.js request getEthercatNetworkState
+DEBUG=* npx node ./dist/cli.js request setEthercatNetworkState 1 # EtherCAT state
+DEBUG=* npx node ./dist/cli.js request startNarrowAngleCalibration
+DEBUG=* npx node ./dist/cli.js request setSystemClientTimeout 2000 # ms
+DEBUG=* npx node ./dist/cli.js request getCirculoEncoderMagnetDistance
+DEBUG=* npx node ./dist/cli.js request startCirculoEncoderNarrowAngleCalibrationProcedure 0 # port
+DEBUG=* npx node ./dist/cli.js request getDeviceCia402State
+DEBUG=* npx node ./dist/cli.js request setDeviceCia402State 2
+DEBUG=* npx node ./dist/cli.js request getSystemLog
+DEBUG=* npx node ./dist/cli.js request startDeviceSiiRestore
+DEBUG=* npx node ./dist/cli.js request startOpenLoopFieldControl 180 200 10000 50 100 # angle, velocity, acceleration, torque, torqueSpeed
+DEBUG=* npx node ./dist/cli.js request computeFullAutoTuningGains 0 1 # tuningType, controllerType
+DEBUG=* npx node ./dist/cli.js request startFullAutoTuning 0 1
+DEBUG=* npx node ./dist/cli.js request stopFullAutoTuning
 
 #
 # Requests: Position Signal Generator
