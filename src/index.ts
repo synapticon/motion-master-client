@@ -4,4 +4,4 @@ export { IMotionMasterNotificationSubscribeData } from './motion-master-notifica
 export { MotionMasterNotificationWebSocketConnection } from './motion-master-notification-web-socket-connection';
 export { MotionMasterNotification } from './motion-master-notification';
 
-export * as util from './util';
+export * from './util';
