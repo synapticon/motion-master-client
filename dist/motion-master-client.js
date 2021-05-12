@@ -79,8 +79,9 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ stopDevice: stopDevice }, messageId);
         return id;
     };
-    MotionMasterClient.prototype.requestStartDeviceFirmwareInstallation = function (deviceAddress, firmwarePackageContent, messageId) {
-        var startDeviceFirmwareInstallation = util_1.MotionMasterMessage.Request.StartDeviceFirmwareInstallation.create({ deviceAddress: deviceAddress, firmwarePackageContent: firmwarePackageContent });
+    MotionMasterClient.prototype.requestStartDeviceFirmwareInstallation = function (deviceAddress, firmwarePackageContent, skipSiiInstallation, messageId) {
+        if (skipSiiInstallation === void 0) { skipSiiInstallation = false; }
+        var startDeviceFirmwareInstallation = util_1.MotionMasterMessage.Request.StartDeviceFirmwareInstallation.create({ deviceAddress: deviceAddress, firmwarePackageContent: firmwarePackageContent, skipSiiInstallation: skipSiiInstallation });
         var id = this.sendRequest({ startDeviceFirmwareInstallation: startDeviceFirmwareInstallation }, messageId);
         return this.selectMessageStatus('deviceFirmwareInstallation', id);
     };

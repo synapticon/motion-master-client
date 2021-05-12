@@ -136,8 +136,8 @@ export class MotionMasterClient {
     return id;
   }
 
-  requestStartDeviceFirmwareInstallation(deviceAddress: DeviceAddressType, firmwarePackageContent: Uint8Array, messageId?: string) {
-    const startDeviceFirmwareInstallation = MotionMasterMessage.Request.StartDeviceFirmwareInstallation.create({ deviceAddress, firmwarePackageContent });
+  requestStartDeviceFirmwareInstallation(deviceAddress: DeviceAddressType, firmwarePackageContent: Uint8Array, skipSiiInstallation = false, messageId?: string) {
+    const startDeviceFirmwareInstallation = MotionMasterMessage.Request.StartDeviceFirmwareInstallation.create({ deviceAddress, firmwarePackageContent, skipSiiInstallation });
     const id = this.sendRequest({ startDeviceFirmwareInstallation }, messageId);
     return this.selectMessageStatus('deviceFirmwareInstallation', id);
   }

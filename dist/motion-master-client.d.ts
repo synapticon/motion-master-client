@@ -33,7 +33,7 @@ export declare class MotionMasterClient {
     requestDeleteDeviceFile(deviceAddress: DeviceAddressType, name: string, messageId?: string): Observable<MotionMasterMessage.Status.DeviceFile>;
     requestResetDeviceFault(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.DeviceFaultReset>;
     requestStopDevice(deviceAddress: DeviceAddressType, messageId?: string): string;
-    requestStartDeviceFirmwareInstallation(deviceAddress: DeviceAddressType, firmwarePackageContent: Uint8Array, messageId?: string): Observable<MotionMasterMessage.Status.DeviceFirmwareInstallation>;
+    requestStartDeviceFirmwareInstallation(deviceAddress: DeviceAddressType, firmwarePackageContent: Uint8Array, skipSiiInstallation?: boolean, messageId?: string): Observable<MotionMasterMessage.Status.DeviceFirmwareInstallation>;
     requestGetDeviceLog(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.DeviceLog>;
     requestStartCoggingTorqueRecording(deviceAddress: DeviceAddressType, skipAutoTuning: boolean, messageId?: string): Observable<MotionMasterMessage.Status.CoggingTorqueRecording>;
     requestGetCoggingTorqueData(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.CoggingTorqueData>;

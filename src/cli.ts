@@ -260,7 +260,9 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       const filepath = args[0];
       const firmwarePackageContent = fs.readFileSync(filepath);
 
-      motionMasterClient.requestStartDeviceFirmwareInstallation(deviceAddress, firmwarePackageContent, messageId);
+      const skipSiiInstallation = parseInt(args[1], 10) !== 0;
+
+      motionMasterClient.requestStartDeviceFirmwareInstallation(deviceAddress, firmwarePackageContent, skipSiiInstallation, messageId);
 
       break;
     }
