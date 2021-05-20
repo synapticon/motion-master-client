@@ -88,6 +88,10 @@ Usage: cli [options] [command]
       getSystemLog
       startDeviceSiiRestore
       startOpenLoopFieldControl
+      computeFullAutoTuningGains
+      startFullAutoTuning
+      stopFullAutoTuning
+      startCirculoEncoderConfiguration
 
 ### monitor
 

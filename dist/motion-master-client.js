@@ -266,6 +266,11 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ stopFullAutoTuning: stopFullAutoTuning }, messageId);
         return this.selectMessageStatus('fullAutoTuning', id);
     };
+    MotionMasterClient.prototype.requestStartCirculoEncoderConfiguration = function (deviceAddress, encoderPort, messageId) {
+        var startCirculoEncoderConfiguration = util_1.MotionMasterMessage.Request.StartCirculoEncoderConfiguration.create({ deviceAddress: deviceAddress, encoderPort: encoderPort });
+        var id = this.sendRequest({ startCirculoEncoderConfiguration: startCirculoEncoderConfiguration }, messageId);
+        return this.selectMessageStatus('circuloEncoderConfiguration', id);
+    };
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain

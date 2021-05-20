@@ -59,6 +59,7 @@ DEBUG=* npx node ./dist/cli.js request startOpenLoopFieldControl 180 200 10000 5
 DEBUG=* npx node ./dist/cli.js request computeFullAutoTuningGains 0 1 # tuningType, controllerType
 DEBUG=* npx node ./dist/cli.js request startFullAutoTuning 0 1
 DEBUG=* npx node ./dist/cli.js request stopFullAutoTuning
+DEBUG=* npx node ./dist/cli.js request startCirculoEncoderConfiguration 1 # encoderPort
 
 #
 # Requests: Position Signal Generator

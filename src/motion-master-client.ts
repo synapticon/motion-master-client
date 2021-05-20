@@ -48,6 +48,7 @@ export type StatusTypeObservable<T extends StatusType> =
   T extends 'deviceSiiRestore' ? Observable<MotionMasterMessage.Status.DeviceSiiRestore> :
   T extends 'openLoopFieldControl' ? Observable<MotionMasterMessage.Status.OpenLoopFieldControl> :
   T extends 'fullAutoTuning' ? Observable<MotionMasterMessage.Status.FullAutoTuning> :
+  T extends 'circuloEncoderConfiguration' ? Observable<MotionMasterMessage.Status.CirculoEncoderConfiguration> :
   Observable<any>;
 
 export class MotionMasterClient {
@@ -366,13 +367,16 @@ export class MotionMasterClient {
     return this.selectMessageStatus('fullAutoTuning', id);
   }
 
-  requestStopFullAutoTuning(
-    deviceAddress: DeviceAddressType,
-    messageId?: string,
-  ) {
+  requestStopFullAutoTuning(deviceAddress: DeviceAddressType, messageId?: string) {
     const stopFullAutoTuning = MotionMasterMessage.Request.StopFullAutoTuning.create({ deviceAddress });
     const id = this.sendRequest({ stopFullAutoTuning }, messageId);
     return this.selectMessageStatus('fullAutoTuning', id);
+  }
+
+  requestStartCirculoEncoderConfiguration(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string) {
+    const startCirculoEncoderConfiguration = MotionMasterMessage.Request.StartCirculoEncoderConfiguration.create({ deviceAddress, encoderPort });
+    const id = this.sendRequest({ startCirculoEncoderConfiguration }, messageId);
+    return this.selectMessageStatus('circuloEncoderConfiguration', id);
   }
 
   /**

@@ -840,6 +840,14 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
 
       break;
     }
+    case 'startCirculoEncoderConfiguration': {
+      exitOnMessageReceived(messageId, 60000, MotionMasterMessage.Status.CirculoEncoderConfiguration.Success.Code.DONE);
+
+      const encoderPort = parseInt(args[0], 10);
+      motionMasterClient.requestStartCirculoEncoderConfiguration(deviceAddress, encoderPort, messageId);
+
+      break;
+    }
     default: {
       throw new Error(`Request "${type}" doesn\'t exist`);
     }
