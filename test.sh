@@ -50,7 +50,7 @@ DEBUG=* npx node ./dist/cli.js request setEthercatNetworkState 1 # EtherCAT stat
 DEBUG=* npx node ./dist/cli.js request startNarrowAngleCalibration
 DEBUG=* npx node ./dist/cli.js request setSystemClientTimeout 2000 # ms
 DEBUG=* npx node ./dist/cli.js request getCirculoEncoderMagnetDistance
-DEBUG=* npx node ./dist/cli.js request startCirculoEncoderNarrowAngleCalibrationProcedure 0 # port
+DEBUG=* npx node ./dist/cli.js request startCirculoEncoderNarrowAngleCalibrationProcedure 0 # encoderPort
 DEBUG=* npx node ./dist/cli.js request getDeviceCia402State
 DEBUG=* npx node ./dist/cli.js request setDeviceCia402State 2
 DEBUG=* npx node ./dist/cli.js request getSystemLog
@@ -60,6 +60,7 @@ DEBUG=* npx node ./dist/cli.js request computeFullAutoTuningGains 0 1 # tuningTy
 DEBUG=* npx node ./dist/cli.js request startFullAutoTuning 0 1
 DEBUG=* npx node ./dist/cli.js request stopFullAutoTuning
 DEBUG=* npx node ./dist/cli.js request startCirculoEncoderConfiguration 1 # encoderPort
+DEBUG=* npx node ./dist/cli.js request stopCirculoEncoderNarrowAngleCalibrationProcedure 0 # encoderPort
 
 #
 # Requests: Position Signal Generator
