@@ -305,19 +305,19 @@ export class MotionMasterClient {
     return this.selectMessageStatus('systemIdentification', id);
   }
 
-  requestGetCirculoEncoderMagnetDistance(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string) {
+  requestGetCirculoEncoderMagnetDistance(deviceAddress: DeviceAddressType, encoderOrdinal: number, messageId?: string) {
     const getCirculoEncoderMagnetDistance = MotionMasterMessage.Request.GetCirculoEncoderMagnetDistance.create({
       deviceAddress,
-      encoderPort,
+      encoderOrdinal,
     });
     const id = this.sendRequest({ getCirculoEncoderMagnetDistance }, messageId);
     return this.selectMessageStatus('circuloEncoderMagnetDistance', id);
   }
 
-  requestStartCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string) {
+  requestStartCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress: DeviceAddressType, encoderOrdinal: number, messageId?: string) {
     const startCirculoEncoderNarrowAngleCalibrationProcedure = MotionMasterMessage.Request.StartCirculoEncoderNarrowAngleCalibrationProcedure.create({
       deviceAddress,
-      encoderPort,
+      encoderOrdinal,
     });
     const id = this.sendRequest({ startCirculoEncoderNarrowAngleCalibrationProcedure }, messageId);
     return this.selectMessageStatus('circuloEncoderNarrowAngleCalibrationProcedure', id);
@@ -373,14 +373,14 @@ export class MotionMasterClient {
     return this.selectMessageStatus('fullAutoTuning', id);
   }
 
-  requestStartCirculoEncoderConfiguration(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string) {
-    const startCirculoEncoderConfiguration = MotionMasterMessage.Request.StartCirculoEncoderConfiguration.create({ deviceAddress, encoderPort });
+  requestStartCirculoEncoderConfiguration(deviceAddress: DeviceAddressType, encoderOrdinal: number, messageId?: string) {
+    const startCirculoEncoderConfiguration = MotionMasterMessage.Request.StartCirculoEncoderConfiguration.create({ deviceAddress, encoderOrdinal });
     const id = this.sendRequest({ startCirculoEncoderConfiguration }, messageId);
     return this.selectMessageStatus('circuloEncoderConfiguration', id);
   }
 
-  requestStopCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string) {
-    const stopCirculoEncoderNarrowAngleCalibrationProcedure = MotionMasterMessage.Request.StopCirculoEncoderNarrowAngleCalibrationProcedure.create({ deviceAddress, encoderPort });
+  requestStopCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress: DeviceAddressType, encoderOrdinal: number, messageId?: string) {
+    const stopCirculoEncoderNarrowAngleCalibrationProcedure = MotionMasterMessage.Request.StopCirculoEncoderNarrowAngleCalibrationProcedure.create({ deviceAddress, encoderOrdinal });
     const id = this.sendRequest({ stopCirculoEncoderNarrowAngleCalibrationProcedure }, messageId);
     return this.selectMessageStatus('circuloEncoderNarrowAngleCalibrationProcedure', id);
   }

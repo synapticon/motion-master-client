@@ -55,8 +55,8 @@ export declare class MotionMasterClient {
     requestStartNarrowAngleCalibration(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.NarrowAngleCalibration>;
     requestSetSystemClientTimeout(timeoutMs: number, messageId?: string): string;
     requestStartSystemIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, messageId?: string): Observable<MotionMasterMessage.Status.SystemIdentification>;
-    requestGetCirculoEncoderMagnetDistance(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderMagnetDistance>;
-    requestStartCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure>;
+    requestGetCirculoEncoderMagnetDistance(deviceAddress: DeviceAddressType, encoderOrdinal: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderMagnetDistance>;
+    requestStartCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress: DeviceAddressType, encoderOrdinal: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure>;
     requestGetDeviceCia402State(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.DeviceCiA402State>;
     requestSetDeviceCia402State(deviceAddress: DeviceAddressType, state: MotionMasterMessage.Status.DeviceCiA402State.State, messageId?: string): Observable<MotionMasterMessage.Status.DeviceCiA402State>;
     requestGetSystemLog(messageId?: string): Observable<MotionMasterMessage.Status.SystemLog>;
@@ -64,8 +64,8 @@ export declare class MotionMasterClient {
     requestStartOpenLoopFieldControl(properties: MotionMasterMessage.Request.IStartOpenLoopFieldControl, messageId?: string): Observable<MotionMasterMessage.Status.OpenLoopFieldControl>;
     requestStartFullAutoTuning(deviceAddress: DeviceAddressType, type: MotionMasterMessage.Request.StartFullAutoTuning.Type, controllerType?: MotionMasterMessage.Request.ComputeAutoTuningGains.PositionParameters.ControllerType, messageId?: string): Observable<MotionMasterMessage.Status.FullAutoTuning>;
     requestStopFullAutoTuning(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.FullAutoTuning>;
-    requestStartCirculoEncoderConfiguration(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderConfiguration>;
-    requestStopCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress: DeviceAddressType, encoderPort: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure>;
+    requestStartCirculoEncoderConfiguration(deviceAddress: DeviceAddressType, encoderOrdinal: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderConfiguration>;
+    requestStopCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress: DeviceAddressType, encoderOrdinal: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure>;
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain

@@ -211,18 +211,18 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ startSystemIdentification: startSystemIdentification }, messageId);
         return this.selectMessageStatus('systemIdentification', id);
     };
-    MotionMasterClient.prototype.requestGetCirculoEncoderMagnetDistance = function (deviceAddress, encoderPort, messageId) {
+    MotionMasterClient.prototype.requestGetCirculoEncoderMagnetDistance = function (deviceAddress, encoderOrdinal, messageId) {
         var getCirculoEncoderMagnetDistance = util_1.MotionMasterMessage.Request.GetCirculoEncoderMagnetDistance.create({
             deviceAddress: deviceAddress,
-            encoderPort: encoderPort,
+            encoderOrdinal: encoderOrdinal,
         });
         var id = this.sendRequest({ getCirculoEncoderMagnetDistance: getCirculoEncoderMagnetDistance }, messageId);
         return this.selectMessageStatus('circuloEncoderMagnetDistance', id);
     };
-    MotionMasterClient.prototype.requestStartCirculoEncoderNarrowAngleCalibrationProcedure = function (deviceAddress, encoderPort, messageId) {
+    MotionMasterClient.prototype.requestStartCirculoEncoderNarrowAngleCalibrationProcedure = function (deviceAddress, encoderOrdinal, messageId) {
         var startCirculoEncoderNarrowAngleCalibrationProcedure = util_1.MotionMasterMessage.Request.StartCirculoEncoderNarrowAngleCalibrationProcedure.create({
             deviceAddress: deviceAddress,
-            encoderPort: encoderPort,
+            encoderOrdinal: encoderOrdinal,
         });
         var id = this.sendRequest({ startCirculoEncoderNarrowAngleCalibrationProcedure: startCirculoEncoderNarrowAngleCalibrationProcedure }, messageId);
         return this.selectMessageStatus('circuloEncoderNarrowAngleCalibrationProcedure', id);
@@ -266,13 +266,13 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ stopFullAutoTuning: stopFullAutoTuning }, messageId);
         return this.selectMessageStatus('fullAutoTuning', id);
     };
-    MotionMasterClient.prototype.requestStartCirculoEncoderConfiguration = function (deviceAddress, encoderPort, messageId) {
-        var startCirculoEncoderConfiguration = util_1.MotionMasterMessage.Request.StartCirculoEncoderConfiguration.create({ deviceAddress: deviceAddress, encoderPort: encoderPort });
+    MotionMasterClient.prototype.requestStartCirculoEncoderConfiguration = function (deviceAddress, encoderOrdinal, messageId) {
+        var startCirculoEncoderConfiguration = util_1.MotionMasterMessage.Request.StartCirculoEncoderConfiguration.create({ deviceAddress: deviceAddress, encoderOrdinal: encoderOrdinal });
         var id = this.sendRequest({ startCirculoEncoderConfiguration: startCirculoEncoderConfiguration }, messageId);
         return this.selectMessageStatus('circuloEncoderConfiguration', id);
     };
-    MotionMasterClient.prototype.requestStopCirculoEncoderNarrowAngleCalibrationProcedure = function (deviceAddress, encoderPort, messageId) {
-        var stopCirculoEncoderNarrowAngleCalibrationProcedure = util_1.MotionMasterMessage.Request.StopCirculoEncoderNarrowAngleCalibrationProcedure.create({ deviceAddress: deviceAddress, encoderPort: encoderPort });
+    MotionMasterClient.prototype.requestStopCirculoEncoderNarrowAngleCalibrationProcedure = function (deviceAddress, encoderOrdinal, messageId) {
+        var stopCirculoEncoderNarrowAngleCalibrationProcedure = util_1.MotionMasterMessage.Request.StopCirculoEncoderNarrowAngleCalibrationProcedure.create({ deviceAddress: deviceAddress, encoderOrdinal: encoderOrdinal });
         var id = this.sendRequest({ stopCirculoEncoderNarrowAngleCalibrationProcedure: stopCirculoEncoderNarrowAngleCalibrationProcedure }, messageId);
         return this.selectMessageStatus('circuloEncoderNarrowAngleCalibrationProcedure', id);
     };

@@ -140,7 +140,7 @@ commander_1.default
     .command('startSystemIdentification <durationSeconds> <torqueAmplitude> <startFrequency> <endFrequency>')
     .action(startSystemIdentificationAction);
 commander_1.default
-    .command('startCirculoEncoderNarrowAngleCalibrationProcedure <encoderPort>')
+    .command('startCirculoEncoderNarrowAngleCalibrationProcedure <encoderOrdinal>')
     .action(startCirculoEncoderNarrowAngleCalibrationProcedureAction);
 commander_1.default
     .command('monitor <topic> [params...]')
@@ -153,7 +153,7 @@ commander_1.default.parse(process.argv);
 //
 function requestAction(type, args, cmd) {
     return __awaiter(this, void 0, void 0, function () {
-        var deviceAddress, messageId, _a, parameters, deviceParameterInfo_1, parameterValues, name_1, filepath, name_2, content, overwrite, name_3, filepath, firmwarePackageContent, skipSiiInstallation, getDeviceLog, skipAutoTuning, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, durationSeconds, torqueAmplitude, startFrequency, endFrequency, computeAutoTuningGainsType, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, signalGeneratorType, setSignalGeneratorParameters, target, sustainTime, target, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, target, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, torqueSlope, sustainTime, target, torqueSlope, sustainTime, repeat, target, torqueSlope, sustainTime, repeat, amplitude, frequency, repeat, parameters, getDeviceParameterValues, topic, startMonitoringRequestId, state, timeoutMs, encoderPort, encoderPort, state, devicePosition, filepath, firmwarePackageContent, properties, tuningType, controllerType, tuningType, controllerType, encoderPort;
+        var deviceAddress, messageId, _a, parameters, deviceParameterInfo_1, parameterValues, name_1, filepath, name_2, content, overwrite, name_3, filepath, firmwarePackageContent, skipSiiInstallation, getDeviceLog, skipAutoTuning, durationSeconds, torqueAmplitude, startFrequency, endFrequency, cutoffFrequency, durationSeconds, torqueAmplitude, startFrequency, endFrequency, computeAutoTuningGainsType, controllerType, settlingTime, positionDamping, alphaMult, order, lb, ub, computeAutoTuningGains, velocityLoopBandwidth, velocityDamping, computeAutoTuningGains, target, setMotionControllerParameters, controllerType, filter, signalGeneratorType, setSignalGeneratorParameters, target, sustainTime, target, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileVelocity, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, target, profileAcceleration, profileDeceleration, sustainTime, repeat, target, profileAcceleration, profileDeceleration, sustainTime, repeat, amplitude, frequency, repeat, target, sustainTime, target, sustainTime, repeat, target, torqueSlope, sustainTime, target, torqueSlope, sustainTime, repeat, target, torqueSlope, sustainTime, repeat, amplitude, frequency, repeat, parameters, getDeviceParameterValues, topic, startMonitoringRequestId, state, timeoutMs, encoderOrdinal, encoderOrdinal, state, devicePosition, filepath, firmwarePackageContent, properties, tuningType, controllerType, tuningType, controllerType, encoderOrdinal;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -756,16 +756,16 @@ function requestAction(type, args, cmd) {
                 case 37:
                     {
                         exitOnMessageReceived(messageId);
-                        encoderPort = parseInt(args[0], 10);
-                        motionMasterClient.requestGetCirculoEncoderMagnetDistance(deviceAddress, encoderPort, messageId);
+                        encoderOrdinal = parseInt(args[0], 10);
+                        motionMasterClient.requestGetCirculoEncoderMagnetDistance(deviceAddress, encoderOrdinal, messageId);
                         return [3 /*break*/, 49];
                     }
                     _b.label = 38;
                 case 38:
                     {
                         exitOnMessageReceived(messageId, 60000, util_2.MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure.Success.Code.DONE);
-                        encoderPort = parseInt(args[0], 10);
-                        motionMasterClient.requestStartCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress, encoderPort, messageId);
+                        encoderOrdinal = parseInt(args[0], 10);
+                        motionMasterClient.requestStartCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress, encoderOrdinal, messageId);
                         return [3 /*break*/, 49];
                     }
                     _b.label = 39;
@@ -873,8 +873,8 @@ function requestAction(type, args, cmd) {
                 case 47:
                     {
                         exitOnMessageReceived(messageId, 60000, util_2.MotionMasterMessage.Status.CirculoEncoderConfiguration.Success.Code.DONE);
-                        encoderPort = parseInt(args[0], 10);
-                        motionMasterClient.requestStartCirculoEncoderConfiguration(deviceAddress, encoderPort, messageId);
+                        encoderOrdinal = parseInt(args[0], 10);
+                        motionMasterClient.requestStartCirculoEncoderConfiguration(deviceAddress, encoderOrdinal, messageId);
                         return [3 /*break*/, 49];
                     }
                     _b.label = 48;
@@ -1157,7 +1157,7 @@ function startSystemIdentificationAction(durationSeconds, torqueAmplitude, start
         });
     });
 }
-function startCirculoEncoderNarrowAngleCalibrationProcedureAction(encoderPort, cmd) {
+function startCirculoEncoderNarrowAngleCalibrationProcedureAction(encoderOrdinal, cmd) {
     return __awaiter(this, void 0, void 0, function () {
         var deviceAddress, messageId, startCirculoEncoderNarrowAngleCalibrationProcedure;
         return __generator(this, function (_a) {
@@ -1170,10 +1170,10 @@ function startCirculoEncoderNarrowAngleCalibrationProcedureAction(encoderPort, c
                     messageId = uuid_1.v4();
                     printOnMessageReceived(messageId, cmd.parent.outputFormat);
                     exitOnMessageReceived(messageId, 60000, util_2.MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure.Success.Code.DONE);
-                    encoderPort = parseInt(encoderPort, 10);
+                    encoderOrdinal = parseInt(encoderOrdinal, 10);
                     startCirculoEncoderNarrowAngleCalibrationProcedure = {
                         deviceAddress: deviceAddress,
-                        encoderPort: encoderPort,
+                        encoderOrdinal: encoderOrdinal,
                     };
                     motionMasterClient.sendRequest({ startCirculoEncoderNarrowAngleCalibrationProcedure: startCirculoEncoderNarrowAngleCalibrationProcedure }, messageId);
                     return [2 /*return*/];

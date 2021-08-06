@@ -133,7 +133,7 @@ program
   .action(startSystemIdentificationAction);
 
 program
-  .command('startCirculoEncoderNarrowAngleCalibrationProcedure <encoderPort>')
+  .command('startCirculoEncoderNarrowAngleCalibrationProcedure <encoderOrdinal>')
   .action(startCirculoEncoderNarrowAngleCalibrationProcedureAction);
 
 program
@@ -718,16 +718,16 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
     case 'getCirculoEncoderMagnetDistance': {
       exitOnMessageReceived(messageId);
 
-      const encoderPort = parseInt(args[0], 10);
-      motionMasterClient.requestGetCirculoEncoderMagnetDistance(deviceAddress, encoderPort, messageId);
+      const encoderOrdinal = parseInt(args[0], 10);
+      motionMasterClient.requestGetCirculoEncoderMagnetDistance(deviceAddress, encoderOrdinal, messageId);
 
       break;
     }
     case 'startCirculoEncoderNarrowAngleCalibrationProcedure': {
       exitOnMessageReceived(messageId, 60000, MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure.Success.Code.DONE);
 
-      const encoderPort = parseInt(args[0], 10);
-      motionMasterClient.requestStartCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress, encoderPort, messageId);
+      const encoderOrdinal = parseInt(args[0], 10);
+      motionMasterClient.requestStartCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress, encoderOrdinal, messageId);
 
       break;
     }
@@ -843,8 +843,8 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
     case 'startCirculoEncoderConfiguration': {
       exitOnMessageReceived(messageId, 60000, MotionMasterMessage.Status.CirculoEncoderConfiguration.Success.Code.DONE);
 
-      const encoderPort = parseInt(args[0], 10);
-      motionMasterClient.requestStartCirculoEncoderConfiguration(deviceAddress, encoderPort, messageId);
+      const encoderOrdinal = parseInt(args[0], 10);
+      motionMasterClient.requestStartCirculoEncoderConfiguration(deviceAddress, encoderOrdinal, messageId);
 
       break;
     }
@@ -1074,7 +1074,7 @@ async function startSystemIdentificationAction(
 }
 
 async function startCirculoEncoderNarrowAngleCalibrationProcedureAction(
-  encoderPort: any,
+  encoderOrdinal: any,
   cmd: Command,
 ) {
   connectToMotionMaster(cmd.parent);
@@ -1084,11 +1084,11 @@ async function startCirculoEncoderNarrowAngleCalibrationProcedureAction(
   printOnMessageReceived(messageId, cmd.parent.outputFormat as OutputFormat);
   exitOnMessageReceived(messageId, 60000, MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure.Success.Code.DONE);
 
-  encoderPort = parseInt(encoderPort, 10);
+  encoderOrdinal = parseInt(encoderOrdinal, 10);
 
   const startCirculoEncoderNarrowAngleCalibrationProcedure: MotionMasterMessage.Request.IStartCirculoEncoderNarrowAngleCalibrationProcedure = {
     deviceAddress,
-    encoderPort,
+    encoderOrdinal,
   };
 
   motionMasterClient.sendRequest({ startCirculoEncoderNarrowAngleCalibrationProcedure }, messageId);

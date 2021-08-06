@@ -33,7 +33,7 @@ Usage: cli [options] [command]
       startOffsetDetection
       startPlantIdentification <durationSeconds> <torqueAmplitude> <startFrequency> <endFrequency> <cutoffFrequency>
       startSystemIdentification <durationSeconds> <torqueAmplitude> <startFrequency> <endFrequency>
-      startCirculoEncoderNarrowAngleCalibrationProcedure <encoderPort>
+      startCirculoEncoderNarrowAngleCalibrationProcedure <encoderOrdinal>
       monitor [options] <topic> [params...]
       help [command]                                                                                                  display help for command
 
