@@ -49,6 +49,7 @@ export type StatusTypeObservable<T extends StatusType> =
   T extends 'openLoopFieldControl' ? Observable<MotionMasterMessage.Status.OpenLoopFieldControl> :
   T extends 'fullAutoTuning' ? Observable<MotionMasterMessage.Status.FullAutoTuning> :
   T extends 'circuloEncoderConfiguration' ? Observable<MotionMasterMessage.Status.CirculoEncoderConfiguration> :
+  T extends 'osCommand' ? Observable<MotionMasterMessage.Status.OsCommand> :
   Observable<any>;
 
 export class MotionMasterClient {
