@@ -66,6 +66,7 @@ export declare class MotionMasterClient {
     requestStopFullAutoTuning(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.FullAutoTuning>;
     requestStartCirculoEncoderConfiguration(deviceAddress: DeviceAddressType, encoderOrdinal: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderConfiguration>;
     requestStopCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress: DeviceAddressType, encoderOrdinal: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure>;
+    requestStartOsCommand(deviceAddress: DeviceAddressType, timeoutMs: number, command: Uint8Array, messageId?: string): Observable<any>;
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain

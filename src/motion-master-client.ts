@@ -385,6 +385,12 @@ export class MotionMasterClient {
     return this.selectMessageStatus('circuloEncoderNarrowAngleCalibrationProcedure', id);
   }
 
+  requestStartOsCommand(deviceAddress: DeviceAddressType, timeoutMs: number, command: Uint8Array, messageId?: string) {
+    const startOsCommand = MotionMasterMessage.Request.StartOsCommand.create({ command, deviceAddress, timeoutMs });
+    const id = this.sendRequest({ startOsCommand }, messageId);
+    return this.selectMessageStatus('osCommand', id);
+  }
+
   /**
    * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
    * @param position device position in EtherCAT chain

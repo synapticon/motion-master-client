@@ -844,7 +844,20 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       exitOnMessageReceived(messageId, 60000, MotionMasterMessage.Status.CirculoEncoderConfiguration.Success.Code.DONE);
 
       const encoderOrdinal = parseInt(args[0], 10);
+
       motionMasterClient.requestStartCirculoEncoderConfiguration(deviceAddress, encoderOrdinal, messageId);
+
+      break;
+    }
+    case 'startOsCommand': {
+      exitOnMessageReceived(messageId, 60000, MotionMasterMessage.Status.OsCommand.Success.Code.DONE);
+
+      const timeoutMs = parseInt(args[0], 10);
+
+      const filepath = args[1];
+      const command = fs.readFileSync(filepath);
+
+      motionMasterClient.requestStartOsCommand(deviceAddress, timeoutMs, command, messageId);
 
       break;
     }

@@ -276,6 +276,11 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ stopCirculoEncoderNarrowAngleCalibrationProcedure: stopCirculoEncoderNarrowAngleCalibrationProcedure }, messageId);
         return this.selectMessageStatus('circuloEncoderNarrowAngleCalibrationProcedure', id);
     };
+    MotionMasterClient.prototype.requestStartOsCommand = function (deviceAddress, timeoutMs, command, messageId) {
+        var startOsCommand = util_1.MotionMasterMessage.Request.StartOsCommand.create({ command: command, deviceAddress: deviceAddress, timeoutMs: timeoutMs });
+        var id = this.sendRequest({ startOsCommand: startOsCommand }, messageId);
+        return this.selectMessageStatus('osCommand', id);
+    };
     /**
      * Select device at position in EtherCAT chain. This function makes an initial request to fetch a list of devices.
      * @param position device position in EtherCAT chain
