@@ -93,6 +93,7 @@ Usage: cli [options] [command]
       stopFullAutoTuning
       startCirculoEncoderConfiguration
       stopCirculoEncoderNarrowAngleCalibrationProcedure
+      startOsCommand
 
 ### monitor
 

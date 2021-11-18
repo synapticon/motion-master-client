@@ -719,7 +719,8 @@ async function requestAction(type: RequestType, args: string[], cmd: Command) {
       exitOnMessageReceived(messageId);
 
       const encoderOrdinal = parseInt(args[0], 10);
-      motionMasterClient.requestGetCirculoEncoderMagnetDistance(deviceAddress, encoderOrdinal, messageId);
+      const ringRevision = parseInt(args[1], 10);
+      motionMasterClient.requestGetCirculoEncoderMagnetDistance(deviceAddress, encoderOrdinal, ringRevision, messageId);
 
       break;
     }

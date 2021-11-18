@@ -211,10 +211,11 @@ var MotionMasterClient = /** @class */ (function () {
         var id = this.sendRequest({ startSystemIdentification: startSystemIdentification }, messageId);
         return this.selectMessageStatus('systemIdentification', id);
     };
-    MotionMasterClient.prototype.requestGetCirculoEncoderMagnetDistance = function (deviceAddress, encoderOrdinal, messageId) {
+    MotionMasterClient.prototype.requestGetCirculoEncoderMagnetDistance = function (deviceAddress, encoderOrdinal, ringRevision, messageId) {
         var getCirculoEncoderMagnetDistance = util_1.MotionMasterMessage.Request.GetCirculoEncoderMagnetDistance.create({
             deviceAddress: deviceAddress,
             encoderOrdinal: encoderOrdinal,
+            ringRevision: ringRevision,
         });
         var id = this.sendRequest({ getCirculoEncoderMagnetDistance: getCirculoEncoderMagnetDistance }, messageId);
         return this.selectMessageStatus('circuloEncoderMagnetDistance', id);

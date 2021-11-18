@@ -1,0 +1,7 @@
+{
+  "pingSystemInterval": 200,
+  "motionMasterHeartbeatTimeoutDue": 1000,
+  "serverEndpoint": "tcp://192.168.1.41:62524",
+  "notificationEndpoint": "tcp://192.168.1.41:62525",
+  "identity": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+}

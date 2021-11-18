@@ -306,10 +306,11 @@ export class MotionMasterClient {
     return this.selectMessageStatus('systemIdentification', id);
   }
 
-  requestGetCirculoEncoderMagnetDistance(deviceAddress: DeviceAddressType, encoderOrdinal: number, messageId?: string) {
+  requestGetCirculoEncoderMagnetDistance(deviceAddress: DeviceAddressType, encoderOrdinal: number, ringRevision: number, messageId?: string) {
     const getCirculoEncoderMagnetDistance = MotionMasterMessage.Request.GetCirculoEncoderMagnetDistance.create({
       deviceAddress,
       encoderOrdinal,
+      ringRevision,
     });
     const id = this.sendRequest({ getCirculoEncoderMagnetDistance }, messageId);
     return this.selectMessageStatus('circuloEncoderMagnetDistance', id);

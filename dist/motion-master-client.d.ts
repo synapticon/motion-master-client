@@ -55,7 +55,7 @@ export declare class MotionMasterClient {
     requestStartNarrowAngleCalibration(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.NarrowAngleCalibration>;
     requestSetSystemClientTimeout(timeoutMs: number, messageId?: string): string;
     requestStartSystemIdentification(deviceAddress: DeviceAddressType, durationSeconds: number, torqueAmplitude: number, startFrequency: number, endFrequency: number, messageId?: string): Observable<MotionMasterMessage.Status.SystemIdentification>;
-    requestGetCirculoEncoderMagnetDistance(deviceAddress: DeviceAddressType, encoderOrdinal: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderMagnetDistance>;
+    requestGetCirculoEncoderMagnetDistance(deviceAddress: DeviceAddressType, encoderOrdinal: number, ringRevision: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderMagnetDistance>;
     requestStartCirculoEncoderNarrowAngleCalibrationProcedure(deviceAddress: DeviceAddressType, encoderOrdinal: number, messageId?: string): Observable<MotionMasterMessage.Status.CirculoEncoderNarrowAngleCalibrationProcedure>;
     requestGetDeviceCia402State(deviceAddress: DeviceAddressType, messageId?: string): Observable<MotionMasterMessage.Status.DeviceCiA402State>;
     requestSetDeviceCia402State(deviceAddress: DeviceAddressType, state: MotionMasterMessage.Status.DeviceCiA402State.State, messageId?: string): Observable<MotionMasterMessage.Status.DeviceCiA402State>;
