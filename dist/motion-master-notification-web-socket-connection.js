@@ -15,6 +15,7 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
         this.wssUrl = wssUrl;
         this.notification = new motion_master_notification_1.MotionMasterNotification();
         this.connected$ = new rxjs_1.BehaviorSubject(false);
+        this.monitoringTimedout$ = new rxjs_1.Subject();
         this.decoder = new TextDecoder('utf-8');
         this.closeObserver = {
             next: function () {
@@ -55,7 +56,7 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
      */
     MotionMasterNotificationWebSocketConnection.prototype.subscribe = function (data) {
         var _this = this;
-        var _a = data.bufferSize, bufferSize = _a === void 0 ? 1 : _a, _b = data.distinct, distinct = _b === void 0 ? false : _b, _c = data.id, id = _c === void 0 ? uuid_1.v4() : _c, topic = data.topic;
+        var _a = data.bufferSize, bufferSize = _a === void 0 ? 1 : _a, _b = data.distinct, distinct = _b === void 0 ? false : _b, _c = data.id, id = _c === void 0 ? uuid_1.v4() : _c, topic = data.topic, monitoringTimeoutDue = data.monitoringTimeoutDue;
         var observable = this.selectBufferByTopic(topic, true);
         if (distinct) {
             observable = observable.pipe(
@@ -69,6 +70,11 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
         var subscription = messages$.subscribe(function (messages) {
             _this.notification.input$.next({ topic: topic, messages: messages });
         });
+        if (monitoringTimeoutDue) {
+            subscription.add(observable.pipe(operators_1.timeout(monitoringTimeoutDue)).subscribe({
+                error: function () { return _this.monitoringTimedout$.next({ id: id, topic: topic }); },
+            }));
+        }
         this.subscriptions[id] = subscription;
         return id;
     };

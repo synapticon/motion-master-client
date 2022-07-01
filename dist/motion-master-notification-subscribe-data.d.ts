@@ -3,5 +3,6 @@ export interface IMotionMasterNotificationSubscribeData {
     distinct?: boolean;
     id?: string;
     topic: string;
+    monitoringTimeoutDue?: number;
 }
 //# sourceMappingURL=motion-master-notification-subscribe-data.d.ts.map
