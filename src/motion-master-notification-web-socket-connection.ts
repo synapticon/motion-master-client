@@ -68,7 +68,8 @@ export class MotionMasterNotificationWebSocketConnection {
   subscribe(data: IMotionMasterNotificationSubscribeData) {
     const { bufferSize = 1, distinct = false, id = v4(), topic, monitoringTimeoutDue } = data;
 
-    let observable = this.selectBufferByTopic(topic, true);
+    const sourceObservable = this.selectBufferByTopic(topic, true);
+    let observable = sourceObservable;
 
     if (distinct) {
       observable = observable.pipe(
@@ -90,7 +91,7 @@ export class MotionMasterNotificationWebSocketConnection {
 
     if (monitoringTimeoutDue) {
       subscription.add(
-        observable.pipe(
+        sourceObservable.pipe(
           timeout(monitoringTimeoutDue),
         ).subscribe({
           error: () => this.monitoringTimedout$.next({ id, topic }),
