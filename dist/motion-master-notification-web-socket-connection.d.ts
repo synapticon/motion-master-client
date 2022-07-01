@@ -1,4 +1,4 @@
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { WebSocketSubject, WebSocketSubjectConfig } from 'rxjs/webSocket';
 import { MotionMasterNotification } from './motion-master-notification';
 import { IMotionMasterNotificationSubscribeData } from './motion-master-notification-subscribe-data';
@@ -7,6 +7,10 @@ export declare class MotionMasterNotificationWebSocketConnection {
     wssUrl: string;
     notification: MotionMasterNotification;
     readonly connected$: BehaviorSubject<boolean>;
+    readonly monitoringTimedout$: Subject<{
+        id: string;
+        topic: string;
+    }>;
     private decoder;
     private closeObserver;
     private openObserver;

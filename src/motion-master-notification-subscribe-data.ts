@@ -3,4 +3,5 @@ export interface IMotionMasterNotificationSubscribeData {
   distinct?: boolean;
   id?: string;
   topic: string;
+  monitoringTimeoutDue?: number;
 }

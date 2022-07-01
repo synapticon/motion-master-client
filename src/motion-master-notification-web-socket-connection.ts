@@ -1,6 +1,6 @@
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { isEqual } from 'lodash';
-import { bufferCount, distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { bufferCount, distinctUntilChanged, filter, map, timeout } from 'rxjs/operators';
 import { webSocket, WebSocketSubject, WebSocketSubjectConfig } from 'rxjs/webSocket';
 import { v4 } from 'uuid';
 
@@ -13,6 +13,7 @@ export class MotionMasterNotificationWebSocketConnection {
   notification = new MotionMasterNotification();
 
   readonly connected$ = new BehaviorSubject<boolean>(false);
+  readonly monitoringTimedout$ = new Subject<{ id: string, topic: string }>();
 
   private decoder = new TextDecoder('utf-8');
 
@@ -65,9 +66,10 @@ export class MotionMasterNotificationWebSocketConnection {
    * @returns subscription id
    */
   subscribe(data: IMotionMasterNotificationSubscribeData) {
-    const { bufferSize = 1, distinct = false, id = v4(), topic } = data;
+    const { bufferSize = 1, distinct = false, id = v4(), topic, monitoringTimeoutDue } = data;
 
-    let observable = this.selectBufferByTopic(topic, true);
+    const sourceObservable = this.selectBufferByTopic(topic, true);
+    let observable = sourceObservable;
 
     if (distinct) {
       observable = observable.pipe(
@@ -86,6 +88,16 @@ export class MotionMasterNotificationWebSocketConnection {
     const subscription = messages$.subscribe((messages) => {
       this.notification.input$.next({ topic, messages });
     });
+
+    if (monitoringTimeoutDue) {
+      subscription.add(
+        sourceObservable.pipe(
+          timeout(monitoringTimeoutDue),
+        ).subscribe({
+          error: () => this.monitoringTimedout$.next({ id, topic }),
+        }),
+      );
+    }
 
     this.subscriptions[id] = subscription;
 
