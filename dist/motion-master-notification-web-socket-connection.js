@@ -57,7 +57,8 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
     MotionMasterNotificationWebSocketConnection.prototype.subscribe = function (data) {
         var _this = this;
         var _a = data.bufferSize, bufferSize = _a === void 0 ? 1 : _a, _b = data.distinct, distinct = _b === void 0 ? false : _b, _c = data.id, id = _c === void 0 ? uuid_1.v4() : _c, topic = data.topic, monitoringTimeoutDue = data.monitoringTimeoutDue;
-        var observable = this.selectBufferByTopic(topic, true);
+        var sourceObservable = this.selectBufferByTopic(topic, true);
+        var observable = sourceObservable;
         if (distinct) {
             observable = observable.pipe(
             // compare values only, ignore timestamps
@@ -71,7 +72,7 @@ var MotionMasterNotificationWebSocketConnection = /** @class */ (function () {
             _this.notification.input$.next({ topic: topic, messages: messages });
         });
         if (monitoringTimeoutDue) {
-            subscription.add(observable.pipe(operators_1.timeout(monitoringTimeoutDue)).subscribe({
+            subscription.add(sourceObservable.pipe(operators_1.timeout(monitoringTimeoutDue)).subscribe({
                 error: function () { return _this.monitoringTimedout$.next({ id: id, topic: topic }); },
             }));
         }
