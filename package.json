@@ -1,6 +1,6 @@
 {
   "name": "@synapticon/motion-master-client",
-  "version": "2.2.2",
+  "version": "2.3.0-beta.0",
   "private": false,
   "description": "",
   "main": "./dist/index.js",
