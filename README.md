@@ -1,3 +1,5 @@
+> :warning: **This project is deprecated**: Please use https://github.com/synapticon/oblac/tree/main/libs/motion-master-client instead.
+
 # Motion Master Client
 
 Library and CLI tool for interacting with [Motion Master](https://github.com/synapticon/motion-master).
